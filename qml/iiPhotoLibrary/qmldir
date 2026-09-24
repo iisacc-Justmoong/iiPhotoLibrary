@@ -1,0 +1,5 @@
+module iiPhotoLibrary
+PhotosView 1.0 PhotosView.qml
+GalleryTile 1.0 GalleryTile.qml
+GalleryInfo 1.0 GalleryInfo.qml
+GalleryZoom 1.0 GalleryZoom.qml

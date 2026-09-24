@@ -1,0 +1,26 @@
+{
+  "source": "Product/Society",
+  "revision": "990909aef78c872160c9d997a4544685d4dee079",
+  "sha256": {
+    "src/App/Photos/PhotoLibrary.h": "dfc35b91fce4fac828e4e337eaba80360dedcdb1b00b37f7c2de82fb490e3deb",
+    "src/App/Photos/PhotoController.cpp": "2293b0e55fca70609ad636c248ad0fe0e82e5a95553ae6320fb3ee37cdb55404",
+    "src/App/Photos/PhotoLibraryAndroid.cpp": "f01edb86bb93cb94e5357574f4cfe87bdac08d184d539633a270671416278234",
+    "src/App/Photos/PhotoController.h": "11f4e49dea8907c52796f42bc0589b1fb8ca9f01c2a47a173e2f91a7b7b99f44",
+    "src/App/Photos/PhotosView.qml": "368ac1a7a9c81bf8bf71630c254b8e8802367a489e387ad61f88c849bd506646",
+    "src/App/Photos/PhotoLibraryApple.mm": "ead7e2ade20fdbea04a42b453e5482f02e77b2c9bb8b49070909bf98460e72c8",
+    "src/App/Photos/PhotoStore.cpp": "d27800ed473d231a09656e23961236826b4964b95a5a53321be3015382f84551",
+    "src/App/Photos/PhotoLibraryUnsupported.cpp": "3bb1a081798dede2cda047f65db127d2c06693a6da2ff65a8b567136ca8e751c",
+    "src/App/Photos/PhotoStore.h": "823aab0dabd7486240d4593e84436e803a60c3813234b873ceadc6075b3a84ce",
+    "src/App/Photos/PhotoLibraryWindows.cpp": "1184a76b21ce1d27d95dab9dfa682248c2700b32fe7f03a44182fd52e9fee901",
+    "src/App/Gallery/GalleryInfo.qml": "36cdbf8790dceb79c60ab668e972088a5cbf321b44c8883b0210c1b574ff681e",
+    "src/App/Gallery/GalleryTile.qml": "6b368dd71e0a2d32acb6bbd63282297dbec203dbf3d4265a9ebcbe3a56e7c9d0",
+    "src/App/Gallery/GalleryZoom.qml": "1c69c5e45654868cba09d36691dd4615ea9b883f32fe970a7a370358b1f8a927",
+    "src/platform/android/src/com/iisacc/society/SocietyPhotoLibrary.java": "8f14c44fa841ea1fec859302dd5b6e0e15ed9506b3e30c30bf785f66a46c3958",
+    "tests/tst_photos.cpp": "5c3a61de5129e9b2fa683b08cf86c56104979737c74ecd599a2a31726a9b20ef",
+    "tests/photos/PhotosHarness.qml": "7f54c3f779f2e7df5466eed561049b12f1f4cabd12a70c17898c98a0258d555f",
+    "docs/Photos.md": "435d11f76c63b99e173881f8817482e77b806c54218c07587aebaa20df0097fd",
+    "tests/photos/android/PhotoInstrumentation.java": "b20eae0a5c493436a4c5fe94dd3e53faf707a1c7b6da7d4429b546f363c04f05",
+    "tests/photos/android/AndroidManifest.xml": "7e180650018938d3b125374fed342f501abda82d95fd1f629a365b8c96734ac4",
+    "tools/test_android_photos.py": "2d670435f682c8920f3969b722300ef9597b7b499f2f592be8555afe18e2f933"
+  }
+}
