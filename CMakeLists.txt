@@ -7,6 +7,32 @@ if(PROJECT_IS_TOP_LEVEL AND CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/build/install" CACHE PATH "Install prefix" FORCE)
 endif()
 
+option(IIPHOTOLIBRARY_ALBUMS_ONLY "Build the C++23 album core without the legacy Qt photo/UI layer" OFF)
+find_package(Threads REQUIRED)
+add_library(iiPhotoLibraryAlbums STATIC src/Albums/Album.cpp src/Albums/GooglePhotosSource.cpp)
+add_library(iiPhotoLibrary::Albums ALIAS iiPhotoLibraryAlbums)
+target_compile_features(iiPhotoLibraryAlbums PUBLIC cxx_std_23)
+target_include_directories(iiPhotoLibraryAlbums PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+target_include_directories(iiPhotoLibraryAlbums SYSTEM PRIVATE ThirdParty)
+target_link_libraries(iiPhotoLibraryAlbums PUBLIC Threads::Threads)
+set_target_properties(iiPhotoLibraryAlbums PROPERTIES EXPORT_NAME Albums CXX_EXTENSIONS OFF POSITION_INDEPENDENT_CODE ON)
+if(BUILD_TESTING AND NOT CMAKE_CROSSCOMPILING)
+    add_executable(iiPhotoLibraryAlbumTests tests/album_tests.cpp)
+    target_link_libraries(iiPhotoLibraryAlbumTests PRIVATE iiPhotoLibrary::Albums)
+    add_test(NAME iiPhotoLibrary.AlbumManager COMMAND iiPhotoLibraryAlbumTests manager)
+    add_test(NAME iiPhotoLibrary.GooglePhotosAlbums COMMAND iiPhotoLibraryAlbumTests google)
+    set_tests_properties(iiPhotoLibrary.AlbumManager iiPhotoLibrary.GooglePhotosAlbums PROPERTIES TIMEOUT 30)
+    add_test(NAME iiPhotoLibrary.AlbumsInstalledConsumer COMMAND ${CMAKE_COMMAND}
+        "-DPROJECT_BUILD=${CMAKE_CURRENT_BINARY_DIR}" "-DPROJECT_SOURCE=${CMAKE_CURRENT_SOURCE_DIR}"
+        -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/albums_installed_consumer.cmake")
+    set_tests_properties(iiPhotoLibrary.AlbumsInstalledConsumer PROPERTIES TIMEOUT 120)
+endif()
+
+set(IIPHOTOLIBRARY_HAS_LEGACY OFF)
+if(NOT IIPHOTOLIBRARY_ALBUMS_ONLY)
+set(IIPHOTOLIBRARY_HAS_LEGACY ON)
 find_package(Qt6 6.8.3 EXACT REQUIRED COMPONENTS Core Gui Concurrent)
 find_package(iiSocietyContainer 0.14.0 CONFIG REQUIRED COMPONENTS Gui
     HINTS "$ENV{HOME}/.local/SDK/iiSocietyContainer")
@@ -14,14 +40,14 @@ find_package(iiSocietyContainer 0.14.0 CONFIG REQUIRED COMPONENTS Gui
 include(cmake/QtApple.cmake)
 
 add_library(iiPhotoLibrary STATIC
-    src/PhotoStore.cpp src/PhotoController.cpp
+    src/PhotoStore.cpp src/PhotoController.cpp src/Albums/PhotoLibrarySource.cpp
     include/iiPhotoLibrary/PhotoController.h)
 add_library(iiPhotoLibrary::iiPhotoLibrary ALIAS iiPhotoLibrary)
 target_compile_features(iiPhotoLibrary PUBLIC cxx_std_23)
 target_include_directories(iiPhotoLibrary PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
-target_link_libraries(iiPhotoLibrary PUBLIC Qt6::Gui Qt6::Concurrent iiSocietyContainer::Gui)
+target_link_libraries(iiPhotoLibrary PUBLIC iiPhotoLibrary::Albums Qt6::Gui Qt6::Concurrent iiSocietyContainer::Gui)
 set_target_properties(iiPhotoLibrary PROPERTIES AUTOMOC ON CXX_EXTENSIONS OFF POSITION_INDEPENDENT_CODE ON)
 if(APPLE)
     enable_language(OBJCXX)
@@ -45,6 +71,10 @@ else()
 endif()
 
 if(BUILD_TESTING AND NOT CMAKE_CROSSCOMPILING)
+    add_executable(iiPhotoLibraryAlbumBridgeTests tests/album_bridge_tests.cpp)
+    target_link_libraries(iiPhotoLibraryAlbumBridgeTests PRIVATE iiPhotoLibrary::iiPhotoLibrary)
+    add_test(NAME iiPhotoLibrary.NativeAlbumBridge COMMAND iiPhotoLibraryAlbumBridgeTests)
+    set_tests_properties(iiPhotoLibrary.NativeAlbumBridge PROPERTIES TIMEOUT 30)
     find_package(Qt6 6.8.3 EXACT REQUIRED COMPONENTS Test Quick QuickControls2)
     find_package(LVRS CONFIG REQUIRED HINTS "$ENV{HOME}/.local/LVRS" "$ENV{HOME}/.local/SDK/LVRS")
     find_package(iiSocietySync 0.8.0 CONFIG REQUIRED HINTS "$ENV{HOME}/.local/SDK/iiSocietySync")
@@ -74,10 +104,21 @@ install(TARGETS iiPhotoLibrary EXPORT iiPhotoLibraryTargets ARCHIVE DESTINATION 
 install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 install(DIRECTORY qml/ DESTINATION ${CMAKE_INSTALL_DATADIR}/iiPhotoLibrary/qml)
 install(DIRECTORY platform/ DESTINATION ${CMAKE_INSTALL_DATADIR}/iiPhotoLibrary/platform)
+endif()
+
+install(TARGETS iiPhotoLibraryAlbums EXPORT iiPhotoLibraryAlbumTargets ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+if(IIPHOTOLIBRARY_ALBUMS_ONLY)
+    install(FILES include/iiPhotoLibrary/Album.h include/iiPhotoLibrary/GooglePhotosAlbumSource.h
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/iiPhotoLibrary)
+endif()
+install(FILES ThirdParty/nlohmann/LICENSE.MIT DESTINATION ${CMAKE_INSTALL_DATADIR}/iiPhotoLibrary/licenses/nlohmann-json)
 install(DIRECTORY docs/ DESTINATION ${CMAKE_INSTALL_DATADIR}/iiPhotoLibrary/docs)
 install(FILES README.md DESTINATION ${CMAKE_INSTALL_DATADIR}/iiPhotoLibrary)
 set(package_dir "${CMAKE_INSTALL_LIBDIR}/cmake/iiPhotoLibrary")
-install(EXPORT iiPhotoLibraryTargets NAMESPACE iiPhotoLibrary:: DESTINATION ${package_dir})
+install(EXPORT iiPhotoLibraryAlbumTargets NAMESPACE iiPhotoLibrary:: DESTINATION ${package_dir})
+if(IIPHOTOLIBRARY_HAS_LEGACY)
+    install(EXPORT iiPhotoLibraryTargets NAMESPACE iiPhotoLibrary:: DESTINATION ${package_dir})
+endif()
 configure_package_config_file(cmake/iiPhotoLibraryConfig.cmake.in
     "${CMAKE_CURRENT_BINARY_DIR}/iiPhotoLibraryConfig.cmake" INSTALL_DESTINATION ${package_dir}
     PATH_VARS CMAKE_INSTALL_DATADIR)

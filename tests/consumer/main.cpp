@@ -18,6 +18,12 @@ int main(int argc, char **argv) {
     // Construction does not request permission, scan, import or remove real photos.
     auto library = iiPhotoLibrary::nativePhotoLibrary();
     if (!library || library->name().isEmpty()) return 2;
+    iiPhotoLibrary::AlbumManager albums;
+    auto localAlbum = albums.createLocal("local", "Local");
+    auto systemAlbum = albums.connect({"device", "system-library", "System Photos"},
+        iiPhotoLibrary::photoLibraryAlbumSource(library));
+    albums.setLocalPhotos(localAlbum, {iiPhotoLibrary::AlbumPhoto{.sourcePhotoId = "fixture"}});
+    if (localAlbum == systemAlbum || albums.albums().size() != 2) return 5;
     const QString id(64, 'a');
     if (iiPhotoLibrary::importedPhotoId(iiPhotoLibrary::importedResourceName(id, 0, "hello.jpg")) != id) return 3;
     iiPhotoLibrary::PhotoController controller({}, nullptr, library);
@@ -28,6 +34,6 @@ int main(int argc, char **argv) {
     component.setData("import QtQuick\nimport iiPhotoLibrary 1.0\nPhotosView { width: 402; height: 700 }", QUrl());
     std::unique_ptr<QObject> view(component.createWithInitialProperties({{"controller", QVariant::fromValue(&controller)}}));
     if (!view) { qCritical() << component.errors(); return 4; }
-    qInfo() << "Installed iiPhotoLibrary: native backend, controller and QML import passed";
+    qInfo() << "Installed iiPhotoLibrary: album manager/bridge, native backend, controller and QML import passed";
     return 0;
 }

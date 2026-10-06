@@ -1,6 +1,8 @@
 # 플랫폼 통합 계약
 
-## Apple
+<a id="apple"></a>
+
+## 사과
 
 PhotoKit 권한 요청 전 호스트 앱의 Info.plist에 `NSPhotoLibraryUsageDescription` 및
 `NSPhotoLibraryAddUsageDescription`을 앱 용도에 맞게 설정한다.
