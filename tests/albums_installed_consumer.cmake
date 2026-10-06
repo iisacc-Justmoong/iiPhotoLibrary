@@ -10,7 +10,7 @@ set(relocated "${PROJECT_BUILD}/albums-consumer-relocated")
 file(REMOVE_RECURSE "${stage}" "${relocated}")
 run("${CMAKE_COMMAND}" --install "${PROJECT_BUILD}" --prefix "${stage}")
 file(RENAME "${stage}" "${relocated}")
-run("${CMAKE_COMMAND}" -S "${PROJECT_SOURCE}/tests/albums_consumer" -B "${PROJECT_BUILD}/albums-consumer/build"
+run("${CMAKE_COMMAND}" --fresh -G "${GENERATOR}" -S "${PROJECT_SOURCE}/tests/albums_consumer" -B "${PROJECT_BUILD}/albums-consumer/build"
     "-DiiPhotoLibrary_DIR=${relocated}/lib/cmake/iiPhotoLibrary"
     -DCMAKE_DISABLE_FIND_PACKAGE_Qt6=TRUE -DCMAKE_DISABLE_FIND_PACKAGE_iiSocietyContainer=TRUE -DCMAKE_BUILD_TYPE=Release)
 run("${CMAKE_COMMAND}" --build "${PROJECT_BUILD}/albums-consumer/build" --parallel 4)

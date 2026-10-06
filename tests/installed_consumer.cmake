@@ -12,7 +12,7 @@ file(REMOVE_RECURSE "${stage}" "${relocated}")
 run("${CMAKE_COMMAND}" --install "${PROJECT_BUILD}" --prefix "${stage}")
 file(RENAME "${stage}" "${relocated}")
 file(WRITE "${PROJECT_BUILD}/consumer-prefix.cmake" "set(CMAKE_PREFIX_PATH [==[${PREFIX_PATH}]==] CACHE STRING Dependencies FORCE)\n")
-run("${CMAKE_COMMAND}" -C "${PROJECT_BUILD}/consumer-prefix.cmake" -S "${PROJECT_SOURCE}/tests/consumer" -B "${PROJECT_BUILD}/consumer/build"
+run("${CMAKE_COMMAND}" --fresh -G "${GENERATOR}" -C "${PROJECT_BUILD}/consumer-prefix.cmake" -S "${PROJECT_SOURCE}/tests/consumer" -B "${PROJECT_BUILD}/consumer/build"
     "-DiiPhotoLibrary_DIR=${relocated}/lib/cmake/iiPhotoLibrary"
     "-DQt6_DIR=${Qt6_DIR}"
     "-DiiSocietyContainer_DIR=${iiSocietyContainer_DIR}" "-DLVRS_DIR=${LVRS_DIR}"

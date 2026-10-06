@@ -25,7 +25,7 @@ if(BUILD_TESTING AND NOT CMAKE_CROSSCOMPILING)
     add_test(NAME iiPhotoLibrary.GooglePhotosAlbums COMMAND iiPhotoLibraryAlbumTests google)
     set_tests_properties(iiPhotoLibrary.AlbumManager iiPhotoLibrary.GooglePhotosAlbums PROPERTIES TIMEOUT 30)
     add_test(NAME iiPhotoLibrary.AlbumsInstalledConsumer COMMAND ${CMAKE_COMMAND}
-        "-DPROJECT_BUILD=${CMAKE_CURRENT_BINARY_DIR}" "-DPROJECT_SOURCE=${CMAKE_CURRENT_SOURCE_DIR}"
+        "-DGENERATOR=${CMAKE_GENERATOR}" "-DPROJECT_BUILD=${CMAKE_CURRENT_BINARY_DIR}" "-DPROJECT_SOURCE=${CMAKE_CURRENT_SOURCE_DIR}"
         -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/albums_installed_consumer.cmake")
     set_tests_properties(iiPhotoLibrary.AlbumsInstalledConsumer PROPERTIES TIMEOUT 120)
 endif()
@@ -92,7 +92,7 @@ if(BUILD_TESTING AND NOT CMAKE_CROSSCOMPILING)
     set_tests_properties(iiPhotoLibrary.Photos PROPERTIES TIMEOUT 180
         ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software;QML_DISABLE_DISK_CACHE=1")
     add_test(NAME iiPhotoLibrary.InstalledConsumer COMMAND ${CMAKE_COMMAND}
-        "-DPROJECT_BUILD=${CMAKE_CURRENT_BINARY_DIR}" "-DPROJECT_SOURCE=${CMAKE_CURRENT_SOURCE_DIR}"
+        "-DGENERATOR=${CMAKE_GENERATOR}" "-DPROJECT_BUILD=${CMAKE_CURRENT_BINARY_DIR}" "-DPROJECT_SOURCE=${CMAKE_CURRENT_SOURCE_DIR}"
         "-DPREFIX_PATH=${CMAKE_PREFIX_PATH}" "-DQt6_DIR=${Qt6_DIR}"
         "-DiiSocietyContainer_DIR=${iiSocietyContainer_DIR}"
         "-DLVRS_DIR=${LVRS_DIR}" "-DLVRS_QML_IMPORT_PATH=${LVRS_QML_IMPORT_PATH}"
