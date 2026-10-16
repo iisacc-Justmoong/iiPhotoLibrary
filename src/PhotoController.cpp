@@ -74,6 +74,7 @@ void PhotoController::configure(const QString &container, bool enabled, const QS
         return;
     }
     ++m_generation; finishCycle({}, false); m_timer.stop(); m_jobs.clear();
+    m_authorizing = false; m_importLibraryRequested = false;
     if (m_store) { m_store->cancel(); if (!m_customLibrary) m_library = nativePhotoLibrary(); }
     m_store.reset();
     m_container = container; m_identifier = identifier; m_refreshing = false;
@@ -118,14 +119,19 @@ void PhotoController::setApplicationActive(bool active) {
     if (active) refresh();
 }
 void PhotoController::connectLibrary() {
-    if (m_authorizing) return;
+    if (!m_store || busy()) return;
+    if (m_library->access() == Access::Full || m_library->access() == Access::Limited) {
+        m_importLibraryRequested = true; refresh(); return;
+    }
     m_authorizing = true; emit changed();
     qInfo() << "iiPhotoLibrary: requesting library access; current access:" << access();
     const auto library = m_library;
+    const auto generation = m_generation;
     QPointer<PhotoController> self(this);
-    library->authorize([self, library] {
-        if (!self) return;
+    library->authorize([self, library, generation] {
+        if (!self || self->m_generation != generation) return;
         self->m_authorizing = false;
+        self->m_importLibraryRequested = true;
         emit self->changed();
         self->refresh();
     });
@@ -171,18 +177,14 @@ void PhotoController::updateEntries(const QJsonArray &records) {
 }
 void PhotoController::refresh() {
     if (!m_store || busy()) return;
-    // Only a foreground GUI with a ready container may show the initial
-    // permission prompt. Denied/limited access never opens Settings on a timer.
-    if (m_applicationActive && !m_automaticAccessRequested && m_library->access() == Access::NotDetermined) {
-        m_automaticAccessRequested = true;
-        connectLibrary(); return;
-    }
+    const bool includeLibrary = std::exchange(m_importLibraryRequested, false);
     m_refreshing = true; m_status = tr("Updating photos and videos…"); emit changed();
     const QPointer<PhotoController> guard(this); const auto generation = m_generation;
-    work([guard, generation](PhotoStore &store) {
+    work([guard, generation, includeLibrary](PhotoStore &store) {
         QElapsedTimer published;
         QJsonArray pendingRecords; QJsonObject pendingPreviews;
-        const bool ok = store.refresh([&](const QJsonObject &record) {
+        const auto refresh = includeLibrary ? &PhotoStore::importLibrary : &PhotoStore::refresh;
+        const bool ok = (store.*refresh)([&](const QJsonObject &record) {
             // Read only the newly committed preview. Re-reading the entire
             // catalog for every partial update stalls large libraries for
             // seconds under operation.lock and starves real progress reports.
@@ -232,9 +234,7 @@ void PhotoController::refresh() {
         m_previewStamps = result.value("previews").toObject();
         updateEntries(records);
         if (!result.value("ok").toBool()) m_status = result.value("error").toString();
-        else if (access() == "limited") m_status = tr("Synchronizing the photos and videos allowed by this device.");
-        else if (access() == "full") m_status = tr("%1 photos and videos. Originals stay in your photo library.").arg(m_entries.size());
-        else m_status = tr("Connect your photo library to add these photos to this device.");
+        else m_status = tr("%1 photos and videos in this container.").arg(m_entries.size());
         if (changed) emit contentsChanged();
         startCycle();
         if (!m_cycle) emit this->changed();

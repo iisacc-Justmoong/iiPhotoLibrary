@@ -1,5 +1,11 @@
 @PACKAGE_INIT@
 include(CMakeFindDependencyMacro)
+
+
+
+
+
+
 find_dependency(Threads)
 include("${CMAKE_CURRENT_LIST_DIR}/iiPhotoLibraryAlbumTargets.cmake")
 set(iiPhotoLibrary_Albums_FOUND TRUE)
@@ -18,8 +24,9 @@ if(NOT iiPhotoLibrary_FIND_COMPONENTS OR "Library" IN_LIST iiPhotoLibrary_FIND_C
     # Save paths before dependency package configs modify PACKAGE_PREFIX_DIR.
     set_and_check(iiPhotoLibrary_QML_IMPORT_PATH "@PACKAGE_CMAKE_INSTALL_DATADIR@/iiPhotoLibrary/qml")
     set_and_check(iiPhotoLibrary_ANDROID_SOURCE_DIR "@PACKAGE_CMAKE_INSTALL_DATADIR@/iiPhotoLibrary/platform/android/src")
+    find_dependency(iiFileProvider 0.6 CONFIG HINTS "$ENV{IIFILEPROVIDER_PREFIX}" "$ENV{HOME}/.local/SDK/iiFileProvider")
     find_dependency(Qt6 6.8.3 EXACT COMPONENTS Core Gui Concurrent)
-    find_dependency(iiSocietyContainer 0.14.0 CONFIG COMPONENTS Gui)
+    find_dependency(iiSocietyContainer 0.16.0 CONFIG COMPONENTS Sharing)
     include("${CMAKE_CURRENT_LIST_DIR}/QtApple.cmake")
     include("${CMAKE_CURRENT_LIST_DIR}/iiPhotoLibraryTargets.cmake")
 endif()

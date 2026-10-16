@@ -15,6 +15,7 @@ struct Asset {
     QDateTime created;
     bool favorite = false;
     QList<Resource> resources;
+    bool screenshot = false, imported = false, hidden = false, deleted = false;
 };
 struct Snapshot {
     QList<Asset> assets;
@@ -24,8 +25,9 @@ struct Snapshot {
 };
 
 // All I/O methods run on the photo worker. Authorization runs on the GUI thread.
-// The implementation owns access to originals; the container owns only aliases
-// and previews. Import must recognize its deterministic Society resource names.
+// Native originals remain owned by the OS library. PhotoStore reads selected
+// originals into its container and never calls import/trash; those low-level
+// mutations remain available to consumers that explicitly request OS changes.
 class PhotoLibrary {
 public:
     virtual ~PhotoLibrary() = default;

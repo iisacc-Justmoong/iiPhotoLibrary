@@ -1,5 +1,7 @@
 package com.iisacc.iiphotolibrary;
 
+import com.iisacc.iifileprovider.FileStorage;
+
 import android.Manifest;
 import android.app.Activity;
 import android.app.PendingIntent;
@@ -223,14 +225,14 @@ public final class PhotoLibrary {
                     values.put(MediaStore.MediaColumns.IS_PENDING, 1);
                 } else {
                     File directory = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "Society");
-                    if (!directory.isDirectory() && !directory.mkdirs()) throw new IllegalStateException("Could not create the Society gallery folder.");
+                    if (!directory.isDirectory() && !FileStorage.mkdirs(directory)) throw new IllegalStateException("Could not create the Society gallery folder.");
                     values.put(MediaStore.MediaColumns.DATA, new File(directory, name).getAbsolutePath());
                 }
                 Uri collection = video ? MediaStore.Video.Media.EXTERNAL_CONTENT_URI : MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
                 Uri uri = context.getContentResolver().insert(collection, values);
                 if (uri == null) throw new IllegalStateException("Could not create the gallery photo.");
                 inserted.add(uri);
-                try (InputStream input = new FileInputStream(paths.getString(i)); OutputStream output = context.getContentResolver().openOutputStream(uri, "w")) { copy(input, output); }
+                try (InputStream input = new FileInputStream(paths.getString(i)); OutputStream output = FileStorage.openOutput(context.getContentResolver(), uri, "w")) { copy(input, output); }
                 present.put(i, uri);
             }
             if (Build.VERSION.SDK_INT >= 29) for (Uri uri : inserted) {
@@ -283,11 +285,11 @@ public final class PhotoLibrary {
             else if (action.equals("export")) {
                 Uri uri = Uri.parse(request.getString("token"));
                 if (!uri.getScheme().equals("content") || !uri.getAuthority().equals("media")) throw new SecurityException("Invalid gallery reference.");
-                try (InputStream input = context.getContentResolver().openInputStream(original(context, uri)); OutputStream output = new FileOutputStream(request.getString("path"))) { copy(input, output); }
+                try (InputStream input = context.getContentResolver().openInputStream(original(context, uri)); OutputStream output = FileStorage.openOutput(request.getString("path"))) { copy(input, output); }
             } else if (action.equals("preview")) {
                 Bitmap bitmap = thumbnail(context, Uri.parse(request.getString("identifier")).buildUpon().fragment(null).build());
                 if (bitmap == null) throw new IllegalStateException("The gallery preview is unavailable.");
-                try (OutputStream output = new FileOutputStream(request.getString("path"))) {
+                try (OutputStream output = FileStorage.openOutput(request.getString("path"))) {
                     if (!bitmap.compress(Bitmap.CompressFormat.JPEG, 85, output)) throw new IllegalStateException("Could not store the gallery preview.");
                 } finally { bitmap.recycle(); }
             } else if (action.equals("import")) result.put("identifier", importPhoto(context, request));

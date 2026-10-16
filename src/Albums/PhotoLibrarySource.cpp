@@ -36,6 +36,10 @@ class LibrarySource final : public AlbumSource {
             photo.sourcePhotoId = asset.identifier.toStdString();
             photo.name = asset.name.toStdString(); photo.mediaType = asset.media.toStdString();
             photo.created = asset.created.toString(Qt::ISODateWithMs).toStdString(); photo.favorite = asset.favorite;
+            photo.traits.screenshot = asset.screenshot; photo.traits.imported = asset.imported; photo.traits.hidden = asset.hidden;
+            photo.traits.deleted = asset.deleted;
+            for (const auto &resource : asset.resources)
+                if (!importedPhotoId(resource.name).isEmpty()) photo.traits.imported = true;
             photo.properties["native.stamp"] = asset.stamp.toStdString();
             if (!asset.cloudIdentifier.isEmpty()) photo.properties["native.cloudIdentifier"] = asset.cloudIdentifier.toStdString();
             // Native resource tokens stay inside PhotoLibrary; album references

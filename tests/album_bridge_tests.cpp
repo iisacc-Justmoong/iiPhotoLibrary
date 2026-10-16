@@ -36,6 +36,7 @@ int main() {
         auto library = std::make_shared<Library>();
         Asset asset; asset.identifier = "native-id"; asset.cloudIdentifier = "cloud-id";
         asset.name = "native.jpg"; asset.media = "photo"; asset.stamp = "stamp"; asset.favorite = true;
+        asset.screenshot = true; asset.imported = true; asset.hidden = true;
         asset.created = QDateTime::fromString("2026-10-02T00:00:00Z", Qt::ISODate);
         asset.resources.push_back({"private-token", "original.jpg", "photo"});
         library->contents = {{asset}, true, "native-revision"};
@@ -51,6 +52,31 @@ int main() {
         CHECK(photo.created.starts_with("2026-10-02T00:00:00"));
         CHECK(photo.properties.at("native.cloudIdentifier") == "cloud-id");
         CHECK(photo.properties.size() == 2 && photo.contentUrl.empty());
+        CHECK(photo.traits.screenshot && photo.traits.imported && photo.traits.hidden);
+        CHECK(manager.allLibrary()->snapshot().contents.photos.empty());
+        CHECK(manager.smartAlbum(SmartAlbumKind::Hidden)->snapshot().contents.photos.size() == 1);
+        CHECK(manager.smartAlbum(SmartAlbumKind::Favorite)->snapshot().contents.photos.empty());
+        auto removed = asset; removed.deleted = true;
+        library->contents = {{removed}, true, "deleted"}; manager.refresh(album);
+        CHECK(album->snapshot().contents.photos[0].traits.deleted);
+        CHECK(manager.smartAlbum(SmartAlbumKind::Deleted)->snapshot().contents.photos.size() == 1 &&
+            manager.smartAlbum(SmartAlbumKind::Hidden)->snapshot().contents.photos.empty());
+        manager.setDeleted(photo.id, false);
+        CHECK(manager.smartAlbum(SmartAlbumKind::Hidden)->snapshot().contents.photos.size() == 1 &&
+            manager.smartAlbum(SmartAlbumKind::Deleted)->snapshot().contents.photos.empty());
+        manager.setHidden(photo.id, false);
+        CHECK(manager.smartAlbum(SmartAlbumKind::Screenshots)->snapshot().contents.photos.size() == 1);
+        CHECK(manager.smartAlbum(SmartAlbumKind::Imported)->snapshot().contents.photos.size() == 1);
+        CHECK(manager.smartAlbum(SmartAlbumKind::Images)->snapshot().contents.photos.size() == 1 &&
+            manager.smartAlbum(SmartAlbumKind::Videos)->snapshot().contents.photos.empty());
+        CHECK(manager.smartAlbum(SmartAlbumKind::Favorite)->snapshot().contents.photos.size() == 1 && manager.isFavorite(photo.id));
+        manager.setFavorite(photo.id, false);
+        CHECK(manager.smartAlbum(SmartAlbumKind::Favorite)->snapshot().contents.photos.empty() && !manager.isFavorite(photo.id));
+        auto tagged = asset; tagged.imported = false;
+        tagged.resources[0].name = importedResourceName(QString(64, 'a'), 0, "original.jpg");
+        library->contents = {{tagged}, true, "tagged"};
+        CHECK(source->read({}).photos[0].traits.imported);
+        library->contents = {{asset}, true, "native-revision"};
         library->permission = library->after = Access::Limited;
         library->contents.assets.clear();
         manager.refresh(album);

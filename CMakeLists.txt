@@ -1,5 +1,10 @@
 cmake_minimum_required(VERSION 3.24)
 project(iiPhotoLibrary VERSION 0.1.0 LANGUAGES CXX)
+
+
+
+
+
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 include(CTest)
@@ -24,6 +29,14 @@ if(BUILD_TESTING AND NOT CMAKE_CROSSCOMPILING)
     add_test(NAME iiPhotoLibrary.AlbumManager COMMAND iiPhotoLibraryAlbumTests manager)
     add_test(NAME iiPhotoLibrary.GooglePhotosAlbums COMMAND iiPhotoLibraryAlbumTests google)
     set_tests_properties(iiPhotoLibrary.AlbumManager iiPhotoLibrary.GooglePhotosAlbums PROPERTIES TIMEOUT 30)
+    add_executable(iiPhotoLibraryAllLibraryTests tests/all_library_tests.cpp)
+    target_link_libraries(iiPhotoLibraryAllLibraryTests PRIVATE iiPhotoLibrary::Albums)
+    add_test(NAME iiPhotoLibrary.AllLibrary COMMAND iiPhotoLibraryAllLibraryTests)
+    set_tests_properties(iiPhotoLibrary.AllLibrary PROPERTIES TIMEOUT 30)
+    add_executable(iiPhotoLibrarySmartAlbumTests tests/smart_album_tests.cpp)
+    target_link_libraries(iiPhotoLibrarySmartAlbumTests PRIVATE iiPhotoLibrary::Albums)
+    add_test(NAME iiPhotoLibrary.SmartAlbums COMMAND iiPhotoLibrarySmartAlbumTests)
+    set_tests_properties(iiPhotoLibrary.SmartAlbums PROPERTIES TIMEOUT 30)
     add_test(NAME iiPhotoLibrary.AlbumsInstalledConsumer COMMAND ${CMAKE_COMMAND}
         "-DGENERATOR=${CMAKE_GENERATOR}" "-DPROJECT_BUILD=${CMAKE_CURRENT_BINARY_DIR}" "-DPROJECT_SOURCE=${CMAKE_CURRENT_SOURCE_DIR}"
         -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/albums_installed_consumer.cmake")
@@ -32,9 +45,11 @@ endif()
 
 set(IIPHOTOLIBRARY_HAS_LEGACY OFF)
 if(NOT IIPHOTOLIBRARY_ALBUMS_ONLY)
+# File creation is owned by iiFileProvider.
+find_package(iiFileProvider 0.6 CONFIG REQUIRED HINTS "$ENV{IIFILEPROVIDER_PREFIX}" "$ENV{HOME}/.local/SDK/iiFileProvider")
 set(IIPHOTOLIBRARY_HAS_LEGACY ON)
 find_package(Qt6 6.8.3 EXACT REQUIRED COMPONENTS Core Gui Concurrent)
-find_package(iiSocietyContainer 0.14.0 CONFIG REQUIRED COMPONENTS Gui
+find_package(iiSocietyContainer 0.14.0 CONFIG REQUIRED COMPONENTS Sharing
     HINTS "$ENV{HOME}/.local/SDK/iiSocietyContainer")
 # Qt 6.8 refers to AGL, removed from current macOS SDKs.
 include(cmake/QtApple.cmake)
@@ -47,7 +62,7 @@ target_compile_features(iiPhotoLibrary PUBLIC cxx_std_23)
 target_include_directories(iiPhotoLibrary PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
-target_link_libraries(iiPhotoLibrary PUBLIC iiPhotoLibrary::Albums Qt6::Gui Qt6::Concurrent iiSocietyContainer::Gui)
+target_link_libraries(iiPhotoLibrary PUBLIC iiPhotoLibrary::Albums Qt6::Gui Qt6::Concurrent iiSocietyContainer::Sharing PRIVATE iiFileProvider::iiFileProvider)
 set_target_properties(iiPhotoLibrary PROPERTIES AUTOMOC ON CXX_EXTENSIONS OFF POSITION_INDEPENDENT_CODE ON)
 if(APPLE)
     enable_language(OBJCXX)

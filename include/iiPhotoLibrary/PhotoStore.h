@@ -18,6 +18,9 @@ public:
     bool open(const GalleryProgress &published = {});
     using Progress = std::function<void(const QJsonObject &)>;
     bool refresh(const Progress &progress = {}, const GalleryProgress &galleryProgress = {});
+    // Explicitly read the permitted native library into this container. Ordinary
+    // refresh never enumerates the native library or imports/trashes its assets.
+    bool importLibrary(const Progress &progress = {}, const GalleryProgress &galleryProgress = {});
     QJsonArray gallery();
     // Only the viewport mailbox is shared with the GUI; disk state stays on the worker.
     void prioritize(const QStringList &keys);
@@ -51,7 +54,8 @@ private:
     bool writeRecord(const QJsonObject &record, const QString &path = {});
     bool remember(const Asset &asset, const QString &id, const QJsonObject &record);
     bool importLooseFiles();
-    bool refreshImpl(const Progress &progress, const GalleryProgress &galleryProgress);
+    bool refreshContents(bool includeLibrary, const Progress &progress, const GalleryProgress &galleryProgress);
+    bool refreshImpl(const Progress &progress, const GalleryProgress &galleryProgress, std::optional<Snapshot> initialSnapshot);
     bool indexGallery(const Snapshot &snapshot, const GalleryProgress &progress);
     QJsonObject galleryRow(const QString &key);
     bool saveGallery(const QString &key, const QJsonObject &entry);
@@ -59,6 +63,7 @@ private:
     QJsonArray loadGalleryCatalog();
     QString galleryPreview(const QString &key) const;
     void pruneExports();
+    QSet<QString> containerOwnedOriginals() const;
     void releasePhoto(const QString &id);
     bool consumeImpl(const QString &id);
     QJsonObject readRecord(const QString &id) const;

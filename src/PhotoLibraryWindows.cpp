@@ -1,7 +1,7 @@
+#include <File.h>
+#include <iiFileProviderDevice.h>
 #include <iiPhotoLibrary/PhotoLibrary.h>
 #include <QDirIterator>
-#include <QFile>
-#include <QSaveFile>
 #include <QCryptographicHash>
 #include <QImage>
 #include <QImageReader>
@@ -26,7 +26,7 @@ struct ComScope {
 QString pathOf(IShellItem *item) {
     PWSTR value = nullptr;
     if (!item || FAILED(item->GetDisplayName(SIGDN_FILESYSPATH, &value))) return {};
-    const auto path = QDir::fromNativeSeparators(QString::fromWCharArray(value)); CoTaskMemFree(value); return path;
+    const auto path = iiFileProvider::Directory::fromNativeSeparators(QString::fromWCharArray(value)); CoTaskMemFree(value); return path;
 }
 QStringList libraryFolders(REFKNOWNFOLDERID identifier) {
     QStringList result; ComPtr<IShellLibrary> library;
@@ -49,14 +49,14 @@ QStringList roots() {
 bool sourceAllowed(const QString &path) {
     const QFileInfo info(path); if (!info.isFile() || info.isSymLink() || info.isJunction()) return false;
     for (const auto &root : roots()) {
-        const auto relative = QDir(root).relativeFilePath(info.canonicalFilePath());
-        if (!relative.startsWith("../") && relative != ".." && !QDir::isAbsolutePath(relative)) return true;
+        const auto relative = iiFileProvider::Directory(root).relativeFilePath(info.canonicalFilePath());
+        if (!relative.startsWith("../") && relative != ".." && !iiFileProvider::Directory::isAbsolutePath(relative)) return true;
     }
     return false;
 }
 bool fail(QString *error, const QString &message) { if (error) *error = message; return false; }
 QString digestFile(const QString &path) {
-    QFile file(path); QCryptographicHash digest(QCryptographicHash::Sha256);
+    iiFileProvider::FileDevice file(path); QCryptographicHash digest(QCryptographicHash::Sha256);
     return file.open(QIODevice::ReadOnly) && digest.addData(&file) ? QString::fromLatin1(digest.result().toHex()) : QString();
 }
 class WindowsLibrary final : public PhotoLibrary {
@@ -73,7 +73,7 @@ public:
                 GetVolumeInformationW(volume, nullptr, 0, &serial, nullptr, nullptr, nullptr, 0);
             snapshot.revision += root + ':' + QString::number(serial) + ';';
             if (!QFileInfo(root).isReadable() || !QFileInfo(root).isDir()) { snapshot.complete = false; continue; }
-            QDirIterator files(root, QDir::Files | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+            QDirIterator files(root, iiFileProvider::Directory::Files | iiFileProvider::Directory::NoDotAndDotDot, QDirIterator::Subdirectories);
             while (files.hasNext()) {
                 const auto path = files.next(); const QFileInfo info(path);
                 if (info.isSymLink() || info.isJunction() || seen.contains(info.canonicalFilePath())) continue;
@@ -108,25 +108,25 @@ public:
         QImage image(shape.bmWidth, shape.bmHeight, QImage::Format_RGB32); HDC dc = GetDC(nullptr);
         const bool ok = GetDIBits(dc, bitmap, 0, shape.bmHeight, image.bits(), &info, DIB_RGB_COLORS) != 0;
         ReleaseDC(nullptr, dc); DeleteObject(bitmap);
-        return ok && image.save(path, "JPEG", 85) ? true : fail(error, "Could not save the photo preview.");
+        return ok && iiFileProvider::File::saveImage(image, path, "JPEG", 85) ? true : fail(error, "Could not save the photo preview.");
     }
     bool exportResource(const QString &, const QString &token, const QString &path, QString *error) override {
         ComScope com;
-        return sourceAllowed(token) && QFile::copy(token, path) ? true : fail(error, "The photo original is unavailable. Check its cloud download status.");
+        return sourceAllowed(token) && iiFileProvider::FileDevice::copy(token, path) ? true : fail(error, "The photo original is unavailable. Check its cloud download status.");
     }
     QString import(const QJsonObject &record, const QStringList &paths, QString *error) override {
         ComScope com; const auto directory = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation) + "/Society";
-        if (!QDir().mkpath(directory) || QFileInfo(directory).isSymLink() || QFileInfo(directory).isJunction()) { fail(error, "Could not open the Society Pictures folder."); return {}; }
+        if (!iiFileProvider::Directory().mkpath(directory) || QFileInfo(directory).isSymLink() || QFileInfo(directory).isJunction()) { fail(error, "Could not open the Society Pictures folder."); return {}; }
         const auto resources = record.value("resources").toArray(); if (resources.size() != paths.size()) return {};
         QString first;
         for (int i = 0; i < resources.size(); ++i) {
-            const auto path = QDir(directory).filePath(importedResourceName(record.value("id").toString(), i, resources[i].toObject().value("name").toString()));
+            const auto path = iiFileProvider::Directory(directory).filePath(importedResourceName(record.value("id").toString(), i, resources[i].toObject().value("name").toString()));
             if (QFileInfo(path).isSymLink() || QFileInfo(path).isJunction()) { fail(error, "The photo destination was redirected."); return {}; }
             const auto expected = resources[i].toObject().value("hash").toString();
-            if (QFile::exists(path)) {
+            if (iiFileProvider::FileDevice::exists(path)) {
                 if (digestFile(path) != expected) { fail(error, "This photo has a different native original. Its existing original was preserved."); return {}; }
             } else {
-                QFile input(paths[i]); QSaveFile output(path);
+                iiFileProvider::FileDevice input(paths[i]); iiFileProvider::SaveFile output(path);
                 if (!input.open(QIODevice::ReadOnly) || !output.open(QIODevice::WriteOnly)) { fail(error, "Could not add the photo to Windows Pictures."); return {}; }
                 QCryptographicHash digest(QCryptographicHash::Sha256);
                 while (!input.atEnd()) {
@@ -148,13 +148,13 @@ public:
             if (asset.identifier != id && (imported.isEmpty() || importedPhotoId(asset.name) != imported)) continue;
             for (const auto &resource : asset.resources) {
                 if (!sourceAllowed(resource.token)) return fail(error, "The library photo is unavailable.");
-                QFile file(resource.token);
+                iiFileProvider::FileDevice file(resource.token);
                 // Qt verifies the per-item Shell result and requires recycling.
                 if (!file.moveToTrash()) return fail(error, "Could not move the photo to the Recycle Bin: " + file.errorString());
             }
             return true;
         }
-        return !QFile::exists(id) || fail(error, "The library photo is unavailable.");
+        return !iiFileProvider::FileDevice::exists(id) || fail(error, "The library photo is unavailable.");
     }
 };
 }

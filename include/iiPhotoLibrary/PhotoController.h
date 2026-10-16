@@ -108,7 +108,7 @@ private:
     quint64 m_cycleGeneration = 0;
     bool m_refreshing = false, m_cycle = false, m_uploading = false;
     bool m_customLibrary = false, m_transferred = false;
-    bool m_applicationActive = false, m_authorizing = false, m_automaticAccessRequested = false;
+    bool m_applicationActive = false, m_authorizing = false, m_importLibraryRequested = false;
     int m_photoIndex = 0, m_resourceIndex = 0;
     int m_waitingOriginals = 0;
     qint64 m_offset = 0;

@@ -115,9 +115,8 @@ Item {
             LV.PushButton {
                 objectName: "connectPhotoLibrary"
                 height: Math.max(implicitHeight, root.touchNavigation ? 44 : 0)
-                visible: root.controller && root.controller.access !== "full" && root.controller.access !== "unsupported"
-                text: root.controller && root.controller.access === "limited" ? qsTr("Manage access…")
-                    : root.width < 600 ? qsTr("Connect…") : qsTr("Connect photo library…")
+                visible: root.controller && root.controller.access !== "unsupported"
+                text: root.width < 600 ? qsTr("Import library…") : qsTr("Import photo library…")
                 enabled: root.controller && !root.controller.busy
                 onClicked: root.controller.connectLibrary()
             }
@@ -186,7 +185,7 @@ Item {
                     horizontalAlignment: Text.AlignHCenter
                     wrapMode: Text.WordWrap
                     text: root.controller && root.controller.busy ? qsTr("Reading your photo library…")
-                        : qsTr("Connect your photo library or add photos and videos here. New items also appear in your device’s photo library.")
+                        : qsTr("Add photos and videos to this container, or explicitly import your photo library.")
                     style: description
                 }
             }
