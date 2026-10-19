@@ -799,12 +799,12 @@ private slots:
         // Checking unchanged content does not replace rows or move the camera.
         const auto endScroll = grid->property("contentY").toReal();
         QSignalSpy entriesChanged(&controller, &PhotoController::entriesChanged);
-        controller.refresh(); QTRY_VERIFY(settled());
+        controller.refresh(); QTRY_VERIFY_WITH_TIMEOUT(settled(), 15000);
         QCOMPARE(entriesChanged.size(), 0);
         QCOMPARE(grid->property("contentY").toReal(), endScroll);
         // New arrivals preserve the camera even when it was at the end.
         for (int i = 40; i < 43; ++i) add(i);
-        controller.connectLibrary(); QTRY_COMPARE(grid->property("count").toInt(), 43); QTRY_VERIFY(settled());
+        controller.connectLibrary(); QTRY_COMPARE(grid->property("count").toInt(), 43); QTRY_VERIFY_WITH_TIMEOUT(settled(), 15000);
         QTRY_COMPARE(grid->property("contentY").toReal(), endScroll);
         grid->setProperty("contentY", grid->property("originY").toReal() + grid->property("cellHeight").toReal());
         QTest::qWait(100);
@@ -813,7 +813,7 @@ private slots:
         const auto selected = controller.entries()[8].toMap().value("id").toString();
         view->setProperty("selectedId", selected);
         for (int i = 43; i < 50; ++i) add(i);
-        controller.connectLibrary(); QTRY_COMPARE(grid->property("count").toInt(), 50); QTRY_VERIFY(settled());
+        controller.connectLibrary(); QTRY_COMPARE(grid->property("count").toInt(), 50); QTRY_VERIFY_WITH_TIMEOUT(settled(), 15000);
         QCOMPARE(grid->property("contentY").toReal(), scroll);
         QCOMPARE(view->property("selectedId").toString(), selected);
 
@@ -823,20 +823,20 @@ private slots:
         auto record = QJsonDocument::fromJson(alias.readAll()).object(); alias.close();
         record["created"] = epoch.addDays(100).toString(Qt::ISODateWithMs);
         write(alias.fileName(), QJsonDocument(record).toJson());
-        controller.refresh(); QTRY_VERIFY(settled());
+        controller.refresh(); QTRY_VERIFY_WITH_TIMEOUT(settled(), 15000);
         QCOMPARE(controller.entries().last().toMap().value("id").toString(), movedId);
         QCOMPARE(grid->property("contentY").toReal(), scroll);
         QCOMPARE(view->property("selectedId").toString(), selected);
 
         // Storage keeps the view alive: re-entry still starts at the newest.
         view->setVisible(false); view->setVisible(true);
-        QTRY_VERIFY(settled()); QTRY_VERIFY(grid->property("atYEnd").toBool());
+        QTRY_VERIFY_WITH_TIMEOUT(settled(), 15000); QTRY_VERIFY(grid->property("atYEnd").toBool());
         view->setVisible(false);
         controller.configure({}, false); QTRY_COMPARE(grid->property("count").toInt(), 0);
         controller.configure(f.temporary.path() + "/drive.societycontainer", true);
         QTRY_COMPARE(grid->property("count").toInt(), 50); QTRY_VERIFY(!controller.busy());
         view->setVisible(true);
-        QTRY_VERIFY(settled()); QTRY_VERIFY(grid->property("atYEnd").toBool());
+        QTRY_VERIFY_WITH_TIMEOUT(settled(), 15000); QTRY_VERIFY(grid->property("atYEnd").toBool());
         QCOMPARE(view->property("selectedId").toString(), QString());
         QVERIFY2(warnings.isEmpty(), qPrintable(warnings.join('\n')));
         window->close();

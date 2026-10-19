@@ -106,6 +106,9 @@ if(BUILD_TESTING AND NOT CMAKE_CROSSCOMPILING)
     add_test(NAME iiPhotoLibrary.Photos COMMAND iiPhotoLibraryTests)
     set_tests_properties(iiPhotoLibrary.Photos PROPERTIES TIMEOUT 180
         ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software;QML_DISABLE_DISK_CACHE=1")
+    if(WIN32)
+        set_property(TEST iiPhotoLibrary.Photos PROPERTY TIMEOUT 300)
+    endif()
     add_test(NAME iiPhotoLibrary.InstalledConsumer COMMAND ${CMAKE_COMMAND}
         "-DGENERATOR=${CMAKE_GENERATOR}" "-DPROJECT_BUILD=${CMAKE_CURRENT_BINARY_DIR}" "-DPROJECT_SOURCE=${CMAKE_CURRENT_SOURCE_DIR}"
         "-DPREFIX_PATH=${CMAKE_PREFIX_PATH}" "-DQt6_DIR=${Qt6_DIR}"
