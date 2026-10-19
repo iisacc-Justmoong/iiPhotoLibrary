@@ -1,5 +1,10 @@
 # iiPhotoLibrary
 
+Package release: **0.1.1** (2026-10-19). This patch packages the current
+source snapshot; build, test and installation evidence is recorded in the SDK
+patch-release report. Earlier versioned feature notes remain historical.
+
+
 C++23 is an SDK extracted as an independent package from the implementation of Photos and device photo album synchronization in Society. In the initial extraction, the source and build connection of Society were maintained. Subsequently, Society was switched to consume this package, and the existing internal implementation within the app is preserved for reference. The SDK does not reference Society app source or binaries and provides the `iiPhotoLibrary` namespace and `iiPhotoLibrary::iiPhotoLibrary` CMake target.
 
 <a id="범위와-의존성"></a>

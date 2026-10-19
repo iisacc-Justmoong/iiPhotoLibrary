@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.24)
-project(iiPhotoLibrary VERSION 0.1.0 LANGUAGES CXX)
+project(iiPhotoLibrary VERSION 0.1.1 LANGUAGES CXX)
 
 
 
