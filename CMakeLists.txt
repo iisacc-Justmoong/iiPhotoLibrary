@@ -92,10 +92,11 @@ if(BUILD_TESTING AND NOT CMAKE_CROSSCOMPILING)
     set_tests_properties(iiPhotoLibrary.NativeAlbumBridge PROPERTIES TIMEOUT 30)
     find_package(Qt6 6.8.3 EXACT REQUIRED COMPONENTS Test Quick QuickControls2)
     find_package(LVRS CONFIG REQUIRED HINTS "$ENV{HOME}/.local/LVRS" "$ENV{HOME}/.local/SDK/LVRS")
-    find_package(iiSocietySync 0.8.0 CONFIG REQUIRED HINTS "$ENV{HOME}/.local/SDK/iiSocietySync")
+
+    find_package(iiSocietyHelper 0.10.0 CONFIG REQUIRED)
     qt_add_executable(iiPhotoLibraryTests tests/tst_photos.cpp)
     target_link_libraries(iiPhotoLibraryTests PRIVATE iiPhotoLibrary::iiPhotoLibrary
-        iiSocietySync::iiSocietySync Qt6::Test Qt6::Quick Qt6::QuickControls2)
+        iiSocietyHelper::iiSocietyHelper Qt6::Test Qt6::Quick Qt6::QuickControls2)
     lvrs_configure_qml_app(iiPhotoLibraryTests NO_PLATFORM_RUNTIME_TARGETS)
     set_target_properties(iiPhotoLibraryTests PROPERTIES AUTOMOC ON)
     target_compile_definitions(iiPhotoLibraryTests PRIVATE

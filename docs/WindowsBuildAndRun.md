@@ -1,3 +1,6 @@
+> iiSocietyHelper 0.10.0 consolidation: synchronization tests now discover Helper; this document
+> records the earlier Windows execution and is not execution evidence for the merged release.
+
 # iiPhotoLibrary: Windows 빌드 및 실행
 
 사진·앨범 모델과 외부 사진 라이브러리 및 Society 동기화 어댑터를 제공하는 SDK이다.
@@ -15,9 +18,9 @@ Release 빌드·실행 검사·설치를 완료하였다. 등록 검사 8개 중
 - [LVRS](../../../SDK/LVRS/docs/WindowsBuildAndRun.md)
 - [iiFileProvider](../../../SDK/iiFileProvider/docs/WindowsBuildAndRun.md)
 - [iiSocietyContainer](../../../SDK/iiSocietyContainer/docs/WindowsBuildAndRun.md)
-- [iiSocietySync](../../../SDK/iiSocietySync/docs/WindowsBuildAndRun.md)
+- [iiSocietyHelper Sync](../../../SDK/iiSocietyHelper/docs/WindowsBuildAndRun.md)
 
-- 전체 Library 구성은 iiFileProvider, iiSocietyContainer Sharing, iiSocietySync, LVRS 및 Qt 6.8.3에 의존한다.
+- 전체 Library 구성은 iiFileProvider, iiSocietyContainer Sharing, iiSocietyHelper Sync, LVRS 및 Qt 6.8.3에 의존한다.
 - Google/iCloud/기기 사진 권한과 실제 계정 연동은 각각 해당 제공자와 장치에서 별도 검증해야 한다.
 
 프로젝트별 Windows 조건은 다음과 같다.

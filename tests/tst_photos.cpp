@@ -20,7 +20,7 @@
 #include <QQuickWindow>
 #include <QQuickItem>
 #include "backend/runtime/appbootstrap.h"
-#include <iiSocietySync.h>
+#include <iiSocietyHelper/Sync/Sync.h>
 
 using namespace iiPhotoLibrary;
 namespace {
@@ -994,10 +994,10 @@ private slots:
         QVERIFY(desktop.store->importLibrary());
         const auto desktopRecord = desktop.store->catalog().first().toObject();
         iiServerHost::LanPeer host, client;
-        iiSocietySync::Controller hosting({}), syncing([&](const auto &peer, const auto &packet) { return client.request(peer, packet); });
+        iiSocietyHelper::Sync::Controller hosting({}), syncing([&](const auto &peer, const auto &packet) { return client.request(peer, packet); });
         PhotoController hostPhotos({}, nullptr, desktop.library);
         PhotoController phonePhotos([&](const auto &peer, const auto &packet) { return client.request(peer, packet); }, nullptr, phone.library);
-        const auto files = iiSocietySync::filesHandler(desktop.temporary.path() + "/drive.societycontainer");
+        const auto files = iiSocietyHelper::Sync::filesHandler(desktop.temporary.path() + "/drive.societycontainer");
         connect(&client, &iiServerHost::LanPeer::completed, this, [&](const auto &id, const auto &result, const auto &transport) {
             QCOMPARE(transport, QString("local")); syncing.receive(id, result); phonePhotos.receive(id, result);
         });
@@ -1010,7 +1010,7 @@ private slots:
         syncing.open(phone.temporary.path() + "/drive.societycontainer", QString(64, 'a'));
         QTRY_VERIFY(hosting.available() && syncing.available());
         hosting.setPeers({"phone"}, {});
-        QSignalSpy mirrored(&syncing, &iiSocietySync::Controller::synchronized);
+        QSignalSpy mirrored(&syncing, &iiSocietyHelper::Sync::Controller::synchronized);
         syncing.setPeers({"desktop"}, {"desktop"});
         QTRY_VERIFY2_WITH_TIMEOUT(!mirrored.isEmpty(), qPrintable(syncing.errorString()), 15000);
         const auto desktopId = desktopRecord.value("id").toString();
@@ -1024,9 +1024,9 @@ private slots:
             if (value.toObject().value("id") != desktopId) phoneRecord = value.toObject();
         QVERIFY(!phoneRecord.isEmpty());
         QTRY_COMPARE_WITH_TIMEOUT(PhotoStore::digestFile(phone.store->previewPath(desktopId)), PhotoStore::digestFile(desktop.store->previewPath(desktopId)), 15000);
-        connect(&hostPhotos, &PhotoController::contentsChanged, &hosting, &iiSocietySync::Controller::synchronizeNow);
-        connect(&phonePhotos, &PhotoController::contentsChanged, &syncing, &iiSocietySync::Controller::synchronizeNow);
-        connect(&syncing, &iiSocietySync::Controller::synchronized, &phonePhotos, &PhotoController::refresh);
+        connect(&hostPhotos, &PhotoController::contentsChanged, &hosting, &iiSocietyHelper::Sync::Controller::synchronizeNow);
+        connect(&phonePhotos, &PhotoController::contentsChanged, &syncing, &iiSocietyHelper::Sync::Controller::synchronizeNow);
+        connect(&syncing, &iiSocietyHelper::Sync::Controller::synchronized, &phonePhotos, &PhotoController::refresh);
         hostPhotos.configure(desktop.temporary.path() + "/drive.societycontainer", true, {"phone"});
         QTRY_VERIFY_WITH_TIMEOUT(!hostPhotos.busy(), 5000);
         phonePhotos.configure(phone.temporary.path() + "/drive.societycontainer", true, {"desktop"}, {"desktop"});

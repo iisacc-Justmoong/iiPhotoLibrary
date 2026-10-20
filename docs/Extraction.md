@@ -31,7 +31,7 @@ macOS arm64, AppleClang 21, C++23, Qt 6.8.3에서 빌드했다.
 
 - `build/libiiPhotoLibrary.a`: Apple PhotoKit 어댑터를 포함한 SDK 빌드.
 - `build/standalone/build/libiiPhotoLibrary.a`: BUILD_TESTING=OFF 구성.
-  LVRS 및 iiSocietySync를 찾지 않고 Qt와 iiSocietyContainer만으로 빌드된다.
+  LVRS 및 iiSocietyHelper Sync를 찾지 않고 Qt와 iiSocietyContainer만으로 빌드된다.
 - `iiPhotoLibrary.Photos`: 원본 회귀 테스트 이식. 갤러리 영구 인덱스, 우선순위 변경,
   원본 보존, 취소, 해시 검증, 제한 권한·DB 교체의 삭제 방지, TLS 원본 전송 등을 검사한다.
 - `iiPhotoLibrary.InstalledConsumer`: 별도 prefix에 설치 후 디렉터리를 옮겨
