@@ -94,3 +94,11 @@ Container-owned duplicates and received resource revisions keep their verified o
 The original SHA-256 and extraction criteria Git revision are at [source-manifest.json](docs/source-manifest.json). Existing Society uncommitted changes are not changed regardless of inclusion or exclusion.
 [original operation contract](docs/SocietyReference.md)is the reference document at the time of extraction, and the existing product's platform verification written in that document does not mean the new verification of this SDK.
 Refer to [platform integration](docs/Platforms.md), [extraction and verification results](docs/Extraction.md).
+
+## License
+
+SPDX-License-Identifier: MIT
+
+The original code and documentation in this repository are licensed under the
+[MIT License](LICENSE). Third-party code, libraries, fonts, tools, and model
+weights retain their respective licenses.
