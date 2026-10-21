@@ -14,11 +14,11 @@ endif()
 
 option(IIPHOTOLIBRARY_ALBUMS_ONLY "Build the C++23 album core without the legacy Qt photo/UI layer" OFF)
 find_package(Threads REQUIRED)
-add_library(iiPhotoLibraryAlbums STATIC src/Albums/Album.cpp src/Albums/GooglePhotosSource.cpp)
+add_library(iiPhotoLibraryAlbums STATIC src/iiPhotoLibrary/Album.cpp src/iiPhotoLibrary/GooglePhotosSource.cpp)
 add_library(iiPhotoLibrary::Albums ALIAS iiPhotoLibraryAlbums)
 target_compile_features(iiPhotoLibraryAlbums PUBLIC cxx_std_23)
 target_include_directories(iiPhotoLibraryAlbums PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 target_include_directories(iiPhotoLibraryAlbums SYSTEM PRIVATE ThirdParty)
 target_link_libraries(iiPhotoLibraryAlbums PUBLIC Threads::Threads)
@@ -55,19 +55,19 @@ find_package(iiSocietyContainer 0.14.0 CONFIG REQUIRED COMPONENTS Sharing
 include(cmake/QtApple.cmake)
 
 add_library(iiPhotoLibrary STATIC
-    src/PhotoStore.cpp src/PhotoController.cpp src/Albums/PhotoLibrarySource.cpp
-    include/iiPhotoLibrary/PhotoController.h)
+    src/iiPhotoLibrary/PhotoStore.cpp src/iiPhotoLibrary/PhotoController.cpp src/iiPhotoLibrary/PhotoLibrarySource.cpp
+    src/iiPhotoLibrary/PhotoController.h)
 add_library(iiPhotoLibrary::iiPhotoLibrary ALIAS iiPhotoLibrary)
 target_compile_features(iiPhotoLibrary PUBLIC cxx_std_23)
 target_include_directories(iiPhotoLibrary PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 target_link_libraries(iiPhotoLibrary PUBLIC iiPhotoLibrary::Albums Qt6::Gui Qt6::Concurrent iiSocietyContainer::Sharing PRIVATE iiFileProvider::iiFileProvider)
 set_target_properties(iiPhotoLibrary PROPERTIES AUTOMOC ON CXX_EXTENSIONS OFF POSITION_INDEPENDENT_CODE ON)
 if(APPLE)
     enable_language(OBJCXX)
-    target_sources(iiPhotoLibrary PRIVATE src/PhotoLibraryApple.mm)
-    set_source_files_properties(src/PhotoLibraryApple.mm PROPERTIES COMPILE_OPTIONS "-fobjc-arc")
+    target_sources(iiPhotoLibrary PRIVATE src/iiPhotoLibrary/PhotoLibraryApple.mm)
+    set_source_files_properties(src/iiPhotoLibrary/PhotoLibraryApple.mm PROPERTIES COMPILE_OPTIONS "-fobjc-arc")
     set_target_properties(iiPhotoLibrary PROPERTIES OBJCXX_STANDARD 23 OBJCXX_STANDARD_REQUIRED ON)
     target_link_libraries(iiPhotoLibrary PRIVATE "-framework Photos" "-framework Foundation" "-framework UniformTypeIdentifiers")
     if(CMAKE_SYSTEM_NAME STREQUAL "iOS")
@@ -76,13 +76,13 @@ if(APPLE)
         target_link_libraries(iiPhotoLibrary PRIVATE "-framework AppKit")
     endif()
 elseif(ANDROID)
-    target_sources(iiPhotoLibrary PRIVATE src/PhotoLibraryAndroid.cpp)
+    target_sources(iiPhotoLibrary PRIVATE src/iiPhotoLibrary/PhotoLibraryAndroid.cpp)
 elseif(WIN32)
-    target_sources(iiPhotoLibrary PRIVATE src/PhotoLibraryWindows.cpp)
+    target_sources(iiPhotoLibrary PRIVATE src/iiPhotoLibrary/PhotoLibraryWindows.cpp)
     target_compile_definitions(iiPhotoLibrary PRIVATE NOMINMAX WIN32_LEAN_AND_MEAN)
     target_link_libraries(iiPhotoLibrary PRIVATE shell32 ole32 gdi32 uuid)
 else()
-    target_sources(iiPhotoLibrary PRIVATE src/PhotoLibraryUnsupported.cpp)
+    target_sources(iiPhotoLibrary PRIVATE src/iiPhotoLibrary/PhotoLibraryUnsupported.cpp)
 endif()
 
 if(BUILD_TESTING AND NOT CMAKE_CROSSCOMPILING)
@@ -120,14 +120,22 @@ if(BUILD_TESTING AND NOT CMAKE_CROSSCOMPILING)
 endif()
 
 install(TARGETS iiPhotoLibrary EXPORT iiPhotoLibraryTargets ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
-install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(FILES
+    src/iiPhotoLibrary/Album.h
+    src/iiPhotoLibrary/GooglePhotosAlbumSource.h
+    src/iiPhotoLibrary/PhotoController.h
+    src/iiPhotoLibrary/PhotoLibrary.h
+    src/iiPhotoLibrary/PhotoLibraryAlbumSource.h
+    src/iiPhotoLibrary/PhotoStore.h
+    src/iiPhotoLibrary/iiPhotoLibrary.h
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/iiPhotoLibrary)
 install(DIRECTORY qml/ DESTINATION ${CMAKE_INSTALL_DATADIR}/iiPhotoLibrary/qml)
 install(DIRECTORY platform/ DESTINATION ${CMAKE_INSTALL_DATADIR}/iiPhotoLibrary/platform)
 endif()
 
 install(TARGETS iiPhotoLibraryAlbums EXPORT iiPhotoLibraryAlbumTargets ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 if(IIPHOTOLIBRARY_ALBUMS_ONLY)
-    install(FILES include/iiPhotoLibrary/Album.h include/iiPhotoLibrary/GooglePhotosAlbumSource.h
+    install(FILES src/iiPhotoLibrary/Album.h src/iiPhotoLibrary/GooglePhotosAlbumSource.h
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/iiPhotoLibrary)
 endif()
 install(FILES ThirdParty/nlohmann/LICENSE.MIT DESTINATION ${CMAKE_INSTALL_DATADIR}/iiPhotoLibrary/licenses/nlohmann-json)
