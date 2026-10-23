@@ -993,18 +993,18 @@ private slots:
         phone.library->add("phone.mp4", QByteArray(800000, 'p'), "video");
         QVERIFY(desktop.store->importLibrary());
         const auto desktopRecord = desktop.store->catalog().first().toObject();
-        iiServerHost::LanPeer host, client;
+        iiWebServer::LanPeer host, client;
         iiSocietyHelper::Sync::Controller hosting({}), syncing([&](const auto &peer, const auto &packet) { return client.request(peer, packet); });
         PhotoController hostPhotos({}, nullptr, desktop.library);
         PhotoController phonePhotos([&](const auto &peer, const auto &packet) { return client.request(peer, packet); }, nullptr, phone.library);
         const auto files = iiSocietyHelper::Sync::filesHandler(desktop.temporary.path() + "/drive.societycontainer");
-        connect(&client, &iiServerHost::LanPeer::completed, this, [&](const auto &id, const auto &result, const auto &transport) {
+        connect(&client, &iiWebServer::LanPeer::completed, this, [&](const auto &id, const auto &result, const auto &transport) {
             QCOMPARE(transport, QString("local")); syncing.receive(id, result); phonePhotos.receive(id, result);
         });
         QVERIFY(host.startHost("desktop", "Desktop", [&](const auto &peer, const auto &packet) {
             if (packet.value("op") == "society.photos") return hostPhotos.handle(peer, packet);
             return packet.value("op") == "society.sync" ? hosting.handle(peer, packet) : files(peer, packet);
-        }, {"127.0.0.1"}, QHostAddress::LocalHost));
+        }, {"127.0.0.1"}, iiWebServer::Address::loopback()));
         QVERIFY(client.join(host.createOffer(), "phone", "Phone")); QTRY_VERIFY2(client.connected(), qPrintable(client.errorString()));
         hosting.open(desktop.temporary.path() + "/drive.societycontainer", QString(64, 'a'));
         syncing.open(phone.temporary.path() + "/drive.societycontainer", QString(64, 'a'));

@@ -23,7 +23,7 @@ C++23 is an SDK extracted as an independent package from the implementation of P
 - `PhotosView`: LVRS based screens and GalleryTile / GalleryInfo / GalleryZoom.
 - Apple PhotoKit, Android MediaStore, Windows Shell adapter and unsupported platform storage-only adapter.
 
-This 0.1 extraction preserves the existing Qt implementation. **The transition to a standard C++ SDK without Qt is not complete.** Qt 6.8.3 Core/Gui/Concurrent and iiSocietyContainer 0.14 Gui are required, and Qt types remain in the public API. Existing Qt dependencies are present in storage and synchronization code as well as GUI image processing and QML models. This is a compatibility package separated without rewriting its features; these dependencies must not be mistaken for a pure C++ core. Using QML requires LVRS and Qt Quick/QuickControls2/Dialogs. `iiSocietyHelper` 0.10.0 and `iiServerHost` are required only for integration tests and are not direct dependencies of the library.
+This 0.1 extraction preserves the existing Qt implementation. **The transition to a standard C++ SDK without Qt is not complete.** Qt 6.8.3 Core/Gui/Concurrent and iiSocietyContainer 0.14 Gui are required, and Qt types remain in the public API. Existing Qt dependencies are present in storage and synchronization code as well as GUI image processing and QML models. This is a compatibility package separated without rewriting its features; these dependencies must not be mistaken for a pure C++ core. Using QML requires LVRS and Qt Quick/QuickControls2/Dialogs. `iiSocietyHelper` 0.10.0 and `iiWebServer` are required only for integration tests and are not direct dependencies of the library.
 
 <a id="빌드테스트설치"></a>
 
@@ -35,7 +35,7 @@ All artifacts are placed under `build/`. The path of the existing SDK installati
 
 ```sh
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release \
-  -DCMAKE_PREFIX_PATH="<Qt>;<iiSocietyContainer>;<iiSocietyHelper>;<iiServerHost>;<LVRS>" \
+  -DCMAKE_PREFIX_PATH="<Qt>;<iiSocietyContainer>;<iiSocietyHelper>;<iiWebServer>;<LVRS>" \
   -DCMAKE_INSTALL_PREFIX="$PWD/build/install"
 cmake --build build --parallel
 ctest --test-dir build --output-on-failure
