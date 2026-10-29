@@ -15,7 +15,8 @@ Society 앱의 Photos/Gallery 구현, Android 어댑터, 테스트·참조 문�
 ## 독립 패키지로 변경한 것
 
 - C++ 네임스페이스: `society::photos` → `iiPhotoLibrary`.
-- 공개 헤더와 구현: `src/iiPhotoLibrary/`, umbrella 헤더 `iiPhotoLibrary.h`.
+- 공개 헤더와 구현: `src/Albums/`와 `src/Library/`, 플랫폼 구현: `src/Platform/`.
+  umbrella 헤더는 `src/Library/iiPhotoLibrary.h`이며 기존 공개 include 이름은 유지한다.
 - 독립 CMake 정적 라이브러리·설치·export·버전 config 제공.
 - Android 클래스: `com.iisacc.iiphotolibrary.PhotoLibrary`; 호스트 Activity 콜백 계약 문서화.
 - QML 모듈: `iiPhotoLibrary 1.0`, SDK 안의 LVRS 기반 Gallery 컴포넌트를 사용.

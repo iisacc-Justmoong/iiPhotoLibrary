@@ -105,7 +105,9 @@ weights retain their respective licenses.
 
 ## Source header layout
 
-Public headers and implementations live together in `src/iiPhotoLibrary/`.
+Public headers and implementations live together under `src/Albums/`,
+`src/Library/`, and `src/Platform/` according to responsibility. Existing
+`<iiPhotoLibrary/...>` public include names remain unchanged.
 There is no separate authored `include/` tree. Existing public `#include` names
 and exported CMake targets are unchanged; installation still places only public
 headers in the package include directory. Generated export headers belong to

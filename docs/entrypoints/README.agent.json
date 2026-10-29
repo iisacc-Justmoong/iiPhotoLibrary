@@ -10,9 +10,9 @@
   },
   "source": {
     "path": "README.md",
-    "sha256": "c42dac3d18c102aa3b58d9ef47226bb676a2ae977de36bd0e148e6a894bd98a5",
-    "bytes": 12685,
-    "line_count": 125,
+    "sha256": "7e0c7385eef0c01e6f412bbf37165526a7f2d14a65ca2e0e247efc43328cb769",
+    "bytes": 12816,
+    "line_count": 127,
     "encoding": "utf-8",
     "language": "ko"
   },
@@ -591,42 +591,42 @@
       "id": "b000071",
       "kind": "paragraph",
       "start_line": 108,
-      "end_line": 112,
-      "raw": "Public headers and implementations live together in `src/iiPhotoLibrary/`.\nThere is no separate authored `include/` tree. Existing public `#include` names\nand exported CMake targets are unchanged; installation still places only public\nheaders in the package include directory. Generated export headers belong to\n`build/`, not to the authored source tree.\n"
+      "end_line": 114,
+      "raw": "Public headers and implementations live together under `src/Albums/`,\n`src/Library/`, and `src/Platform/` according to responsibility. Existing\n`<iiPhotoLibrary/...>` public include names remain unchanged.\nThere is no separate authored `include/` tree. Existing public `#include` names\nand exported CMake targets are unchanged; installation still places only public\nheaders in the package include directory. Generated export headers belong to\n`build/`, not to the authored source tree.\n"
     },
     {
       "id": "b000072",
       "kind": "blank",
-      "start_line": 113,
-      "end_line": 113,
+      "start_line": 115,
+      "end_line": 115,
       "raw": "\n"
     },
     {
       "id": "b000073",
       "kind": "paragraph",
-      "start_line": 114,
-      "end_line": 116,
+      "start_line": 116,
+      "end_line": 118,
       "raw": "Validate this layout from the SDK workspace with\n`python3 -B tests/test_source_header_layout.py`. Reconfigure, build, run CTest,\nand verify a staged installed consumer after changing source/header paths.\n"
     },
     {
       "id": "b000074",
       "kind": "blank",
-      "start_line": 117,
-      "end_line": 117,
+      "start_line": 119,
+      "end_line": 119,
       "raw": "\n"
     },
     {
       "id": "b000075",
       "kind": "html",
-      "start_line": 118,
-      "end_line": 118,
+      "start_line": 120,
+      "end_line": 120,
       "raw": "<!-- workspace-docs:readme:start -->\n"
     },
     {
       "id": "b000076",
       "kind": "heading",
-      "start_line": 119,
-      "end_line": 119,
+      "start_line": 121,
+      "end_line": 121,
       "raw": "## Documentation entry points\n",
       "level": 2,
       "title": "Documentation entry points"
@@ -634,15 +634,15 @@
     {
       "id": "b000077",
       "kind": "blank",
-      "start_line": 120,
-      "end_line": 120,
+      "start_line": 122,
+      "end_line": 122,
       "raw": "\n"
     },
     {
       "id": "b000078",
       "kind": "list",
-      "start_line": 121,
-      "end_line": 124,
+      "start_line": 123,
+      "end_line": 126,
       "raw": "- Human overview: this English `README.md`.\n- Agent instructions: [AGENT.md](AGENT.md).\n- Human documentation: [documentation index](docs/README.md).\n- Structured agent documentation: [agent index](docs/agent-index.json).\n",
       "items": [
         {
@@ -670,8 +670,8 @@
     {
       "id": "b000079",
       "kind": "html",
-      "start_line": 125,
-      "end_line": 125,
+      "start_line": 127,
+      "end_line": 127,
       "raw": "<!-- workspace-docs:readme:end -->\n"
     }
   ],
@@ -746,7 +746,7 @@
       "level": 2,
       "title": "Documentation entry points",
       "anchor": "documentation-entry-points",
-      "start_line": 119
+      "start_line": 121
     }
   ],
   "indexes": {
@@ -863,21 +863,21 @@
         "label": "AGENT.md",
         "target": "AGENT.md",
         "kind": "relative",
-        "line": 122
+        "line": 124
       },
       {
         "block_id": "b000078",
         "label": "documentation index",
         "target": "docs/README.md",
         "kind": "relative",
-        "line": 123
+        "line": 125
       },
       {
         "block_id": "b000078",
         "label": "agent index",
         "target": "docs/agent-index.json",
         "kind": "relative",
-        "line": 124
+        "line": 126
       }
     ],
     "tables": []

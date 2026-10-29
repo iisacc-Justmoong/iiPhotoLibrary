@@ -21,7 +21,7 @@
       "document_id": "urn:iisacc:document:653e4548eb79591e36c61eb907a6722f96aa12c2ee742ad05a8912bdfed35bf8",
       "source": "README.md",
       "agent_json": "docs/entrypoints/README.agent.json",
-      "source_sha256": "c42dac3d18c102aa3b58d9ef47226bb676a2ae977de36bd0e148e6a894bd98a5",
+      "source_sha256": "7e0c7385eef0c01e6f412bbf37165526a7f2d14a65ca2e0e247efc43328cb769",
       "role": "overview"
     },
     {
@@ -49,14 +49,14 @@
       "document_id": "urn:iisacc:document:94a2d2b97ae1286ba6eeafaef4e6d9ee8969c082ebeae4a902d9f64f29c81820",
       "source": "docs/Extraction.md",
       "agent_json": "docs/Extraction.agent.json",
-      "source_sha256": "d255f5dc3c7a4b31fdb2f69e22cbe629d78687cef07ab2eef17fcba937b02092",
+      "source_sha256": "0c84036fd86795a202513946bda32fa7472212720550d669c82b7f88b5d007e1",
       "role": "guide"
     },
     {
       "document_id": "urn:iisacc:document:da014f2484e6841c9d9cb8910c2529f6585db41660758cfdf47e01c4a2e9e355",
       "source": "docs/FILE_PROVIDER.md",
       "agent_json": "docs/FILE_PROVIDER.agent.json",
-      "source_sha256": "622fd78afd34f88571bf80ad321817b0d332203d5bc2c33c280f7b51fc7abff8",
+      "source_sha256": "61b092cd5b38b43b0347b89b2014e52d991780d381cebed904e8dc68deaad515",
       "role": "guide"
     },
     {

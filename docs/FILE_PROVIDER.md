@@ -11,9 +11,9 @@ Changed boundaries:
 
 
 - `platform/android/src/com/iisacc/iiphotolibrary/PhotoLibrary.java`
-- `src/iiPhotoLibrary/PhotoLibraryApple.mm`
-- `src/iiPhotoLibrary/PhotoLibraryWindows.cpp`
-- `src/iiPhotoLibrary/PhotoStore.cpp`
+- `src/Platform/PhotoLibraryApple.mm`
+- `src/Platform/PhotoLibraryWindows.cpp`
+- `src/Library/PhotoStore.cpp`
 
 The `Albums` target stays independent of Qt and provider adapters. Only the
 legacy photo/UI target imports Qt file-device adapters.

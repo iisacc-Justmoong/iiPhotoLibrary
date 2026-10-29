@@ -10,9 +10,9 @@
   },
   "source": {
     "path": "docs/Extraction.md",
-    "sha256": "d255f5dc3c7a4b31fdb2f69e22cbe629d78687cef07ab2eef17fcba937b02092",
-    "bytes": 4311,
-    "line_count": 65,
+    "sha256": "0c84036fd86795a202513946bda32fa7472212720550d669c82b7f88b5d007e1",
+    "bytes": 4424,
+    "line_count": 66,
     "encoding": "utf-8",
     "language": "ko"
   },
@@ -116,8 +116,8 @@
       "id": "b000013",
       "kind": "list",
       "start_line": 17,
-      "end_line": 24,
-      "raw": "- C++ 네임스페이스: `society::photos` → `iiPhotoLibrary`.\n- 공개 헤더와 구현: `src/iiPhotoLibrary/`, umbrella 헤더 `iiPhotoLibrary.h`.\n- 독립 CMake 정적 라이브러리·설치·export·버전 config 제공.\n- Android 클래스: `com.iisacc.iiphotolibrary.PhotoLibrary`; 호스트 Activity 콜백 계약 문서화.\n- QML 모듈: `iiPhotoLibrary 1.0`, SDK 안의 LVRS 기반 Gallery 컴포넌트를 사용.\n- 환경 변수: `IIPHOTOLIBRARY_DISABLE_PHOTOS`.\n- 테스트·QML harness·Android fixture는 SDK 내부 파일만 사용.\n- SDK 설치기의 자동 프로젝트 검색 및 의존 순서 확인.\n",
+      "end_line": 25,
+      "raw": "- C++ 네임스페이스: `society::photos` → `iiPhotoLibrary`.\n- 공개 헤더와 구현: `src/Albums/`와 `src/Library/`, 플랫폼 구현: `src/Platform/`.\n  umbrella 헤더는 `src/Library/iiPhotoLibrary.h`이며 기존 공개 include 이름은 유지한다.\n- 독립 CMake 정적 라이브러리·설치·export·버전 config 제공.\n- Android 클래스: `com.iisacc.iiphotolibrary.PhotoLibrary`; 호스트 Activity 콜백 계약 문서화.\n- QML 모듈: `iiPhotoLibrary 1.0`, SDK 안의 LVRS 기반 Gallery 컴포넌트를 사용.\n- 환경 변수: `IIPHOTOLIBRARY_DISABLE_PHOTOS`.\n- 테스트·QML harness·Android fixture는 SDK 내부 파일만 사용.\n- SDK 설치기의 자동 프로젝트 검색 및 의존 순서 확인.\n",
       "items": [
         {
           "marker": "-",
@@ -126,7 +126,7 @@
         },
         {
           "marker": "-",
-          "text": "공개 헤더와 구현: `src/iiPhotoLibrary/`, umbrella 헤더 `iiPhotoLibrary.h`.",
+          "text": "공개 헤더와 구현: `src/Albums/`와 `src/Library/`, 플랫폼 구현: `src/Platform/`.",
           "checked": null
         },
         {
@@ -164,15 +164,15 @@
     {
       "id": "b000014",
       "kind": "blank",
-      "start_line": 25,
-      "end_line": 25,
+      "start_line": 26,
+      "end_line": 26,
       "raw": "\n"
     },
     {
       "id": "b000015",
       "kind": "heading",
-      "start_line": 26,
-      "end_line": 26,
+      "start_line": 27,
+      "end_line": 27,
       "raw": "## 검증과 증거\n",
       "level": 2,
       "title": "검증과 증거"
@@ -180,29 +180,29 @@
     {
       "id": "b000016",
       "kind": "blank",
-      "start_line": 27,
-      "end_line": 27,
+      "start_line": 28,
+      "end_line": 28,
       "raw": "\n"
     },
     {
       "id": "b000017",
       "kind": "paragraph",
-      "start_line": 28,
-      "end_line": 30,
+      "start_line": 29,
+      "end_line": 31,
       "raw": "macOS arm64, AppleClang 21, C++23, Qt 6.8.3에서 빌드했다.\n최종 화면 검증은 사용자 설치본 `~/.local/SDK/LVRS/platforms/macos`를 사용한다.\n`~/.local/LVRS` 경로는 현재 존재하지 않는다.\n"
     },
     {
       "id": "b000018",
       "kind": "blank",
-      "start_line": 31,
-      "end_line": 31,
+      "start_line": 32,
+      "end_line": 32,
       "raw": "\n"
     },
     {
       "id": "b000019",
       "kind": "list",
-      "start_line": 32,
-      "end_line": 42,
+      "start_line": 33,
+      "end_line": 43,
       "raw": "- `build/libiiPhotoLibrary.a`: Apple PhotoKit 어댑터를 포함한 SDK 빌드.\n- `build/standalone/build/libiiPhotoLibrary.a`: BUILD_TESTING=OFF 구성.\n  LVRS 및 iiSocietyHelper Sync를 찾지 않고 Qt와 iiSocietyContainer만으로 빌드된다.\n- `iiPhotoLibrary.Photos`: 원본 회귀 테스트 이식. 갤러리 영구 인덱스, 우선순위 변경,\n  원본 보존, 취소, 해시 검증, 제한 권한·DB 교체의 삭제 방지, TLS 원본 전송 등을 검사한다.\n- `iiPhotoLibrary.InstalledConsumer`: 별도 prefix에 설치 후 디렉터리를 옮겨\n  외부 CMake 프로젝트가 패키지를 발견하고 링크·실행하는지 검증한다.\n  네이티브 백엔드·컨트롤러 생성과 설치된 QML 모듈 로드도 포함한다.\n- `build/extraction-checks.json`: 원본 보존·Society 앱 빌드 참조 없음·Android runner 구문 검사 결과.\n- `build/Testing/Temporary/LastTest.log`: 최종 CTest 결과.\n- `build/photos/`: 모바일/데스크톱 갤러리, 시간순 위치 유지, 정보창 렌더링 PNG.\n",
       "items": [
         {
@@ -245,29 +245,29 @@
     {
       "id": "b000020",
       "kind": "blank",
-      "start_line": 43,
-      "end_line": 43,
+      "start_line": 44,
+      "end_line": 44,
       "raw": "\n"
     },
     {
       "id": "b000021",
       "kind": "paragraph",
-      "start_line": 44,
-      "end_line": 46,
+      "start_line": 45,
+      "end_line": 47,
       "raw": "최초 5초 준비 대기에서 한 차례 5.9초 후 조건이 충족되는 지연을 관측했다.\n해당 검사는 성능 기준이 아닌 비동기 작업 완료·스크롤 상태 검사이므로, SDK 테스트의\n최초 준비 대기만 15초로 변경했다. 검증 조건과 제품 동작은 바꾸지 않았다.\n"
     },
     {
       "id": "b000022",
       "kind": "blank",
-      "start_line": 47,
-      "end_line": 47,
+      "start_line": 48,
+      "end_line": 48,
       "raw": "\n"
     },
     {
       "id": "b000023",
       "kind": "heading",
-      "start_line": 48,
-      "end_line": 48,
+      "start_line": 49,
+      "end_line": 49,
       "raw": "## 검증 경계\n",
       "level": 2,
       "title": "검증 경계"
@@ -275,43 +275,43 @@
     {
       "id": "b000024",
       "kind": "blank",
-      "start_line": 49,
-      "end_line": 49,
+      "start_line": 50,
+      "end_line": 50,
       "raw": "\n"
     },
     {
       "id": "b000025",
       "kind": "paragraph",
-      "start_line": 50,
-      "end_line": 55,
+      "start_line": 51,
+      "end_line": 56,
       "raw": "사진 원본은 테스트 fixture이며 실제 사용자 사진을 등록·삭제하지 않았다.\nTLS 테스트는 localhost의 실제 TLS 전송과 주입된 사진 보관함을 조합한다.\nApple 네이티브 구현의 컴파일·링크·생성은 확인했지만 실제 PhotoKit 권한 승인·iCloud 다운로드·\n사용자 보관함 등록/삭제는 이번 실행에서 검증하지 않았다.\nAndroid/Windows/iOS 구현·통합 계약은 포함하되 타깃 빌드와 실기기 검증 완료로 간주하지 않는다.\nAndroid SDK/JDK가 참조된 기존 위치에 없어 Android native fixture를 실행하지 않았다.\n"
     },
     {
       "id": "b000026",
       "kind": "blank",
-      "start_line": 56,
-      "end_line": 56,
+      "start_line": 57,
+      "end_line": 57,
       "raw": "\n"
     },
     {
       "id": "b000027",
       "kind": "paragraph",
-      "start_line": 57,
-      "end_line": 58,
+      "start_line": 58,
+      "end_line": 59,
       "raw": "이 패키지는 기존 Qt 기반 구현을 독립시킨 0.1 추출본이다. Qt 의존성이 GUI 외 저장·동기화 및\n공개 타입에도 남아 있으므로, 표준 C++만을 사용하는 iiSDK 코어로의 전환과는 구별한다.\n"
     },
     {
       "id": "b000028",
       "kind": "blank",
-      "start_line": 59,
-      "end_line": 59,
+      "start_line": 60,
+      "end_line": 60,
       "raw": "\n"
     },
     {
       "id": "b000029",
       "kind": "heading",
-      "start_line": 60,
-      "end_line": 60,
+      "start_line": 61,
+      "end_line": 61,
       "raw": "## 최종 결과\n",
       "level": 2,
       "title": "최종 결과"
@@ -319,15 +319,15 @@
     {
       "id": "b000030",
       "kind": "blank",
-      "start_line": 61,
-      "end_line": 61,
+      "start_line": 62,
+      "end_line": 62,
       "raw": "\n"
     },
     {
       "id": "b000031",
       "kind": "paragraph",
-      "start_line": 62,
-      "end_line": 65,
+      "start_line": 63,
+      "end_line": 66,
       "raw": "2026-09-24 최종 실행에서 QtTest 34 passed / 0 failed / 0 skipped,\nCTest 2/2 passed를 확인했다. Photos 스위트 76.77초,\n설치·재배치 소비 테스트 6.99초, CTest 전체 84.77초이다.\n배포 확인용 설치본은 `build/install/`이며 호스트 앱이나 기존 SDK 설치본을 교체하지 않는다.\n"
     }
   ],
@@ -362,7 +362,7 @@
       "level": 2,
       "title": "검증과 증거",
       "anchor": "검증과-증거",
-      "start_line": 26
+      "start_line": 27
     },
     {
       "block_id": "b000023",
@@ -370,7 +370,7 @@
       "level": 2,
       "title": "검증 경계",
       "anchor": "검증-경계",
-      "start_line": 48
+      "start_line": 49
     },
     {
       "block_id": "b000029",
@@ -378,7 +378,7 @@
       "level": 2,
       "title": "최종 결과",
       "anchor": "최종-결과",
-      "start_line": 60
+      "start_line": 61
     }
   ],
   "indexes": {
@@ -392,21 +392,21 @@
       },
       {
         "block_id": "b000017",
-        "line": 30,
+        "line": 31,
         "text": "`~/.local/LVRS` 경로는 현재 존재하지 않는다.",
         "basis": "lexical_match",
         "context": "paragraph"
       },
       {
         "block_id": "b000025",
-        "line": 54,
+        "line": 55,
         "text": "Android/Windows/iOS 구현·통합 계약은 포함하되 타깃 빌드와 실기기 검증 완료로 간주하지 않는다.",
         "basis": "lexical_match",
         "context": "paragraph"
       },
       {
         "block_id": "b000031",
-        "line": 65,
+        "line": 66,
         "text": "배포 확인용 설치본은 `build/install/`이며 호스트 앱이나 기존 SDK 설치본을 교체하지 않는다.",
         "basis": "lexical_match",
         "context": "paragraph"

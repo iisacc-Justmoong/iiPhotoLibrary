@@ -10,8 +10,8 @@
   },
   "source": {
     "path": "docs/FILE_PROVIDER.md",
-    "sha256": "622fd78afd34f88571bf80ad321817b0d332203d5bc2c33c280f7b51fc7abff8",
-    "bytes": 893,
+    "sha256": "61b092cd5b38b43b0347b89b2014e52d991780d381cebed904e8dc68deaad515",
+    "bytes": 874,
     "line_count": 19,
     "encoding": "utf-8",
     "language": "en"
@@ -85,7 +85,7 @@
       "kind": "list",
       "start_line": 13,
       "end_line": 16,
-      "raw": "- `platform/android/src/com/iisacc/iiphotolibrary/PhotoLibrary.java`\n- `src/iiPhotoLibrary/PhotoLibraryApple.mm`\n- `src/iiPhotoLibrary/PhotoLibraryWindows.cpp`\n- `src/iiPhotoLibrary/PhotoStore.cpp`\n",
+      "raw": "- `platform/android/src/com/iisacc/iiphotolibrary/PhotoLibrary.java`\n- `src/Platform/PhotoLibraryApple.mm`\n- `src/Platform/PhotoLibraryWindows.cpp`\n- `src/Library/PhotoStore.cpp`\n",
       "items": [
         {
           "marker": "-",
@@ -94,17 +94,17 @@
         },
         {
           "marker": "-",
-          "text": "`src/iiPhotoLibrary/PhotoLibraryApple.mm`",
+          "text": "`src/Platform/PhotoLibraryApple.mm`",
           "checked": null
         },
         {
           "marker": "-",
-          "text": "`src/iiPhotoLibrary/PhotoLibraryWindows.cpp`",
+          "text": "`src/Platform/PhotoLibraryWindows.cpp`",
           "checked": null
         },
         {
           "marker": "-",
-          "text": "`src/iiPhotoLibrary/PhotoStore.cpp`",
+          "text": "`src/Library/PhotoStore.cpp`",
           "checked": null
         }
       ]
