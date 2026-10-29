@@ -1,0 +1,975 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:d6d080f4f4e43c72ea0b7fdb6ddd440d6d0747f3e862f4dfc8f28c5994276859",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FiiPhotoLibrary",
+    "name": "iiPhotoLibrary",
+    "root": "SDK/iiPhotoLibrary",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/AlbumsValidation.md",
+    "sha256": "db996b0b8910005871a4e48964f328c9e5d71d9b6159b055e3d1e2eb68868356",
+    "bytes": 11887,
+    "line_count": 176,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "앨범 관리자 검증 기록",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# 앨범 관리자 검증 기록\n",
+      "level": 1,
+      "title": "앨범 관리자 검증 기록"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "heading",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "## 2026-10-12: Images·Videos·Favorite·Deleted 추가\n",
+      "level": 2,
+      "title": "2026-10-12: Images·Videos·Favorite·Deleted 추가"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 6,
+      "raw": "대상: macOS arm64, Release, C++23. 기존 스마트 앨범 네 종류를 유지하면서\n이미지·비디오·Favorite·Deleted를 추가해 전체 여덟 종류를 검증했다.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "table",
+      "start_line": 8,
+      "end_line": 18,
+      "raw": "| 검증 | 결과 |\n| --- | --- |\n| 전체 SDK 빌드 / CTest | 성공, 8/8 통과, 41.46초 |\n| `SmartAlbums` | 171개 검사 통과 |\n| 기존 `AllLibrary` | 62개 검사 통과 |\n| 기존 `AlbumManager` / `GooglePhotosAlbums` | 각각 41개 / 39개 검사 통과 |\n| `NativeAlbumBridge` | 33개 검사 통과, 미디어·즐겨찾기·삭제 표시 전달 포함 |\n| 기존 `Photos` QtTest | 43 passed / 0 failed / 0 skipped |\n| `AlbumsInstalledConsumer` | 재배치한 설치 패키지에서 여덟 스마트 앨범과 Favorite·Deleted API 링크·실행 성공, Qt 탐색 금지 |\n| 전체 `InstalledConsumer` | 이미지·비디오 조회, Favorite 지정, Deleted 표시·복원과 기존 QML 실행 성공 |\n| 코어 전용 빌드 / CTest | 성공, 5/5 통과, 2.48초 |\n",
+      "columns": [
+        "검증",
+        "결과"
+      ],
+      "rows": [
+        [
+          "전체 SDK 빌드 / CTest",
+          "성공, 8/8 통과, 41.46초"
+        ],
+        [
+          "`SmartAlbums`",
+          "171개 검사 통과"
+        ],
+        [
+          "기존 `AllLibrary`",
+          "62개 검사 통과"
+        ],
+        [
+          "기존 `AlbumManager` / `GooglePhotosAlbums`",
+          "각각 41개 / 39개 검사 통과"
+        ],
+        [
+          "`NativeAlbumBridge`",
+          "33개 검사 통과, 미디어·즐겨찾기·삭제 표시 전달 포함"
+        ],
+        [
+          "기존 `Photos` QtTest",
+          "43 passed / 0 failed / 0 skipped"
+        ],
+        [
+          "`AlbumsInstalledConsumer`",
+          "재배치한 설치 패키지에서 여덟 스마트 앨범과 Favorite·Deleted API 링크·실행 성공, Qt 탐색 금지"
+        ],
+        [
+          "전체 `InstalledConsumer`",
+          "이미지·비디오 조회, Favorite 지정, Deleted 표시·복원과 기존 QML 실행 성공"
+        ],
+        [
+          "코어 전용 빌드 / CTest",
+          "성공, 5/5 통과, 2.48초"
+        ]
+      ]
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 19,
+      "end_line": 19,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "paragraph",
+      "start_line": 20,
+      "end_line": 27,
+      "raw": "기존 네 종류의 열거형 값을 유지하고 새 네 종류를 뒤에 추가했다. 각 객체의 동일 인스턴스,\n목록·ID 조회·읽기 전용 동작·수명·한도 제외를 여덟 객체 모두에 대해 검사했다.\n미디어 메타데이터 갱신에 따른 이미지·비디오 소속 변경, 기존 `favorite` 필드의 활용,\n즐겨찾기 지정·해제·조회와 서로 다른 앨범 참조의 일치를 검사했다.\n논리 삭제 시 전체 보기 및 다른 스마트 앨범·중복 그룹에서의 제외, 숨김/삭제 겹침 시\nDeleted 우선, 복원 후 기존 즐겨찾기·숨김·스크린샷·가져옴 상태의 유지도 검사했다.\nFavorite·Deleted의 갱신 보존, 갱신 중 변경, 전송 실패 보존, 권한 회수 및 완전한 목록\n제거 후 정보 정리, 여러 필드의 원자적 변경과 동시 조회를 확인했다.\n"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 28,
+      "end_line": 28,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "paragraph",
+      "start_line": 29,
+      "end_line": 33,
+      "raw": "구현 전 새 계약 테스트는 네 종류와 Favorite·Deleted API의 부재로 컴파일에 실패했고,\n구현 후 전체 빌드와 회귀 테스트를 통과했다. Favorite 값과 삭제 표시는 native `Asset`\nfixture에서 브리지로 전달했고, 설치 소비자에서 실제 SDK API를 호출했다.\nDeleted는 SDK가 가진 항목의 논리 삭제 상태이며, 이 실행은 OS/원격 휴지통 조회·이동·복원이나\n원본 파일 삭제를 수행하지 않는다. 앱 UI 및 실제 기기/사용자 계정 실행도 검증하지 않는다.\n"
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 34,
+      "end_line": 34,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "paragraph",
+      "start_line": 35,
+      "end_line": 37,
+      "raw": "명령과 로그 위치는 아래 All Library 기록과 같다. 최신 패키지는\n`cmake --install build --prefix build/install`로 Workspace 내부에 반영한다.\n기존 `~/.local/SDK/iiPhotoLibrary` 및 실행 중인 제품 앱은 갱신하지 않는다.\n"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 38,
+      "end_line": 38,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "heading",
+      "start_line": 39,
+      "end_line": 39,
+      "raw": "## 2026-10-12: 스마트 앨범과 분류 API\n",
+      "level": 2,
+      "title": "2026-10-12: 스마트 앨범과 분류 API"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 40,
+      "end_line": 40,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "paragraph",
+      "start_line": 41,
+      "end_line": 42,
+      "raw": "대상: macOS arm64, Release, C++23. 전체 네이티브 계층은 Qt 6.8.3이며,\n앨범 코어는 Qt와 iiSocietyContainer 탐색을 비활성화한 별도 구성에서도 검증했다.\n"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 43,
+      "end_line": 43,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "table",
+      "start_line": 44,
+      "end_line": 54,
+      "raw": "| 검증 | 결과 |\n| --- | --- |\n| 전체 SDK 빌드 / CTest | 성공, 8/8 통과, 39.17초 |\n| `SmartAlbums` | 93개 검사 통과 |\n| 기존 `AllLibrary` | 62개 검사 통과 |\n| 기존 `AlbumManager` / `GooglePhotosAlbums` | 각각 41개 / 39개 검사 통과 |\n| `NativeAlbumBridge` | 26개 검사 통과, 분류 전달 및 SDK 리소스 이름의 가져옴 판정 포함 |\n| 기존 `Photos` QtTest | 43 passed / 0 failed / 0 skipped |\n| `AlbumsInstalledConsumer` | 재배치한 패키지에서 네 스마트 앨범·분류 API·중복 그룹·숨김/해제 링크 및 실행 성공, Qt 탐색 금지 |\n| 전체 `InstalledConsumer` | 가져온 사진·숨김·All Library와 기존 네이티브/컨트롤러/QML 실행 성공 |\n| 코어 전용 빌드 / CTest | 성공, 5/5 통과, 1.84초 |\n",
+      "columns": [
+        "검증",
+        "결과"
+      ],
+      "rows": [
+        [
+          "전체 SDK 빌드 / CTest",
+          "성공, 8/8 통과, 39.17초"
+        ],
+        [
+          "`SmartAlbums`",
+          "93개 검사 통과"
+        ],
+        [
+          "기존 `AllLibrary`",
+          "62개 검사 통과"
+        ],
+        [
+          "기존 `AlbumManager` / `GooglePhotosAlbums`",
+          "각각 41개 / 39개 검사 통과"
+        ],
+        [
+          "`NativeAlbumBridge`",
+          "26개 검사 통과, 분류 전달 및 SDK 리소스 이름의 가져옴 판정 포함"
+        ],
+        [
+          "기존 `Photos` QtTest",
+          "43 passed / 0 failed / 0 skipped"
+        ],
+        [
+          "`AlbumsInstalledConsumer`",
+          "재배치한 패키지에서 네 스마트 앨범·분류 API·중복 그룹·숨김/해제 링크 및 실행 성공, Qt 탐색 금지"
+        ],
+        [
+          "전체 `InstalledConsumer`",
+          "가져온 사진·숨김·All Library와 기존 네이티브/컨트롤러/QML 실행 성공"
+        ],
+        [
+          "코어 전용 빌드 / CTest",
+          "성공, 5/5 통과, 1.84초"
+        ]
+      ]
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 55,
+      "end_line": 55,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "paragraph",
+      "start_line": 56,
+      "end_line": 64,
+      "raw": "스크린샷·가져온 사진·중복·숨김 객체의 동일 인스턴스 유지, 조회·읽기 전용 계약,\n분류 지정/해제와 여러 필드의 원자적 변경, 숨김 항목의 가상 보기 제외 및 숨김 보기 조회,\n콘텐츠 해시의 검증·정규화·해제와 중복 그룹 갱신을 검사했다.\n동일 사진의 여러 앨범 소속을 중복으로 세지 않는 계약, 계정별 사진 객체 유지,\n소스 해시 충돌의 미확정 처리, 미해시 사진의 불완전성, 갱신 중 분류 변경 및 후속 응답 반영,\n부분 목록 보존, 전송 실패 보존, 권한 회수·완전한 제거·연결 해제 후 분류 정리,\n동시 분류 변경과 객체 소멸 이후 조회를 검사했다.\n구현 전 계약 테스트는 스마트 앨범·분류 타입/API의 부재로 컴파일에 실패했고,\n구현 후 전체 빌드와 회귀 테스트가 통과했다.\n"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 65,
+      "end_line": 65,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "paragraph",
+      "start_line": 66,
+      "end_line": 70,
+      "raw": "Apple 네이티브 어댑터의 PhotoKit 스크린샷·숨김 메타데이터 읽기는 호스트 빌드에서 컴파일했다.\n브리지의 분류 전달은 native `Asset` fixture와 SDK 가져옴 리소스 이름으로 실행 검증했다.\n중복 해시는 fixture에서 공급한 SHA-256이며, 코어가 원본 파일을 검색·다운로드·해시 계산한다고\n간주하지 않는다. 호스트는 기존 `PhotoStore::digestFile()` 등으로 확인한 원본 해시를 제공한다.\n스마트 보기와 분류 API는 실제 OS 파일·사진 속성·원격 서비스를 변경하지 않는다.\n"
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 71,
+      "end_line": 71,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "paragraph",
+      "start_line": 72,
+      "end_line": 75,
+      "raw": "빌드·테스트 명령과 로그 위치는 아래 All Library 기록과 동일하다.\n최신 패키지는 `cmake --install build --prefix build/install`로 Workspace 내부에 반영한다.\n실제 계정 인증·OS 숨김 앨범 접근·기기 실행·앱 UI 연결은 이번 검증에 포함하지 않으며,\n기존 `~/.local/SDK/iiPhotoLibrary` 설치본 및 실행 중인 제품 앱은 갱신하지 않는다.\n"
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 76,
+      "end_line": 76,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "heading",
+      "start_line": 77,
+      "end_line": 77,
+      "raw": "## 2026-10-12: All Library 전체 사진 앨범\n",
+      "level": 2,
+      "title": "2026-10-12: All Library 전체 사진 앨범"
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 78,
+      "end_line": 78,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "paragraph",
+      "start_line": 79,
+      "end_line": 80,
+      "raw": "대상: macOS arm64, Release, C++23. 전체 호환 계층은 Qt 6.8.3이며,\n별도 앨범 코어 구성은 Qt와 iiSocietyContainer 탐색을 비활성화했다.\n"
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 81,
+      "end_line": 81,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "table",
+      "start_line": 82,
+      "end_line": 92,
+      "raw": "| 검증 | 결과 |\n| --- | --- |\n| 전체 SDK 빌드 | 성공 |\n| 전체 CTest | 7/7 통과, 41.01초 |\n| `AllLibrary` | 62개 검사 통과 |\n| 기존 `AlbumManager` / `GooglePhotosAlbums` | 각각 41개 / 39개 검사 통과 |\n| 기존 `NativeAlbumBridge` | 20개 검사 통과 |\n| 기존 `Photos` QtTest | 43 passed / 0 failed / 0 skipped |\n| `AlbumsInstalledConsumer` | 재배치한 패키지에서 All Library 조회·연결 해제 반영 성공, Qt/iiSocietyContainer 탐색 금지 |\n| 기존 `InstalledConsumer` | All Library와 네이티브 어댑터·컨트롤러·설치된 QML 로드 성공 |\n| 코어 전용 빌드 / CTest | 성공, 4/4 통과, 2.23초 |\n",
+      "columns": [
+        "검증",
+        "결과"
+      ],
+      "rows": [
+        [
+          "전체 SDK 빌드",
+          "성공"
+        ],
+        [
+          "전체 CTest",
+          "7/7 통과, 41.01초"
+        ],
+        [
+          "`AllLibrary`",
+          "62개 검사 통과"
+        ],
+        [
+          "기존 `AlbumManager` / `GooglePhotosAlbums`",
+          "각각 41개 / 39개 검사 통과"
+        ],
+        [
+          "기존 `NativeAlbumBridge`",
+          "20개 검사 통과"
+        ],
+        [
+          "기존 `Photos` QtTest",
+          "43 passed / 0 failed / 0 skipped"
+        ],
+        [
+          "`AlbumsInstalledConsumer`",
+          "재배치한 패키지에서 All Library 조회·연결 해제 반영 성공, Qt/iiSocietyContainer 탐색 금지"
+        ],
+        [
+          "기존 `InstalledConsumer`",
+          "All Library와 네이티브 어댑터·컨트롤러·설치된 QML 로드 성공"
+        ],
+        [
+          "코어 전용 빌드 / CTest",
+          "성공, 4/4 통과, 2.23초"
+        ]
+      ]
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 93,
+      "end_line": 93,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "paragraph",
+      "start_line": 94,
+      "end_line": 100,
+      "raw": "`allLibrary()` 객체의 유지, 표시 이름, ID 조회, 빈 목록, 로컬·외부 앨범 합산,\n같은 제공자·계정의 중복 제거, 다른 제공자·계정의 ID 격리, 원래 항목의 참조 메타데이터,\n원본 사진 ID의 안정성, 목록 변경·재연결·연결 해제 반영을 검사했다.\n미조회·부분 목록·조회 중·전송 실패·권한 회수에 따른 완전성, 캐시 보존, 취소 후 늦은 결과의\n거부, 읽기 전용 오류, 가상 앨범의 한도 제외, 관리자 소멸 후 보유 핸들 및 동시 조회도 검사했다.\n구현 전 새 테스트는 `allLibrary()`와 새 열거형의 부재로 컴파일에 실패했고,\n구현 후 전체 빌드와 회귀 테스트를 통과했다.\n"
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 101,
+      "end_line": 101,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "fenced_code",
+      "start_line": 102,
+      "end_line": 108,
+      "raw": "```sh\ncmake --build build --parallel 4\nctest --test-dir build --output-on-failure\ncmake --build build/albums-only/build --parallel 4\nctest --test-dir build/albums-only/build --output-on-failure\ncmake --install build --prefix build/install\n```\n",
+      "language": "sh",
+      "code": "cmake --build build --parallel 4\nctest --test-dir build --output-on-failure\ncmake --build build/albums-only/build --parallel 4\nctest --test-dir build/albums-only/build --output-on-failure\ncmake --install build --prefix build/install\n",
+      "closed": true
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 109,
+      "end_line": 109,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "paragraph",
+      "start_line": 110,
+      "end_line": 114,
+      "raw": "로그는 `build/Testing/Temporary/LastTest.log` 및\n`build/albums-only/build/Testing/Temporary/LastTest.log`에 있다.\n전체 코어 소비자는 `build/albums-consumer-relocated`, 코어 전용 소비자는\n`build/albums-only/build/albums-consumer-relocated` 패키지로 링크·실행했다.\n전체 호환 소비자는 `build/consumer-relocated` 패키지를 사용했다.\n"
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 115,
+      "end_line": 115,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "paragraph",
+      "start_line": 116,
+      "end_line": 120,
+      "raw": "집계는 관리자에 등록되어 이미 불러온 사진·영상의 현재 목록이다. 이 조회로 실제 OS 사진\n검색이나 네트워크 요청을 실행하지 않는 계약을 fixture로 검증했다. 실제 계정 인증·동기화,\n원본 다운로드와 제품 앱의 All Library UI는 이번 검증에 포함되지 않는다.\n설치 검증과 패키지 반영은 Workspace의 `build/` 내부에서 수행하며,\n`~/.local/SDK/iiPhotoLibrary`와 실행 중인 제품 앱은 갱신하지 않는다.\n"
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 121,
+      "end_line": 121,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "heading",
+      "start_line": 122,
+      "end_line": 122,
+      "raw": "## 2026-10-02: 기존 앨범 관리자\n",
+      "level": 2,
+      "title": "2026-10-02: 기존 앨범 관리자"
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 123,
+      "end_line": 123,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "paragraph",
+      "start_line": 124,
+      "end_line": 124,
+      "raw": "검증일: 2026-10-02. 대상: macOS arm64, AppleClang 21, C++23, 전체 호환 계층은 Qt 6.8.3이다.\n"
+    },
+    {
+      "id": "b000044",
+      "kind": "blank",
+      "start_line": 125,
+      "end_line": 125,
+      "raw": "\n"
+    },
+    {
+      "id": "b000045",
+      "kind": "heading",
+      "start_line": 126,
+      "end_line": 126,
+      "raw": "## 실행 결과\n",
+      "level": 2,
+      "title": "실행 결과"
+    },
+    {
+      "id": "b000046",
+      "kind": "blank",
+      "start_line": 127,
+      "end_line": 127,
+      "raw": "\n"
+    },
+    {
+      "id": "b000047",
+      "kind": "table",
+      "start_line": 128,
+      "end_line": 139,
+      "raw": "| 검증 | 결과 |\n| --- | --- |\n| 전체 SDK 빌드 | 성공, 네이티브 Apple 어댑터 및 새 앨범 어댑터 포함 |\n| 전체 CTest | 6/6 통과, 40.49초 |\n| `AlbumManager` | 41개 검사 통과 |\n| `GooglePhotosAlbums` | 39개 검사 통과 |\n| `NativeAlbumBridge` | 20개 검사 통과 |\n| 기존 `Photos` QtTest | 34 passed / 0 failed / 0 skipped |\n| `AlbumsInstalledConsumer` | 별도 prefix 설치·재배치 후 Qt/iiSocietyContainer 탐색을 금지한 외부 프로젝트 링크·실행 성공 |\n| 기존 `InstalledConsumer` | 새 관리자·네이티브 어댑터 구성, 컨트롤러 및 설치된 QML 모듈 로드 성공 |\n| 코어 전용 빌드 | 성공, Qt·iiSocietyContainer 의존성 없음 |\n| 코어 전용 CTest | 3/3 통과, 1.17초, 재배치 설치 소비자 포함 |\n",
+      "columns": [
+        "검증",
+        "결과"
+      ],
+      "rows": [
+        [
+          "전체 SDK 빌드",
+          "성공, 네이티브 Apple 어댑터 및 새 앨범 어댑터 포함"
+        ],
+        [
+          "전체 CTest",
+          "6/6 통과, 40.49초"
+        ],
+        [
+          "`AlbumManager`",
+          "41개 검사 통과"
+        ],
+        [
+          "`GooglePhotosAlbums`",
+          "39개 검사 통과"
+        ],
+        [
+          "`NativeAlbumBridge`",
+          "20개 검사 통과"
+        ],
+        [
+          "기존 `Photos` QtTest",
+          "34 passed / 0 failed / 0 skipped"
+        ],
+        [
+          "`AlbumsInstalledConsumer`",
+          "별도 prefix 설치·재배치 후 Qt/iiSocietyContainer 탐색을 금지한 외부 프로젝트 링크·실행 성공"
+        ],
+        [
+          "기존 `InstalledConsumer`",
+          "새 관리자·네이티브 어댑터 구성, 컨트롤러 및 설치된 QML 모듈 로드 성공"
+        ],
+        [
+          "코어 전용 빌드",
+          "성공, Qt·iiSocietyContainer 의존성 없음"
+        ],
+        [
+          "코어 전용 CTest",
+          "3/3 통과, 1.17초, 재배치 설치 소비자 포함"
+        ]
+      ]
+    },
+    {
+      "id": "b000048",
+      "kind": "blank",
+      "start_line": 140,
+      "end_line": 140,
+      "raw": "\n"
+    },
+    {
+      "id": "b000049",
+      "kind": "paragraph",
+      "start_line": 141,
+      "end_line": 141,
+      "raw": "전체 빌드는 기존 `build/` 구성에서 수행했다. 별도 코어 빌드는 다음과 같이 수행했다.\n"
+    },
+    {
+      "id": "b000050",
+      "kind": "blank",
+      "start_line": 142,
+      "end_line": 142,
+      "raw": "\n"
+    },
+    {
+      "id": "b000051",
+      "kind": "fenced_code",
+      "start_line": 143,
+      "end_line": 154,
+      "raw": "```sh\ncmake -S . -B build\ncmake --build build --parallel 4\nctest --test-dir build --output-on-failure\n\ncmake -S . -B build/albums-only/build \\\n  -DIIPHOTOLIBRARY_ALBUMS_ONLY=ON -DCMAKE_BUILD_TYPE=Release \\\n  -DCMAKE_DISABLE_FIND_PACKAGE_Qt6=TRUE \\\n  -DCMAKE_DISABLE_FIND_PACKAGE_iiSocietyContainer=TRUE\ncmake --build build/albums-only/build --parallel 4\nctest --test-dir build/albums-only/build --output-on-failure\n```\n",
+      "language": "sh",
+      "code": "cmake -S . -B build\ncmake --build build --parallel 4\nctest --test-dir build --output-on-failure\n\ncmake -S . -B build/albums-only/build \\\n  -DIIPHOTOLIBRARY_ALBUMS_ONLY=ON -DCMAKE_BUILD_TYPE=Release \\\n  -DCMAKE_DISABLE_FIND_PACKAGE_Qt6=TRUE \\\n  -DCMAKE_DISABLE_FIND_PACKAGE_iiSocietyContainer=TRUE\ncmake --build build/albums-only/build --parallel 4\nctest --test-dir build/albums-only/build --output-on-failure\n",
+      "closed": true
+    },
+    {
+      "id": "b000052",
+      "kind": "blank",
+      "start_line": 155,
+      "end_line": 155,
+      "raw": "\n"
+    },
+    {
+      "id": "b000053",
+      "kind": "paragraph",
+      "start_line": 156,
+      "end_line": 160,
+      "raw": "원본 로그는 `build/Testing/Temporary/LastTest.log` 및\n`build/albums-only/build/Testing/Temporary/LastTest.log`에 있다.\n주요 산출물은 `build/libiiPhotoLibraryAlbums.a`, `build/libiiPhotoLibrary.a`이다.\n검증용 패키지는 `cmake --install build --prefix build/install`로 Workspace 내부에 설치한다.\n전체 소비자와 코어 소비자는 각각 `build/consumer-relocated`, `build/albums-consumer-relocated`를 사용한다.\n"
+    },
+    {
+      "id": "b000054",
+      "kind": "blank",
+      "start_line": 161,
+      "end_line": 161,
+      "raw": "\n"
+    },
+    {
+      "id": "b000055",
+      "kind": "heading",
+      "start_line": 162,
+      "end_line": 162,
+      "raw": "## 확인한 동작과 경계\n",
+      "level": 2,
+      "title": "확인한 동작과 경계"
+    },
+    {
+      "id": "b000056",
+      "kind": "blank",
+      "start_line": 163,
+      "end_line": 163,
+      "raw": "\n"
+    },
+    {
+      "id": "b000057",
+      "kind": "paragraph",
+      "start_line": 164,
+      "end_line": 169,
+      "raw": "서비스·계정·원격 앨범별 실제 객체 분리, 길이를 포함한 ID 충돌 방지, 로컬 목록 수정,\n외부 수신, 갱신 시 객체 유지, 재연결 시 이전 객체 정리, 늦은 결과 거부, 동시 갱신 거부,\n취소 전달, 권한 회수, 불완전 목록 병합, 완전 목록 교체, 한도 초과 시 목록 보존을 검사했다.\nGoogle 검사는 현재 Picker 및 앱 생성 항목의 응답 fixture, 페이지네이션, URL 인코딩,\n중복 ID·반복 토큰·본문/깊이/항목/페이지 한도, 잘못된 응답, HTTP 인증·권한·요청 제한,\n토큰 헤더 검사와 upstream 비밀 정보의 오류 메시지 비노출을 포함한다.\n"
+    },
+    {
+      "id": "b000058",
+      "kind": "blank",
+      "start_line": 170,
+      "end_line": 170,
+      "raw": "\n"
+    },
+    {
+      "id": "b000059",
+      "kind": "paragraph",
+      "start_line": 171,
+      "end_line": 176,
+      "raw": "실제 Apple/Google 계정 로그인·PhotoKit 권한 승인·iCloud 사진 다운로드·Google 미디어 다운로드는\n이번 실행에서 검증하지 않았다. 로그인 UI, OAuth 토큰 관리, Picker 선택 UI, TLS 전송은 호스트가\n제공하는 계약이다. Google 전체 개인 보관함 자동 조회를 지원한다고 간주하지 않는다.\niCloud 어댑터는 iCloud 동기화 항목을 포함할 수 있는 시스템 사진 보관함을 읽는다.\n실제 사진 등록·삭제 작업은 수행하지 않았다. Android/Windows/iOS 타깃 빌드·기기 검증은 별도이다.\n기존 `~/.local/SDK/iiPhotoLibrary` 설치본이나 제품 앱 실행본은 이 검증용 패키지와 구분한다.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "앨범 관리자 검증 기록",
+      "anchor": "앨범-관리자-검증-기록",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000003",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "2026-10-12: Images·Videos·Favorite·Deleted 추가",
+      "anchor": "2026-10-12-imagesvideosfavoritedeleted-추가",
+      "start_line": 3
+    },
+    {
+      "block_id": "b000015",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "2026-10-12: 스마트 앨범과 분류 API",
+      "anchor": "2026-10-12-스마트-앨범과-분류-api",
+      "start_line": 39
+    },
+    {
+      "block_id": "b000027",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "2026-10-12: All Library 전체 사진 앨범",
+      "anchor": "2026-10-12-all-library-전체-사진-앨범",
+      "start_line": 77
+    },
+    {
+      "block_id": "b000041",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "2026-10-02: 기존 앨범 관리자",
+      "anchor": "2026-10-02-기존-앨범-관리자",
+      "start_line": 122
+    },
+    {
+      "block_id": "b000045",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "실행 결과",
+      "anchor": "실행-결과",
+      "start_line": 126
+    },
+    {
+      "block_id": "b000055",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "확인한 동작과 경계",
+      "anchor": "확인한-동작과-경계",
+      "start_line": 162
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [
+      {
+        "block_id": "b000007",
+        "line": 16,
+        "text": "| `AlbumsInstalledConsumer` | 재배치한 설치 패키지에서 여덟 스마트 앨범과 Favorite·Deleted API 링크·실행 성공, Qt 탐색 금지 |",
+        "basis": "lexical_match",
+        "context": "table"
+      },
+      {
+        "block_id": "b000011",
+        "line": 33,
+        "text": "원본 파일 삭제를 수행하지 않는다. 앱 UI 및 실제 기기/사용자 계정 실행도 검증하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000013",
+        "line": 37,
+        "text": "기존 `~/.local/SDK/iiPhotoLibrary` 및 실행 중인 제품 앱은 갱신하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000019",
+        "line": 52,
+        "text": "| `AlbumsInstalledConsumer` | 재배치한 패키지에서 네 스마트 앨범·분류 API·중복 그룹·숨김/해제 링크 및 실행 성공, Qt 탐색 금지 |",
+        "basis": "lexical_match",
+        "context": "table"
+      },
+      {
+        "block_id": "b000023",
+        "line": 69,
+        "text": "간주하지 않는다. 호스트는 기존 `PhotoStore::digestFile()` 등으로 확인한 원본 해시를 제공한다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000023",
+        "line": 70,
+        "text": "스마트 보기와 분류 API는 실제 OS 파일·사진 속성·원격 서비스를 변경하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000025",
+        "line": 75,
+        "text": "기존 `~/.local/SDK/iiPhotoLibrary` 설치본 및 실행 중인 제품 앱은 갱신하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000031",
+        "line": 90,
+        "text": "| `AlbumsInstalledConsumer` | 재배치한 패키지에서 All Library 조회·연결 해제 반영 성공, Qt/iiSocietyContainer 탐색 금지 |",
+        "basis": "lexical_match",
+        "context": "table"
+      },
+      {
+        "block_id": "b000039",
+        "line": 120,
+        "text": "`~/.local/SDK/iiPhotoLibrary`와 실행 중인 제품 앱은 갱신하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000047",
+        "line": 136,
+        "text": "| `AlbumsInstalledConsumer` | 별도 prefix 설치·재배치 후 Qt/iiSocietyContainer 탐색을 금지한 외부 프로젝트 링크·실행 성공 |",
+        "basis": "lexical_match",
+        "context": "table"
+      },
+      {
+        "block_id": "b000059",
+        "line": 173,
+        "text": "제공하는 계약이다. Google 전체 개인 보관함 자동 조회를 지원한다고 간주하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      }
+    ],
+    "commands": [
+      {
+        "block_id": "b000035",
+        "language": "sh",
+        "code": "cmake --build build --parallel 4\nctest --test-dir build --output-on-failure\ncmake --build build/albums-only/build --parallel 4\nctest --test-dir build/albums-only/build --output-on-failure\ncmake --install build --prefix build/install\n"
+      },
+      {
+        "block_id": "b000051",
+        "language": "sh",
+        "code": "cmake -S . -B build\ncmake --build build --parallel 4\nctest --test-dir build --output-on-failure\n\ncmake -S . -B build/albums-only/build \\\n  -DIIPHOTOLIBRARY_ALBUMS_ONLY=ON -DCMAKE_BUILD_TYPE=Release \\\n  -DCMAKE_DISABLE_FIND_PACKAGE_Qt6=TRUE \\\n  -DCMAKE_DISABLE_FIND_PACKAGE_iiSocietyContainer=TRUE\ncmake --build build/albums-only/build --parallel 4\nctest --test-dir build/albums-only/build --output-on-failure\n"
+      }
+    ],
+    "links": [],
+    "tables": [
+      {
+        "block_id": "b000007",
+        "columns": [
+          "검증",
+          "결과"
+        ],
+        "rows": [
+          [
+            "전체 SDK 빌드 / CTest",
+            "성공, 8/8 통과, 41.46초"
+          ],
+          [
+            "`SmartAlbums`",
+            "171개 검사 통과"
+          ],
+          [
+            "기존 `AllLibrary`",
+            "62개 검사 통과"
+          ],
+          [
+            "기존 `AlbumManager` / `GooglePhotosAlbums`",
+            "각각 41개 / 39개 검사 통과"
+          ],
+          [
+            "`NativeAlbumBridge`",
+            "33개 검사 통과, 미디어·즐겨찾기·삭제 표시 전달 포함"
+          ],
+          [
+            "기존 `Photos` QtTest",
+            "43 passed / 0 failed / 0 skipped"
+          ],
+          [
+            "`AlbumsInstalledConsumer`",
+            "재배치한 설치 패키지에서 여덟 스마트 앨범과 Favorite·Deleted API 링크·실행 성공, Qt 탐색 금지"
+          ],
+          [
+            "전체 `InstalledConsumer`",
+            "이미지·비디오 조회, Favorite 지정, Deleted 표시·복원과 기존 QML 실행 성공"
+          ],
+          [
+            "코어 전용 빌드 / CTest",
+            "성공, 5/5 통과, 2.48초"
+          ]
+        ]
+      },
+      {
+        "block_id": "b000019",
+        "columns": [
+          "검증",
+          "결과"
+        ],
+        "rows": [
+          [
+            "전체 SDK 빌드 / CTest",
+            "성공, 8/8 통과, 39.17초"
+          ],
+          [
+            "`SmartAlbums`",
+            "93개 검사 통과"
+          ],
+          [
+            "기존 `AllLibrary`",
+            "62개 검사 통과"
+          ],
+          [
+            "기존 `AlbumManager` / `GooglePhotosAlbums`",
+            "각각 41개 / 39개 검사 통과"
+          ],
+          [
+            "`NativeAlbumBridge`",
+            "26개 검사 통과, 분류 전달 및 SDK 리소스 이름의 가져옴 판정 포함"
+          ],
+          [
+            "기존 `Photos` QtTest",
+            "43 passed / 0 failed / 0 skipped"
+          ],
+          [
+            "`AlbumsInstalledConsumer`",
+            "재배치한 패키지에서 네 스마트 앨범·분류 API·중복 그룹·숨김/해제 링크 및 실행 성공, Qt 탐색 금지"
+          ],
+          [
+            "전체 `InstalledConsumer`",
+            "가져온 사진·숨김·All Library와 기존 네이티브/컨트롤러/QML 실행 성공"
+          ],
+          [
+            "코어 전용 빌드 / CTest",
+            "성공, 5/5 통과, 1.84초"
+          ]
+        ]
+      },
+      {
+        "block_id": "b000031",
+        "columns": [
+          "검증",
+          "결과"
+        ],
+        "rows": [
+          [
+            "전체 SDK 빌드",
+            "성공"
+          ],
+          [
+            "전체 CTest",
+            "7/7 통과, 41.01초"
+          ],
+          [
+            "`AllLibrary`",
+            "62개 검사 통과"
+          ],
+          [
+            "기존 `AlbumManager` / `GooglePhotosAlbums`",
+            "각각 41개 / 39개 검사 통과"
+          ],
+          [
+            "기존 `NativeAlbumBridge`",
+            "20개 검사 통과"
+          ],
+          [
+            "기존 `Photos` QtTest",
+            "43 passed / 0 failed / 0 skipped"
+          ],
+          [
+            "`AlbumsInstalledConsumer`",
+            "재배치한 패키지에서 All Library 조회·연결 해제 반영 성공, Qt/iiSocietyContainer 탐색 금지"
+          ],
+          [
+            "기존 `InstalledConsumer`",
+            "All Library와 네이티브 어댑터·컨트롤러·설치된 QML 로드 성공"
+          ],
+          [
+            "코어 전용 빌드 / CTest",
+            "성공, 4/4 통과, 2.23초"
+          ]
+        ]
+      },
+      {
+        "block_id": "b000047",
+        "columns": [
+          "검증",
+          "결과"
+        ],
+        "rows": [
+          [
+            "전체 SDK 빌드",
+            "성공, 네이티브 Apple 어댑터 및 새 앨범 어댑터 포함"
+          ],
+          [
+            "전체 CTest",
+            "6/6 통과, 40.49초"
+          ],
+          [
+            "`AlbumManager`",
+            "41개 검사 통과"
+          ],
+          [
+            "`GooglePhotosAlbums`",
+            "39개 검사 통과"
+          ],
+          [
+            "`NativeAlbumBridge`",
+            "20개 검사 통과"
+          ],
+          [
+            "기존 `Photos` QtTest",
+            "34 passed / 0 failed / 0 skipped"
+          ],
+          [
+            "`AlbumsInstalledConsumer`",
+            "별도 prefix 설치·재배치 후 Qt/iiSocietyContainer 탐색을 금지한 외부 프로젝트 링크·실행 성공"
+          ],
+          [
+            "기존 `InstalledConsumer`",
+            "새 관리자·네이티브 어댑터 구성, 컨트롤러 및 설치된 QML 모듈 로드 성공"
+          ],
+          [
+            "코어 전용 빌드",
+            "성공, Qt·iiSocietyContainer 의존성 없음"
+          ],
+          [
+            "코어 전용 CTest",
+            "3/3 통과, 1.17초, 재배치 설치 소비자 포함"
+          ]
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

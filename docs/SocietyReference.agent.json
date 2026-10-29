@@ -1,0 +1,1074 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:3e409b75eaca58f45078847084a49b8865c31167fe03d80e20417eaf2c87492c",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FiiPhotoLibrary",
+    "name": "iiPhotoLibrary",
+    "root": "SDK/iiPhotoLibrary",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/SocietyReference.md",
+    "sha256": "cae87657e832e78127116e4714267f89f73bea9de4a05abbfedfebc8c4693f29",
+    "bytes": 19139,
+    "line_count": 101,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "Photos와 기기 사진 보관함",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# Photos와 기기 사진 보관함\n",
+      "level": 1,
+      "title": "Photos와 기기 사진 보관함"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "heading",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "## Lazy storage directories\n",
+      "level": 2,
+      "title": "Lazy storage directories"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "The extracted SDK opens and reads an empty `PhotoStore` without preparing private photo directories or `Photos/.previews/`. Its initial refresh also writes no photo state when neither the private tree nor Photos contains files and native access is unavailable or the permitted scan is empty. Existing empty directories from an older session qualify; any existing record, reference, tombstone or unknown file keeps the normal refresh path. Each JSON, preview, native export and received resource write creates only its required parent after checking that the path remains inside the container. Original caches appear when an original is explicitly prepared or a received resource is committed; discovery does not allocate that directory. Empty staging/cache parents removed after an operation are recreated by the next writer.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "paragraph",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "Existing record/reference formats are unchanged; explicit native reading is provided by importLibrary(). The SDK is linked statically, so Society's GUI and daemon must be relinked to receive this behavior. Existing running sessions retain their earlier code and may require the directories created by their original `open()`; do not remove those directories while preserving such a session. SDK tests cover empty reads and repeated opens, deferred original staging and the first received transfer without a prior refresh.\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "paragraph",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "`Society.societycontainer/Photos`는 사진과 비디오를 함께 관리하는 고정 디렉터리이다. 기본 갱신은 컨테이너 안에 사용자가 넣은 파일과 기존 객체·참조·캐시만 관리하며, OS 사진 보관함을 자동으로 열거하지 않는다. 사용자가 `connectLibrary()` 또는 `importLibrary()`를 명시한 경우에만 허용된 네이티브 사진을 읽는다. PhotoStore는 OS 사진 보관함에 등록하거나 삭제하지 않으며 Photos의 사용자 파일도 자동 제거하지 않는다. 독립 PhotoLibrary의 명시적 OS 등록·삭제 API는 다른 소비자용으로 유지한다.\n"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "heading",
+      "start_line": 11,
+      "end_line": 11,
+      "raw": "## 저장 계약\n",
+      "level": 2,
+      "title": "저장 계약"
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 12,
+      "end_line": 12,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "table",
+      "start_line": 13,
+      "end_line": 22,
+      "raw": "| 위치 | 내용 | 전파 |\n| --- | --- | --- |\n| `Photos/<id>.societyphoto` | 사진 객체, 이름, 종류, 시각, 원본 리소스 해시·크기, 삭제 표식 | 컨테이너 동기화 |\n| `Photos/.previews/<id>.jpg` | 직접 저장한 사진·비디오 프리뷰 | 컨테이너 동기화 |\n| `.society-photos/<container-id>/gallery-catalog.json` | 개별 참조 읽기 전 갤러리를 복원하는 통합 시작 카탈로그 | 전파하지 않음 |\n| `.society-photos/<container-id>/gallery/<native-key>.json` | 네이티브 메타데이터·변경 시점·프리뷰 완료 상태의 영구 인덱스 | 전파하지 않음 |\n| `Photos/.previews/gallery-<native-key>.jpg` | 원본 해시 완료 전부터 사용하는 영구 갤러리 프리뷰 | 컨테이너 내부 저장 |\n| `.society-photos/<container-id>/references/<id>.json` | 기기별 PhotoKit ID, MediaStore URI 또는 Windows 경로·변경 시점 | 전파하지 않음 |\n| `.society-photos/<container-id>/originals/<hash>` | 검증된 컨테이너 원본 또는 명시적 열람·전송을 위한 네이티브 읽기 캐시 | 인증된 사진 채널 |\n| `.society-photos/<container-id>/incoming` | 검증 전 부분 전송과 임시 출력 | 전파하지 않음 |\n",
+      "columns": [
+        "위치",
+        "내용",
+        "전파"
+      ],
+      "rows": [
+        [
+          "`Photos/<id>.societyphoto`",
+          "사진 객체, 이름, 종류, 시각, 원본 리소스 해시·크기, 삭제 표식",
+          "컨테이너 동기화"
+        ],
+        [
+          "`Photos/.previews/<id>.jpg`",
+          "직접 저장한 사진·비디오 프리뷰",
+          "컨테이너 동기화"
+        ],
+        [
+          "`.society-photos/<container-id>/gallery-catalog.json`",
+          "개별 참조 읽기 전 갤러리를 복원하는 통합 시작 카탈로그",
+          "전파하지 않음"
+        ],
+        [
+          "`.society-photos/<container-id>/gallery/<native-key>.json`",
+          "네이티브 메타데이터·변경 시점·프리뷰 완료 상태의 영구 인덱스",
+          "전파하지 않음"
+        ],
+        [
+          "`Photos/.previews/gallery-<native-key>.jpg`",
+          "원본 해시 완료 전부터 사용하는 영구 갤러리 프리뷰",
+          "컨테이너 내부 저장"
+        ],
+        [
+          "`.society-photos/<container-id>/references/<id>.json`",
+          "기기별 PhotoKit ID, MediaStore URI 또는 Windows 경로·변경 시점",
+          "전파하지 않음"
+        ],
+        [
+          "`.society-photos/<container-id>/originals/<hash>`",
+          "검증된 컨테이너 원본 또는 명시적 열람·전송을 위한 네이티브 읽기 캐시",
+          "인증된 사진 채널"
+        ],
+        [
+          "`.society-photos/<container-id>/incoming`",
+          "검증 전 부분 전송과 임시 출력",
+          "전파하지 않음"
+        ]
+      ]
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 23,
+      "end_line": 23,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "paragraph",
+      "start_line": 24,
+      "end_line": 24,
+      "raw": "`.societyphoto`는 Society가 해석하는 논리적 alias이다. OS 심볼릭 링크나 다른 기기의 절대 경로를 복제하지 않는다. 로컬 원본은 시스템 사진 보관함에 남고, Society는 네이티브 API로 접근한다. 공통 식별자는 원본 리소스 해시를 바탕으로 생성하며, 이후에는 로컬 참조로 식별자를 유지한다. Apple cloud identifier와 Society가 가져온 리소스의 고정 이름도 사용하여 재등록을 방지한다.\n"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 25,
+      "end_line": 25,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "paragraph",
+      "start_line": 26,
+      "end_line": 26,
+      "raw": "발견 시에는 임시로 원본을 읽어 해시를 계산하고 임시 출력을 제거한다. 원본 전송 요청이 오면 별도로 준비한다. 전송이 끝난 읽기 임대를 해제하면 로컬 사진 보관함이 보유한 임시 원본을 제거한다. 다른 수신자가 읽는 원본은 유지한다. 중단된 임대는 1시간 후 만료되며, 활성 임대가 없는 오래된 네이티브 캐시는 갱신 시 정리한다. 사진 보관함이 없는 NAS의 원본은 계속 보관한다.\n"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 27,
+      "end_line": 27,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "paragraph",
+      "start_line": 28,
+      "end_line": 28,
+      "raw": "`View original`은 원본을 변경하지 않는 컨테이너 내부 열람용 복사본을 외부 뷰어로 연다. 파일 가져오기·전송 완료·갱신 모두 기기 사진 보관함에 등록하지 않는다. 이 복사본과 중단된 임시 출력은 24시간, 이어받기용 부분 원본은 7일이 지난 뒤 갱신 시 정리한다. 외부 뷰어가 열람용 파일에 저장한 편집은 네이티브 원본으로 덮어쓰지 않는다.\n"
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 29,
+      "end_line": 29,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "paragraph",
+      "start_line": 30,
+      "end_line": 30,
+      "raw": "Photos에 직접 넣은 파일은 그 위치에 유지하며 같은 컨테이너 안에 alias와 검증된 원본 캐시를 만든다. 사용자의 외부 원본 경로도 이동하지 않는다. 사진·비디오 이외의 일반 파일은 가져오지 않는다.\n"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 31,
+      "end_line": 31,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "heading",
+      "start_line": 32,
+      "end_line": 32,
+      "raw": "## 양방향 동작\n",
+      "level": 2,
+      "title": "양방향 동작"
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 33,
+      "end_line": 33,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "paragraph",
+      "start_line": 34,
+      "end_line": 34,
+      "raw": "준비된 컨테이너에서 사진 보관함을 조회하고 사진 객체·프리뷰를 기존 `iiSocietyHelper Sync`로 합친다. 클라이언트는 호스트에 없는 자신의 원본을 올린다. 호스트 원본은 openPhoto/downloadPhoto로 선택할 때만 받아 Society 원본 캐시에 검증하여 저장한다. 원본을 열기 위해 네이티브 사진 보관함에 자동 등록하지 않는다. 호스트를 통해 애플·Android·Windows 사진이 모인다. 원본 소유 기기가 오프라인이면 프리뷰를 표시하며 전송을 대기한다. Live Photo의 사진·paired video와 보조 사진은 한 객체의 여러 리소스로 전송한다.\n"
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 35,
+      "end_line": 35,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "paragraph",
+      "start_line": 36,
+      "end_line": 36,
+      "raw": "`society.photos` 채널은 기존 LAN/TLS·자체 서버의 계정 인증을 사용한다. 검증된 피어와 현재 컨테이너 ID가 모두 일치해야 한다. 경로 대신 사진 ID·리소스 번호를 전달하며, 256 KiB 청크·이어받기·중복 청크 확인·최종 SHA-256 및 크기 검증을 적용한다. 원본 준비는 별도 작업 스레드에서 실행하고 티켓으로 결과를 조회한다. 사진을 교환하는 기기는 이 추가 채널을 제공하는 앱 버전이어야 한다.\n"
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 37,
+      "end_line": 37,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "paragraph",
+      "start_line": 38,
+      "end_line": 38,
+      "raw": "완료된 응답 캐시는 제한된 크기로 교체하므로 큰 영상의 전송이 요청 수 제한 때문에 멈추지 않는다. 복합 사진의 일부 리소스만 받은 상태는 완료로 처리하지 않는다. 수신 완료는 모든 컨테이너 원본의 해시·크기를 검증하며 OS 사진 등록을 호출하지 않는다. 다른 내용의 네이티브 원본이 같은 객체로 명시적 가져오기에서 발견되면 기존 원본과 공유 객체를 보존한다. 원본 바이트 교체에 대한 충돌 자동 해결은 수행하지 않는다.\n"
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 39,
+      "end_line": 39,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "paragraph",
+      "start_line": 40,
+      "end_line": 40,
+      "raw": "컨테이너 연결과 전경 복귀는 OS 사진 권한을 자동 요청하지 않는다. Photos 화면의 `Import photo library…`를 명시적으로 실행하면 필요한 권한을 요청하고 허용된 항목을 한 번 읽는다. 주기적 갱신·컨테이너 동기화 완료·새로 고침은 컨테이너 자료만 조회한다. 변경 없는 결과로 추가 동기화를 유발하지 않으며, 목록 변경 시 선택과 스크롤을 유지한다.\n"
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 41,
+      "end_line": 41,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "paragraph",
+      "start_line": 42,
+      "end_line": 45,
+      "raw": "최신 항목 위치는 Photos 화면에 진입할 때만 정한다. 백그라운드 갱신 중에는 최신 행을\n보고 있어도 새 사진을 따라 자동 스크롤하지 않는다. 내용이 같으면 목록 변경 신호도\n내보내지 않는다. `Society.Photos`는 모바일·데스크톱 크기에서 변경 없는 조회와 실제 추가·\n재정렬 후 카메라 위치·선택 유지, 명시적 화면 재진입을 검사한다.\n"
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 46,
+      "end_line": 46,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "paragraph",
+      "start_line": 47,
+      "end_line": 47,
+      "raw": "모바일에서는 사진 작업도 기존 동기화의 백그라운드 실행 시간에 포함한다. OS가 실행 시간을 종료하거나 컨테이너가 바뀌면 네이티브 요청을 취소하고, 포그라운드 복귀 시 다시 조회한다. OS의 백그라운드 실행 한도를 우회하거나 무제한 실행을 보장하지 않는다.\n"
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 48,
+      "end_line": 48,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "paragraph",
+      "start_line": 49,
+      "end_line": 49,
+      "raw": "`Move to trash`는 컨테이너 객체에 삭제 표식을 기록하고 다른 기기에 전파한다. 로컬·원격 표식 모두 OS 사진 원본을 삭제하지 않는다. 명시적 네이티브 조회에서 없어진 항목은 연속된 전체 조회에서 확인하며, 권한 손실·제한된 접근·조회 실패·미디어 DB 재구축을 전체 삭제로 해석하지 않는다. OS 삭제 확인창이나 휴지통 비우기는 호출하지 않는다. 각 사진 앱의 비파괴 편집 이력을 다른 OS의 편집 이력으로 변환하는 기능은 포함하지 않는다.\n"
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 50,
+      "end_line": 50,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "heading",
+      "start_line": 51,
+      "end_line": 51,
+      "raw": "## 플랫폼 범위\n",
+      "level": 2,
+      "title": "플랫폼 범위"
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 52,
+      "end_line": 52,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "paragraph",
+      "start_line": 53,
+      "end_line": 53,
+      "raw": "아래 OS 등록·삭제 기능은 독립 PhotoLibrary 어댑터의 명시적 저수준 API 범위이다. PhotoStore·PhotoController는 이 변경 API를 호출하지 않으며, 사용자가 요청한 가져오기와 기존 참조 원본 읽기만 수행한다.\n"
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 54,
+      "end_line": 54,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "list",
+      "start_line": 55,
+      "end_line": 58,
+      "raw": "- Apple: PhotoKit 읽기·쓰기 권한, PHAsset·PHCloudIdentifier·PHAssetResourceManager·PHAssetCreationRequest를 사용한다. iCloud 원본도 PhotoKit을 통해 내려받는다. Photos 내부 DB나 원본 디렉터리는 직접 수정하지 않는다. 사진 앱에서 변경한 프리뷰를 다시 저장하며, 시스템 iCloud 설정 자체는 변경하지 않는다.\n- Android: 이미지·비디오 MediaStore 컬렉션과 외부 볼륨을 조회한다. 미디어 DB 버전·마운트된 볼륨·`GENERATION_MODIFIED`, 제한된 접근을 확인한다. `Pictures/Society`에 `IS_PENDING` 쓰기·공개·실패 정리를 수행한다. Android 11 이상에서 추가 동의가 필요한 휴지통 변경은 Android 항목 확인창을 호출한다. 이전 OS에서는 영구 삭제로 대체하지 않고 시스템 갤러리에서 관리하도록 안내한다. Google Photos의 클라우드 전용 항목 전체를 읽는 API를 의미하지 않는다. 원본 위치 메타데이터 권한도 요청하며, 허용되면 `setRequireOriginal`로 읽는다. 허용되지 않으면 OS가 제공하는 메타데이터 범위를 따른다.\n- Windows: Shell Pictures/Videos 라이브러리와 기본 Pictures/Movies 폴더, 그 안에서 실제 파일로 접근 가능한 OneDrive 항목을 연결한다. Windows Photos의 비공개 DB나 별도 클라우드의 웹 전용 목록을 읽지 않는다. Shell 썸네일과 Recycle Bin을 사용한다.\n- 네이티브 사진 보관함이 없는 호스트: 객체·프리뷰와 받은 원본을 보존하여 NAS 역할을 수행한다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "Apple: PhotoKit 읽기·쓰기 권한, PHAsset·PHCloudIdentifier·PHAssetResourceManager·PHAssetCreationRequest를 사용한다. iCloud 원본도 PhotoKit을 통해 내려받는다. Photos 내부 DB나 원본 디렉터리는 직접 수정하지 않는다. 사진 앱에서 변경한 프리뷰를 다시 저장하며, 시스템 iCloud 설정 자체는 변경하지 않는다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "Android: 이미지·비디오 MediaStore 컬렉션과 외부 볼륨을 조회한다. 미디어 DB 버전·마운트된 볼륨·`GENERATION_MODIFIED`, 제한된 접근을 확인한다. `Pictures/Society`에 `IS_PENDING` 쓰기·공개·실패 정리를 수행한다. Android 11 이상에서 추가 동의가 필요한 휴지통 변경은 Android 항목 확인창을 호출한다. 이전 OS에서는 영구 삭제로 대체하지 않고 시스템 갤러리에서 관리하도록 안내한다. Google Photos의 클라우드 전용 항목 전체를 읽는 API를 의미하지 않는다. 원본 위치 메타데이터 권한도 요청하며, 허용되면 `setRequireOriginal`로 읽는다. 허용되지 않으면 OS가 제공하는 메타데이터 범위를 따른다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "Windows: Shell Pictures/Videos 라이브러리와 기본 Pictures/Movies 폴더, 그 안에서 실제 파일로 접근 가능한 OneDrive 항목을 연결한다. Windows Photos의 비공개 DB나 별도 클라우드의 웹 전용 목록을 읽지 않는다. Shell 썸네일과 Recycle Bin을 사용한다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "네이티브 사진 보관함이 없는 호스트: 객체·프리뷰와 받은 원본을 보존하여 NAS 역할을 수행한다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000044",
+      "kind": "blank",
+      "start_line": 59,
+      "end_line": 59,
+      "raw": "\n"
+    },
+    {
+      "id": "b000045",
+      "kind": "paragraph",
+      "start_line": 60,
+      "end_line": 60,
+      "raw": "새 외부 패키지를 추가하지 않는다. 기존 Qt와 OS 공식 API를 재사용하고 `PhotoLibrary` 인터페이스로 플랫폼을 분리한다. 컨테이너·파일 동기화 SDK가 상위 앱 UI를 참조하지 않는다.\n"
+    },
+    {
+      "id": "b000046",
+      "kind": "blank",
+      "start_line": 61,
+      "end_line": 61,
+      "raw": "\n"
+    },
+    {
+      "id": "b000047",
+      "kind": "heading",
+      "start_line": 62,
+      "end_line": 62,
+      "raw": "## 검증\n",
+      "level": 2,
+      "title": "검증"
+    },
+    {
+      "id": "b000048",
+      "kind": "blank",
+      "start_line": 63,
+      "end_line": 63,
+      "raw": "\n"
+    },
+    {
+      "id": "b000049",
+      "kind": "paragraph",
+      "start_line": 64,
+      "end_line": 64,
+      "raw": "`iiPhotoLibrary.Photos`는 컨테이너 기본 갱신의 OS 스캔·권한 요청 부재, 명시적 읽기, 원본 참조 보존, alias·프리뷰, 사진·비디오 양방향 전송, OS 등록·삭제 부재, 사용자 Photos 파일 보존, 청크 재시도·해시 불일치, 경로 리디렉션, 제한된 권한과 미인증 피어 거부를 격리된 보관함으로 검사한다. 실제 로컬 TLS와 `iiSocietyHelper Sync`를 연결하는 통합 시험은 alias·프리뷰 전송, 선택 다운로드 전 원본 미수신, 명시 요청 후 원본 캐시 저장과 호스트의 업로드 검증, 반대 방향 컨테이너 삭제 표식 전파를 검사한다. 사진 보관함 자체는 테스트용 구현을 사용한다.\n"
+    },
+    {
+      "id": "b000050",
+      "kind": "blank",
+      "start_line": 65,
+      "end_line": 65,
+      "raw": "\n"
+    },
+    {
+      "id": "b000051",
+      "kind": "paragraph",
+      "start_line": 66,
+      "end_line": 66,
+      "raw": "동일 테스트의 LVRS 화면 검증은 데스크톱·390 px 화면, 늦은 프리뷰, 선택·스크롤 유지와 삭제 후 선택 해제를 확인하고 `build/photos/gallery-*.png`를 저장한다. `tools/test_android_photos.py`는 실행 중인 Android 에뮬레이터에서 별도 시험 앱으로 실제 MediaStore를 검사한다. 설치 대상은 에뮬레이터로 제한하고 시험이 끝나면 시험 앱을 제거한다. 빌드 산출물은 `build/photos/native-android`에만 생성한다.\n"
+    },
+    {
+      "id": "b000052",
+      "kind": "blank",
+      "start_line": 67,
+      "end_line": 67,
+      "raw": "\n"
+    },
+    {
+      "id": "b000053",
+      "kind": "paragraph",
+      "start_line": 68,
+      "end_line": 68,
+      "raw": "일반 CTest는 `SOCIETY_DISABLE_PHOTOS=1`로 실제 사용자 보관함을 가져오지 않는다. 네이티브 SDK 컴파일, 에뮬레이터, 실기기·iCloud 전파 검증은 별도로 기록한다. 빌드와 테스트만으로 기존 설치 앱의 갱신이나 실제 사용자 보관함의 통합 완료를 주장하지 않는다.\n"
+    },
+    {
+      "id": "b000054",
+      "kind": "blank",
+      "start_line": 69,
+      "end_line": 69,
+      "raw": "\n"
+    },
+    {
+      "id": "b000055",
+      "kind": "paragraph",
+      "start_line": 70,
+      "end_line": 70,
+      "raw": "공식 API: [PhotoKit](https://developer.apple.com/documentation/photos), [Apple 기기 간 식별](https://developer.apple.com/videos/play/wwdc2021/10046/), [Android 공유 미디어](https://developer.android.com/training/data-storage/shared/media), [Android 제한된 접근](https://developer.android.com/about/versions/14/changes/partial-photo-video-access), [Windows 라이브러리](https://learn.microsoft.com/en-us/windows/win32/api/shobjidl_core/nf-shobjidl_core-ishelllibrary-getfolders).\n"
+    },
+    {
+      "id": "b000056",
+      "kind": "blank",
+      "start_line": 71,
+      "end_line": 71,
+      "raw": "\n"
+    },
+    {
+      "id": "b000057",
+      "kind": "heading",
+      "start_line": 72,
+      "end_line": 72,
+      "raw": "## 전경의 자동 연결과 점진적 목록 표시\n",
+      "level": 2,
+      "title": "전경의 자동 연결과 점진적 목록 표시"
+    },
+    {
+      "id": "b000058",
+      "kind": "blank",
+      "start_line": 73,
+      "end_line": 73,
+      "raw": "\n"
+    },
+    {
+      "id": "b000059",
+      "kind": "paragraph",
+      "start_line": 74,
+      "end_line": 74,
+      "raw": "Society GUI는 사용자가 Photos 연결을 명시적으로 실행한 경우에만 필요한 OS 권한을 요청한다. 백그라운드 데몬·컨테이너 연결·전경 복귀·주기적 갱신은 권한 창이나 OS 보관함 전체 조회를 시작하지 않는다. 이미 거부된 권한은 사용자가 설정에서 변경하며, 제한된 접근은 명시적 가져오기에서 허용된 항목만 조회하고 설정을 자동으로 열지 않는다.\n"
+    },
+    {
+      "id": "b000060",
+      "kind": "blank",
+      "start_line": 75,
+      "end_line": 75,
+      "raw": "\n"
+    },
+    {
+      "id": "b000061",
+      "kind": "paragraph",
+      "start_line": 76,
+      "end_line": 76,
+      "raw": "기존 alias는 저장소를 열자마자 표시한다. 새 사진과 프리뷰도 준비된 항목부터 표시하므로 느린 원본 하나 때문에 전체 목록이 비어 있지 않는다. 검증한 원본 바이트와 수신 확인된 사진 청크가 동기화 활동의 진행량에 반영된다. 원본은 네이티브 보관함에 유지하며, 불완전하거나 제한된 조회로 삭제를 추론하지 않는다. Photos 테스트는 권한 요청 시점, 지연된 허용, 제한·거부 상태, 두 번째 원본 처리가 느린 동안 첫 사진의 표시를 검사한다.\n"
+    },
+    {
+      "id": "b000062",
+      "kind": "blank",
+      "start_line": 77,
+      "end_line": 77,
+      "raw": "\n"
+    },
+    {
+      "id": "b000063",
+      "kind": "heading",
+      "start_line": 78,
+      "end_line": 78,
+      "raw": "## 경로 이전과 갤러리\n",
+      "level": 2,
+      "title": "경로 이전과 갤러리"
+    },
+    {
+      "id": "b000064",
+      "kind": "blank",
+      "start_line": 79,
+      "end_line": 79,
+      "raw": "\n"
+    },
+    {
+      "id": "b000065",
+      "kind": "paragraph",
+      "start_line": 80,
+      "end_line": 80,
+      "raw": "iiSocietyContainer 0.13.0은 기존 8개 영역 매니페스트를 열 때 `Files/Photos/`를 루트 `Photos/`로 이전하고 9개 영역 매니페스트로 갱신한다. UUID, 사진 객체 ID, 기기 원본 참조와 프리뷰를 유지한다. 이 위치는 일반 Files 공개 루트 밖이며 Society 앱의 최상위 Photos에서 접근한다. 데이터가 충돌하면 덮어쓰지 않고 오류를 반환한다. 동기화하는 기기의 Society와 Container SDK도 새 레이아웃으로 갱신해야 한다.\n"
+    },
+    {
+      "id": "b000066",
+      "kind": "blank",
+      "start_line": 81,
+      "end_line": 81,
+      "raw": "\n"
+    },
+    {
+      "id": "b000067",
+      "kind": "paragraph",
+      "start_line": 82,
+      "end_line": 82,
+      "raw": "사진과 비디오는 이름 없는 정사각형 프리뷰로 표시한다. Generation History와 같이 오래된 항목은 위, 최신 항목은 아래에 두며 처음 열거나 다시 진입하면 최하단에서 시작한다. 과거 항목을 탐색하는 중에는 갱신되어도 현재 스크롤을 유지한다. 정보·원본 보기·휴지통 동작은 선택 후 정보 시트에서 제공한다. Photos에서는 두 손가락 핀치로 갤러리 열 수나 썸네일 크기를 변경하지 않는다. 가로 드래그 크기 조절과 세로 스크롤은 유지한다. [갤러리](Gallery.md)는 화면별 제스처와 스크롤 보존·입력 검증을 설명한다.\n"
+    },
+    {
+      "id": "b000068",
+      "kind": "heading",
+      "start_line": 83,
+      "end_line": 83,
+      "raw": "# 모바일 화면\n",
+      "level": 1,
+      "title": "모바일 화면"
+    },
+    {
+      "id": "b000069",
+      "kind": "blank",
+      "start_line": 84,
+      "end_line": 84,
+      "raw": "\n"
+    },
+    {
+      "id": "b000070",
+      "kind": "paragraph",
+      "start_line": 85,
+      "end_line": 85,
+      "raw": "Photos는 공통 Storage의 최상위 영역으로 제공하며 좁은 화면에서도 같은 갤러리를 유지한다. 모바일의 Connect·Add·Refresh 버튼은 44 px 높이로 표시하고 가용 폭에 맞춰 다음 줄로 배치한다. 전체 탐색과 Storage 작업은 [모바일 공통 화면](MobileViews.md)의 시트를 사용한다.\n"
+    },
+    {
+      "id": "b000071",
+      "kind": "blank",
+      "start_line": 86,
+      "end_line": 86,
+      "raw": "\n"
+    },
+    {
+      "id": "b000072",
+      "kind": "heading",
+      "start_line": 87,
+      "end_line": 87,
+      "raw": "## 화면 우선 영구 인덱싱\n",
+      "level": 2,
+      "title": "화면 우선 영구 인덱싱"
+    },
+    {
+      "id": "b000073",
+      "kind": "blank",
+      "start_line": 88,
+      "end_line": 88,
+      "raw": "\n"
+    },
+    {
+      "id": "b000074",
+      "kind": "paragraph",
+      "start_line": 89,
+      "end_line": 89,
+      "raw": "Photos는 화면의 첫 행과 마지막 행에 해당하는 갤러리 키를 작업 스레드에 전달한다. 프리뷰 큐는 보이는 범위, 그 범위에서 가까운 항목, 먼 항목 순서로 처리하며 화면 밖의 전체 보관함까지 확장한다. 스크롤·창 크기·열 수가 바뀌면 진행 중인 한 항목을 마친 뒤 남은 큐의 순서를 다시 계산한다. 화면 위치를 아직 받지 못했으면 최초 진입 위치인 최신 24개 항목부터 시작한다.\n"
+    },
+    {
+      "id": "b000075",
+      "kind": "blank",
+      "start_line": 90,
+      "end_line": 90,
+      "raw": "\n"
+    },
+    {
+      "id": "b000076",
+      "kind": "paragraph",
+      "start_line": 91,
+      "end_line": 91,
+      "raw": "목록 메타데이터와 갤러리 프리뷰를 먼저 공개한다. 원본 리소스 내보내기·SHA-256 계산과 Apple의 iCloud 식별자 조회는 그 이후에 진행한다. 아직 원본 검증이 끝나지 않은 표시용 행은 사진 전송 카탈로그에 포함하지 않는다. 프리뷰만으로 원본 해시·크기를 조작하거나 검증 완료로 간주하지 않는다.\n"
+    },
+    {
+      "id": "b000077",
+      "kind": "blank",
+      "start_line": 92,
+      "end_line": 92,
+      "raw": "\n"
+    },
+    {
+      "id": "b000078",
+      "kind": "paragraph",
+      "start_line": 93,
+      "end_line": 93,
+      "raw": "인덱스는 사용자 전역 캐시가 아닌 현재 Society 컨테이너의 `.society-photos/<container-id>/gallery/`에 항목별로 원자적으로 저장한다. 프리뷰도 컨테이너의 `Photos/.previews/`에 원자적으로 저장한다. 앱 종료·취소·컨테이너 재연결 후 저장된 목록과 프리뷰를 먼저 표시하고 미완료 항목부터 이어간다. 변경 시점이 같고 정상 프리뷰가 있으면 네이티브 재생성을 생략한다. 편집된 항목은 교체하고 누락·손상된 프리뷰는 기존 alias 프리뷰 또는 네이티브 라이브러리에서 복구한다. 제한된 접근을 전체 삭제로 간주하지 않는다.\n"
+    },
+    {
+      "id": "b000079",
+      "kind": "blank",
+      "start_line": 94,
+      "end_line": 94,
+      "raw": "\n"
+    },
+    {
+      "id": "b000080",
+      "kind": "paragraph",
+      "start_line": 95,
+      "end_line": 95,
+      "raw": "화면에서는 앞뒤 두 화면 높이만큼 타일을 미리 생성·디코딩한다. 디코딩 캐시를 재사용하고 프리뷰 버전이 바뀔 때만 다시 읽으며, 새 이미지 로딩 중에는 기존 이미지를 유지한다. 전체 라이브러리 이미지를 RAM에 올리지는 않는다. Apple 프리뷰 요청은 최대 5초 후 취소하고 다음 항목을 처리하며, 아직 사용할 수 없는 항목은 다음 스캔에서 재시도한다. 최초 인덱스 생성·접근 불가·빠른 미캐시 영역 점프에서는 프리뷰가 준비되기 전 대기 표시가 남을 수 있다.\n"
+    },
+    {
+      "id": "b000081",
+      "kind": "blank",
+      "start_line": 96,
+      "end_line": 96,
+      "raw": "\n"
+    },
+    {
+      "id": "b000082",
+      "kind": "paragraph",
+      "start_line": 97,
+      "end_line": 97,
+      "raw": "`Society.Photos`는 화면 기준 거리순 처리와 중간 우선순위 변경, 원본 읽기 전 모든 프리뷰 공개, 중단 후 영구 인덱스 복원, 캐시 재사용·손상 복구·편집 재생성, 변경 없는 재조회 시 불필요한 동기화 방지, 실제 QML의 선행 버퍼와 디코딩 캐시를 검증한다.\n"
+    },
+    {
+      "id": "b000083",
+      "kind": "blank",
+      "start_line": 98,
+      "end_line": 98,
+      "raw": "\n"
+    },
+    {
+      "id": "b000084",
+      "kind": "paragraph",
+      "start_line": 99,
+      "end_line": 99,
+      "raw": "시작 시에는 통합 `gallery-catalog.json`을 먼저 공개하고 개별 참조·alias 검사를 백그라운드에서 이어간다. 프리뷰 32개 또는 1초마다 통합 카탈로그를 체크포인트하며 단계 종료 시에도 저장한다. 프리뷰 파일명은 상대 이름으로 저장해 컨테이너 경로 변경 후에도 복원할 수 있다. 개별 항목의 원자적 인덱스는 각 완료마다 저장하므로 통합 체크포인트 사이에 종료되어도 진행 결과를 복구한다. 테스트는 개별 참조 오류가 발생하기 전에 통합 카탈로그가 먼저 공개되는 순서를 검증한다.\n"
+    },
+    {
+      "id": "b000085",
+      "kind": "blank",
+      "start_line": 100,
+      "end_line": 100,
+      "raw": "\n"
+    },
+    {
+      "id": "b000086",
+      "kind": "paragraph",
+      "start_line": 101,
+      "end_line": 101,
+      "raw": "프리뷰 갱신은 QAbstractListModel의 해당 행 dataChanged로 전달한다. 갤러리 키와 순서가 유지되면 모델을 재설정하지 않으므로 기존 타일과 디코딩 이미지를 보존한다. 늦은 프리뷰 도착 테스트는 모델 재설정 0회와 실제 행 갱신을 함께 검사한다.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "Photos와 기기 사진 보관함",
+      "anchor": "photos와-기기-사진-보관함",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000003",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Lazy storage directories",
+      "anchor": "lazy-storage-directories",
+      "start_line": 3
+    },
+    {
+      "block_id": "b000011",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "저장 계약",
+      "anchor": "저장-계약",
+      "start_line": 11
+    },
+    {
+      "block_id": "b000023",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "양방향 동작",
+      "anchor": "양방향-동작",
+      "start_line": 32
+    },
+    {
+      "block_id": "b000039",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "플랫폼 범위",
+      "anchor": "플랫폼-범위",
+      "start_line": 51
+    },
+    {
+      "block_id": "b000047",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "검증",
+      "anchor": "검증",
+      "start_line": 62
+    },
+    {
+      "block_id": "b000057",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "전경의 자동 연결과 점진적 목록 표시",
+      "anchor": "전경의-자동-연결과-점진적-목록-표시",
+      "start_line": 72
+    },
+    {
+      "block_id": "b000063",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "경로 이전과 갤러리",
+      "anchor": "경로-이전과-갤러리",
+      "start_line": 78
+    },
+    {
+      "block_id": "b000068",
+      "parent_id": null,
+      "level": 1,
+      "title": "모바일 화면",
+      "anchor": "모바일-화면",
+      "start_line": 83
+    },
+    {
+      "block_id": "b000072",
+      "parent_id": "b000068",
+      "level": 2,
+      "title": "화면 우선 영구 인덱싱",
+      "anchor": "화면-우선-영구-인덱싱",
+      "start_line": 87
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [
+      {
+        "block_id": "b000005",
+        "line": 5,
+        "text": "The extracted SDK opens and reads an empty `PhotoStore` without preparing private photo directories or `Photos/.previews/`. Its initial refresh also writes no photo state when neither the private tree nor Photos contains files and native access is unavailable or the permitted scan is empty. Existing empty directories from an older session qualify; any existing record, reference, tombstone or unknown file keeps the normal refresh path. Each JSON, preview, native export and received resource write creates only its required parent after checking that the path remains inside the container. Original caches appear when an original is explicitly prepared or a received resource is committed; discovery does not allocate that directory. Empty staging/cache parents removed after an operation are recreated by the next writer.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000007",
+        "line": 7,
+        "text": "Existing record/reference formats are unchanged; explicit native reading is provided by importLibrary(). The SDK is linked statically, so Society's GUI and daemon must be relinked to receive this behavior. Existing running sessions retain their earlier code and may require the directories created by their original `open()`; do not remove those directories while preserving such a session. SDK tests cover empty reads and repeated opens, deferred original staging and the first received transfer without a prior refresh.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000009",
+        "line": 9,
+        "text": "`Society.societycontainer/Photos`는 사진과 비디오를 함께 관리하는 고정 디렉터리이다. 기본 갱신은 컨테이너 안에 사용자가 넣은 파일과 기존 객체·참조·캐시만 관리하며, OS 사진 보관함을 자동으로 열거하지 않는다. 사용자가 `connectLibrary()` 또는 `importLibrary()`를 명시한 경우에만 허용된 네이티브 사진을 읽는다. PhotoStore는 OS 사진 보관함에 등록하거나 삭제하지 않으며 Photos의 사용자 파일도 자동 제거하지 않는다. 독립 PhotoLibrary의 명시적 OS 등록·삭제 API는 다른 소비자용으로 유지한다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000015",
+        "line": 24,
+        "text": "`.societyphoto`는 Society가 해석하는 논리적 alias이다. OS 심볼릭 링크나 다른 기기의 절대 경로를 복제하지 않는다. 로컬 원본은 시스템 사진 보관함에 남고, Society는 네이티브 API로 접근한다. 공통 식별자는 원본 리소스 해시를 바탕으로 생성하며, 이후에는 로컬 참조로 식별자를 유지한다. Apple cloud identifier와 Society가 가져온 리소스의 고정 이름도 사용하여 재등록을 방지한다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000019",
+        "line": 28,
+        "text": "`View original`은 원본을 변경하지 않는 컨테이너 내부 열람용 복사본을 외부 뷰어로 연다. 파일 가져오기·전송 완료·갱신 모두 기기 사진 보관함에 등록하지 않는다. 이 복사본과 중단된 임시 출력은 24시간, 이어받기용 부분 원본은 7일이 지난 뒤 갱신 시 정리한다. 외부 뷰어가 열람용 파일에 저장한 편집은 네이티브 원본으로 덮어쓰지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000021",
+        "line": 30,
+        "text": "Photos에 직접 넣은 파일은 그 위치에 유지하며 같은 컨테이너 안에 alias와 검증된 원본 캐시를 만든다. 사용자의 외부 원본 경로도 이동하지 않는다. 사진·비디오 이외의 일반 파일은 가져오지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000025",
+        "line": 34,
+        "text": "준비된 컨테이너에서 사진 보관함을 조회하고 사진 객체·프리뷰를 기존 `iiSocietyHelper Sync`로 합친다. 클라이언트는 호스트에 없는 자신의 원본을 올린다. 호스트 원본은 openPhoto/downloadPhoto로 선택할 때만 받아 Society 원본 캐시에 검증하여 저장한다. 원본을 열기 위해 네이티브 사진 보관함에 자동 등록하지 않는다. 호스트를 통해 애플·Android·Windows 사진이 모인다. 원본 소유 기기가 오프라인이면 프리뷰를 표시하며 전송을 대기한다. Live Photo의 사진·paired video와 보조 사진은 한 객체의 여러 리소스로 전송한다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000027",
+        "line": 36,
+        "text": "`society.photos` 채널은 기존 LAN/TLS·자체 서버의 계정 인증을 사용한다. 검증된 피어와 현재 컨테이너 ID가 모두 일치해야 한다. 경로 대신 사진 ID·리소스 번호를 전달하며, 256 KiB 청크·이어받기·중복 청크 확인·최종 SHA-256 및 크기 검증을 적용한다. 원본 준비는 별도 작업 스레드에서 실행하고 티켓으로 결과를 조회한다. 사진을 교환하는 기기는 이 추가 채널을 제공하는 앱 버전이어야 한다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000029",
+        "line": 38,
+        "text": "완료된 응답 캐시는 제한된 크기로 교체하므로 큰 영상의 전송이 요청 수 제한 때문에 멈추지 않는다. 복합 사진의 일부 리소스만 받은 상태는 완료로 처리하지 않는다. 수신 완료는 모든 컨테이너 원본의 해시·크기를 검증하며 OS 사진 등록을 호출하지 않는다. 다른 내용의 네이티브 원본이 같은 객체로 명시적 가져오기에서 발견되면 기존 원본과 공유 객체를 보존한다. 원본 바이트 교체에 대한 충돌 자동 해결은 수행하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000031",
+        "line": 40,
+        "text": "컨테이너 연결과 전경 복귀는 OS 사진 권한을 자동 요청하지 않는다. Photos 화면의 `Import photo library…`를 명시적으로 실행하면 필요한 권한을 요청하고 허용된 항목을 한 번 읽는다. 주기적 갱신·컨테이너 동기화 완료·새로 고침은 컨테이너 자료만 조회한다. 변경 없는 결과로 추가 동기화를 유발하지 않으며, 목록 변경 시 선택과 스크롤을 유지한다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000033",
+        "line": 43,
+        "text": "보고 있어도 새 사진을 따라 자동 스크롤하지 않는다. 내용이 같으면 목록 변경 신호도",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000035",
+        "line": 47,
+        "text": "모바일에서는 사진 작업도 기존 동기화의 백그라운드 실행 시간에 포함한다. OS가 실행 시간을 종료하거나 컨테이너가 바뀌면 네이티브 요청을 취소하고, 포그라운드 복귀 시 다시 조회한다. OS의 백그라운드 실행 한도를 우회하거나 무제한 실행을 보장하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000037",
+        "line": 49,
+        "text": "`Move to trash`는 컨테이너 객체에 삭제 표식을 기록하고 다른 기기에 전파한다. 로컬·원격 표식 모두 OS 사진 원본을 삭제하지 않는다. 명시적 네이티브 조회에서 없어진 항목은 연속된 전체 조회에서 확인하며, 권한 손실·제한된 접근·조회 실패·미디어 DB 재구축을 전체 삭제로 해석하지 않는다. OS 삭제 확인창이나 휴지통 비우기는 호출하지 않는다. 각 사진 앱의 비파괴 편집 이력을 다른 OS의 편집 이력으로 변환하는 기능은 포함하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000043",
+        "line": 55,
+        "text": "- Apple: PhotoKit 읽기·쓰기 권한, PHAsset·PHCloudIdentifier·PHAssetResourceManager·PHAssetCreationRequest를 사용한다. iCloud 원본도 PhotoKit을 통해 내려받는다. Photos 내부 DB나 원본 디렉터리는 직접 수정하지 않는다. 사진 앱에서 변경한 프리뷰를 다시 저장하며, 시스템 iCloud 설정 자체는 변경하지 않는다.",
+        "basis": "lexical_match",
+        "context": "list"
+      },
+      {
+        "block_id": "b000043",
+        "line": 56,
+        "text": "- Android: 이미지·비디오 MediaStore 컬렉션과 외부 볼륨을 조회한다. 미디어 DB 버전·마운트된 볼륨·`GENERATION_MODIFIED`, 제한된 접근을 확인한다. `Pictures/Society`에 `IS_PENDING` 쓰기·공개·실패 정리를 수행한다. Android 11 이상에서 추가 동의가 필요한 휴지통 변경은 Android 항목 확인창을 호출한다. 이전 OS에서는 영구 삭제로 대체하지 않고 시스템 갤러리에서 관리하도록 안내한다. Google Photos의 클라우드 전용 항목 전체를 읽는 API를 의미하지 않는다. 원본 위치 메타데이터 권한도 요청하며, 허용되면 `setRequireOriginal`로 읽는다. 허용되지 않으면 OS가 제공하는 메타데이터 범위를 따른다.",
+        "basis": "lexical_match",
+        "context": "list"
+      },
+      {
+        "block_id": "b000045",
+        "line": 60,
+        "text": "새 외부 패키지를 추가하지 않는다. 기존 Qt와 OS 공식 API를 재사용하고 `PhotoLibrary` 인터페이스로 플랫폼을 분리한다. 컨테이너·파일 동기화 SDK가 상위 앱 UI를 참조하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000053",
+        "line": 68,
+        "text": "일반 CTest는 `SOCIETY_DISABLE_PHOTOS=1`로 실제 사용자 보관함을 가져오지 않는다. 네이티브 SDK 컴파일, 에뮬레이터, 실기기·iCloud 전파 검증은 별도로 기록한다. 빌드와 테스트만으로 기존 설치 앱의 갱신이나 실제 사용자 보관함의 통합 완료를 주장하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000059",
+        "line": 74,
+        "text": "Society GUI는 사용자가 Photos 연결을 명시적으로 실행한 경우에만 필요한 OS 권한을 요청한다. 백그라운드 데몬·컨테이너 연결·전경 복귀·주기적 갱신은 권한 창이나 OS 보관함 전체 조회를 시작하지 않는다. 이미 거부된 권한은 사용자가 설정에서 변경하며, 제한된 접근은 명시적 가져오기에서 허용된 항목만 조회하고 설정을 자동으로 열지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000061",
+        "line": 76,
+        "text": "기존 alias는 저장소를 열자마자 표시한다. 새 사진과 프리뷰도 준비된 항목부터 표시하므로 느린 원본 하나 때문에 전체 목록이 비어 있지 않는다. 검증한 원본 바이트와 수신 확인된 사진 청크가 동기화 활동의 진행량에 반영된다. 원본은 네이티브 보관함에 유지하며, 불완전하거나 제한된 조회로 삭제를 추론하지 않는다. Photos 테스트는 권한 요청 시점, 지연된 허용, 제한·거부 상태, 두 번째 원본 처리가 느린 동안 첫 사진의 표시를 검사한다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000065",
+        "line": 80,
+        "text": "iiSocietyContainer 0.13.0은 기존 8개 영역 매니페스트를 열 때 `Files/Photos/`를 루트 `Photos/`로 이전하고 9개 영역 매니페스트로 갱신한다. UUID, 사진 객체 ID, 기기 원본 참조와 프리뷰를 유지한다. 이 위치는 일반 Files 공개 루트 밖이며 Society 앱의 최상위 Photos에서 접근한다. 데이터가 충돌하면 덮어쓰지 않고 오류를 반환한다. 동기화하는 기기의 Society와 Container SDK도 새 레이아웃으로 갱신해야 한다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000067",
+        "line": 82,
+        "text": "사진과 비디오는 이름 없는 정사각형 프리뷰로 표시한다. Generation History와 같이 오래된 항목은 위, 최신 항목은 아래에 두며 처음 열거나 다시 진입하면 최하단에서 시작한다. 과거 항목을 탐색하는 중에는 갱신되어도 현재 스크롤을 유지한다. 정보·원본 보기·휴지통 동작은 선택 후 정보 시트에서 제공한다. Photos에서는 두 손가락 핀치로 갤러리 열 수나 썸네일 크기를 변경하지 않는다. 가로 드래그 크기 조절과 세로 스크롤은 유지한다. [갤러리](Gallery.md)는 화면별 제스처와 스크롤 보존·입력 검증을 설명한다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000076",
+        "line": 91,
+        "text": "목록 메타데이터와 갤러리 프리뷰를 먼저 공개한다. 원본 리소스 내보내기·SHA-256 계산과 Apple의 iCloud 식별자 조회는 그 이후에 진행한다. 아직 원본 검증이 끝나지 않은 표시용 행은 사진 전송 카탈로그에 포함하지 않는다. 프리뷰만으로 원본 해시·크기를 조작하거나 검증 완료로 간주하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000078",
+        "line": 93,
+        "text": "인덱스는 사용자 전역 캐시가 아닌 현재 Society 컨테이너의 `.society-photos/<container-id>/gallery/`에 항목별로 원자적으로 저장한다. 프리뷰도 컨테이너의 `Photos/.previews/`에 원자적으로 저장한다. 앱 종료·취소·컨테이너 재연결 후 저장된 목록과 프리뷰를 먼저 표시하고 미완료 항목부터 이어간다. 변경 시점이 같고 정상 프리뷰가 있으면 네이티브 재생성을 생략한다. 편집된 항목은 교체하고 누락·손상된 프리뷰는 기존 alias 프리뷰 또는 네이티브 라이브러리에서 복구한다. 제한된 접근을 전체 삭제로 간주하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      }
+    ],
+    "commands": [],
+    "links": [
+      {
+        "block_id": "b000055",
+        "label": "PhotoKit",
+        "target": "https://developer.apple.com/documentation/photos",
+        "kind": "external",
+        "line": 70
+      },
+      {
+        "block_id": "b000055",
+        "label": "Apple 기기 간 식별",
+        "target": "https://developer.apple.com/videos/play/wwdc2021/10046/",
+        "kind": "external",
+        "line": 70
+      },
+      {
+        "block_id": "b000055",
+        "label": "Android 공유 미디어",
+        "target": "https://developer.android.com/training/data-storage/shared/media",
+        "kind": "external",
+        "line": 70
+      },
+      {
+        "block_id": "b000055",
+        "label": "Android 제한된 접근",
+        "target": "https://developer.android.com/about/versions/14/changes/partial-photo-video-access",
+        "kind": "external",
+        "line": 70
+      },
+      {
+        "block_id": "b000055",
+        "label": "Windows 라이브러리",
+        "target": "https://learn.microsoft.com/en-us/windows/win32/api/shobjidl_core/nf-shobjidl_core-ishelllibrary-getfolders",
+        "kind": "external",
+        "line": 70
+      },
+      {
+        "block_id": "b000067",
+        "label": "갤러리",
+        "target": "Gallery.md",
+        "kind": "relative",
+        "line": 82
+      },
+      {
+        "block_id": "b000070",
+        "label": "모바일 공통 화면",
+        "target": "MobileViews.md",
+        "kind": "relative",
+        "line": 85
+      }
+    ],
+    "tables": [
+      {
+        "block_id": "b000013",
+        "columns": [
+          "위치",
+          "내용",
+          "전파"
+        ],
+        "rows": [
+          [
+            "`Photos/<id>.societyphoto`",
+            "사진 객체, 이름, 종류, 시각, 원본 리소스 해시·크기, 삭제 표식",
+            "컨테이너 동기화"
+          ],
+          [
+            "`Photos/.previews/<id>.jpg`",
+            "직접 저장한 사진·비디오 프리뷰",
+            "컨테이너 동기화"
+          ],
+          [
+            "`.society-photos/<container-id>/gallery-catalog.json`",
+            "개별 참조 읽기 전 갤러리를 복원하는 통합 시작 카탈로그",
+            "전파하지 않음"
+          ],
+          [
+            "`.society-photos/<container-id>/gallery/<native-key>.json`",
+            "네이티브 메타데이터·변경 시점·프리뷰 완료 상태의 영구 인덱스",
+            "전파하지 않음"
+          ],
+          [
+            "`Photos/.previews/gallery-<native-key>.jpg`",
+            "원본 해시 완료 전부터 사용하는 영구 갤러리 프리뷰",
+            "컨테이너 내부 저장"
+          ],
+          [
+            "`.society-photos/<container-id>/references/<id>.json`",
+            "기기별 PhotoKit ID, MediaStore URI 또는 Windows 경로·변경 시점",
+            "전파하지 않음"
+          ],
+          [
+            "`.society-photos/<container-id>/originals/<hash>`",
+            "검증된 컨테이너 원본 또는 명시적 열람·전송을 위한 네이티브 읽기 캐시",
+            "인증된 사진 채널"
+          ],
+          [
+            "`.society-photos/<container-id>/incoming`",
+            "검증 전 부분 전송과 임시 출력",
+            "전파하지 않음"
+          ]
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

@@ -1,0 +1,1413 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:c23e52cd7bfa969bc308d5c64832b05ac64b335424c4c6e5deb40e2a82a6971f",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FiiPhotoLibrary",
+    "name": "iiPhotoLibrary",
+    "root": "SDK/iiPhotoLibrary",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/Albums.md",
+    "sha256": "6911c9281e268d341498237be9a4d36c48adde0097c96e446ab2059b54d3090a",
+    "bytes": 23967,
+    "line_count": 322,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "앨범 관리자와 외부 사진 연결",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# 앨범 관리자와 외부 사진 연결\n",
+      "level": 1,
+      "title": "앨범 관리자와 외부 사진 연결"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 5,
+      "raw": "`AlbumManager`는 로컬 앨범과 연결된 사진 서비스를 각각 독립된 `std::shared_ptr<Album>`으로\n인스턴스화한다. iCloud 사진과 Google Photos에 연결하면 두 개의 별도 앨범 객체가 생긴다.\n동일 제공자의 계정이 다르거나 외부에서 받은 앨범 ID가 다르면 역시 별도 객체이다.\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "heading",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "## 객체와 수명\n",
+      "level": 2,
+      "title": "객체와 수명"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "table",
+      "start_line": 9,
+      "end_line": 21,
+      "raw": "| 객체 | 역할 |\n| --- | --- |\n| `AlbumManager` | 생성·연결·조회·갱신·외부 수신·연결 해제 |\n| `Album` | 연결별 수명, `snapshot()`으로 동기화된 데이터 복사본 제공 |\n| `AlbumManager::allLibrary()` | 전체 앨범의 현재 사진을 모아 반환하는 읽기 전용 `All Library` 앨범 |\n| `AlbumManager::smartAlbum()` | 스크린샷·가져온 사진·중복·숨김·이미지·비디오·Favorite·Deleted의 읽기 전용 앨범 |\n| `AlbumPhotoTraits` / `AlbumPhotoTraitsUpdate` | 사진의 분류 정보 및 변경할 필드만 담은 갱신 값 |\n| `DuplicatePhotoGroup` | 동일 콘텐츠 해시를 가진 서로 다른 사진들의 묶음 |\n| `AlbumConnection` | 제공자·계정·원격 앨범 ID·표시 이름·종류 |\n| `AlbumSnapshot` | 사진 메타데이터·완전성·리비전 |\n| `AlbumSource` | 인증된 사진 연결을 읽는 교체 가능한 인터페이스 |\n| `GooglePhotosAlbumSource` | 현재 Google Photos Picker 또는 앱 생성 항목 REST 조회 |\n| `photoLibraryAlbumSource()` | 기존 네이티브 `PhotoLibrary`를 앨범 소스로 연결 |\n",
+      "columns": [
+        "객체",
+        "역할"
+      ],
+      "rows": [
+        [
+          "`AlbumManager`",
+          "생성·연결·조회·갱신·외부 수신·연결 해제"
+        ],
+        [
+          "`Album`",
+          "연결별 수명, `snapshot()`으로 동기화된 데이터 복사본 제공"
+        ],
+        [
+          "`AlbumManager::allLibrary()`",
+          "전체 앨범의 현재 사진을 모아 반환하는 읽기 전용 `All Library` 앨범"
+        ],
+        [
+          "`AlbumManager::smartAlbum()`",
+          "스크린샷·가져온 사진·중복·숨김·이미지·비디오·Favorite·Deleted의 읽기 전용 앨범"
+        ],
+        [
+          "`AlbumPhotoTraits` / `AlbumPhotoTraitsUpdate`",
+          "사진의 분류 정보 및 변경할 필드만 담은 갱신 값"
+        ],
+        [
+          "`DuplicatePhotoGroup`",
+          "동일 콘텐츠 해시를 가진 서로 다른 사진들의 묶음"
+        ],
+        [
+          "`AlbumConnection`",
+          "제공자·계정·원격 앨범 ID·표시 이름·종류"
+        ],
+        [
+          "`AlbumSnapshot`",
+          "사진 메타데이터·완전성·리비전"
+        ],
+        [
+          "`AlbumSource`",
+          "인증된 사진 연결을 읽는 교체 가능한 인터페이스"
+        ],
+        [
+          "`GooglePhotosAlbumSource`",
+          "현재 Google Photos Picker 또는 앱 생성 항목 REST 조회"
+        ],
+        [
+          "`photoLibraryAlbumSource()`",
+          "기존 네이티브 `PhotoLibrary`를 앨범 소스로 연결"
+        ]
+      ]
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 22,
+      "end_line": 22,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "paragraph",
+      "start_line": 23,
+      "end_line": 27,
+      "raw": "앨범 식별자는 `providerId`, `accountId`, `remoteAlbumId`의 길이를 포함하여 구성한다.\n표시 이름이 같아도 연결이 다르면 식별자와 객체가 다르다. 계정 ID에는 인증 계층에서 확인한\n안정된 비밀이 아닌 ID를 사용한다. 토큰·비밀번호를 계정 ID나 메타데이터에 넣지 않는다.\n기본 `remoteAlbumId`인 `library`는 연결의 루트 앨범이다. `AlbumPhoto::sourcePhotoId`는\n제공자의 원본 ID이고, 관리자가 부여하는 `id`는 앨범 범위를 포함하므로 서로 충돌하지 않는다.\n"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 28,
+      "end_line": 28,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "paragraph",
+      "start_line": 29,
+      "end_line": 33,
+      "raw": "`connect()`는 객체만 만들며 권한·네트워크 요청을 수행하지 않는다.\n호스트가 로그인·권한을 확보한 뒤 작업 스레드에서 `refresh()`를 호출한다.\n갱신은 같은 인스턴스를 유지한다. 동일 연결을 재연결하면 새 객체를 만들고 이전 객체는\n`Disconnected`가 되며 목록이 비워진다. `disconnect()`와 관리자 소멸도 목록을 정리한다.\n이전 핸들로 반영하는 수신 데이터나 늦게 끝난 조회는 새 연결을 덮어쓰지 못한다.\n"
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 34,
+      "end_line": 34,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "heading",
+      "start_line": 35,
+      "end_line": 35,
+      "raw": "## All Library 전체 사진 앨범\n",
+      "level": 2,
+      "title": "All Library 전체 사진 앨범"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 36,
+      "end_line": 36,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "paragraph",
+      "start_line": 37,
+      "end_line": 41,
+      "raw": "관리자는 생성될 때 표시 이름이 `All Library`인 읽기 전용 `Album` 객체를 하나 만든다.\n`allLibrary()`는 항상 같은 객체를 반환하며 `album(all->id())`로도 조회할 수 있다.\n`AlbumOrigin::AllLibrary`와 `AlbumCoverage::AllLibrary`로 일반 앨범과 구분한다.\n기존 `albums()`는 일반 앨범 목록을 유지한다. UI에서 전체 사진 항목이 필요하면\n`allLibrary()` 객체를 그 목록 앞에 배치한다.\n"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 42,
+      "end_line": 42,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "fenced_code",
+      "start_line": 43,
+      "end_line": 58,
+      "raw": "```cpp\n#include <iiPhotoLibrary/Album.h>\nusing namespace iiPhotoLibrary;\nAlbumManager albums;\nauto all = albums.allLibrary();\nauto travel = albums.createLocal(\"travel\", \"Travel\");\nauto work = albums.createLocal(\"work\", \"Work\");\nAlbumPhoto photo;\nphoto.sourcePhotoId = \"photo-1\";\nphoto.name = \"travel.jpg\";\nalbums.setLocalPhotos(travel, {photo});\nalbums.setLocalPhotos(work, {photo});\nauto contents = all->snapshot(); // 동일 사진은 한 번만 반환한다.\nalbums.disconnect(travel);\nauto remaining = all->snapshot(); // Work에 남은 사진은 계속 반환한다.\n```\n",
+      "language": "cpp",
+      "code": "#include <iiPhotoLibrary/Album.h>\nusing namespace iiPhotoLibrary;\nAlbumManager albums;\nauto all = albums.allLibrary();\nauto travel = albums.createLocal(\"travel\", \"Travel\");\nauto work = albums.createLocal(\"work\", \"Work\");\nAlbumPhoto photo;\nphoto.sourcePhotoId = \"photo-1\";\nphoto.name = \"travel.jpg\";\nalbums.setLocalPhotos(travel, {photo});\nalbums.setLocalPhotos(work, {photo});\nauto contents = all->snapshot(); // 동일 사진은 한 번만 반환한다.\nalbums.disconnect(travel);\nauto remaining = all->snapshot(); // Work에 남은 사진은 계속 반환한다.\n",
+      "closed": true
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 59,
+      "end_line": 59,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "paragraph",
+      "start_line": 60,
+      "end_line": 67,
+      "raw": "`snapshot()`은 관리자의 현재 일반 앨범 목록과 사진 상태를 한 번의 관리자 잠금 아래에서\n읽어 새 소유 복사본을 반환한다. 앨범 생성·목록 변경·갱신·재연결·연결 해제는 다음 조회에\n즉시 반영되며 이전에 받은 복사본은 유지된다. 네트워크 요청이나 OS 사진 검색을 실행하지\n않으므로 외부 앨범은 호스트가 기존 `refresh()` 또는 `publish()`로 불러온 사진만 포함한다.\n각 소스에 선언된 접근 범위와 권한을 합치며, 미조회 사진이나 접근할 수 없는 사진을 포함한다고\n간주하지 않는다. 사진과 영상 모두 기존 `AlbumPhoto` 항목으로 반환한다.\n삭제 표시된 항목은 `Deleted`에서 조회한다. 그 밖의 숨김 항목은 `Hidden`에서 조회하며,\n두 상태 모두 `All Library`에서 제외한다.\n"
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 68,
+      "end_line": 68,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "paragraph",
+      "start_line": 69,
+      "end_line": 77,
+      "raw": "중복 판단은 `providerId`, `accountId`, `sourcePhotoId`로 한다. 같은 계정의 동일 사진이\n여러 원격 앨범에 있어도 한 번만 반환하고, 다른 서비스·계정의 동일 원본 ID는 구분한다.\n로컬 앨범들은 같은 `local` 제공자와 빈 계정 ID를 사용하므로 동일 `sourcePhotoId`를 공유하면\n같은 사진으로 취급한다. 전체 사진 ID는 이 세 항목의 길이를 포함해 생성하므로 중복 사진이\n포함된 앨범 하나를 제거해도 나머지 앨범에 남은 사진 ID는 유지된다.\n동일 사진의 스크린샷·가져옴·숨김·삭제·즐겨찾기 표시는 각 참조의 양수 표시를 합친다. 명시적인 분류 API로\n변경한 필드는 모든 참조에 반영한다. 그 밖의 메타데이터는 앨범 ID의 사전순으로 가장 앞선\n앨범에서 가져오며, 결과 목록은\n제공자·계정·원본 사진 ID 순서이다. 날짜순 표시가 필요하면 소비자가 정렬한다.\n"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 78,
+      "end_line": 78,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "paragraph",
+      "start_line": 79,
+      "end_line": 80,
+      "raw": "결과 사진의 `properties`에는 원래 항목을 다시 조회할 수 있도록 예약된 네 키를 기록한다.\n원본 메타데이터에 같은 키가 있어도 관리자가 확인한 참조로 덮어쓴다.\n"
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 81,
+      "end_line": 81,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "table",
+      "start_line": 82,
+      "end_line": 87,
+      "raw": "| 키 | 값 |\n| --- | --- |\n| `allLibrary.providerId` | 원래 제공자 ID |\n| `allLibrary.accountId` | 원래 계정 ID |\n| `allLibrary.albumId` | 메타데이터를 제공한 일반 앨범의 ID |\n| `allLibrary.photoId` | 그 일반 앨범에서 부여한 사진 ID |\n",
+      "columns": [
+        "키",
+        "값"
+      ],
+      "rows": [
+        [
+          "`allLibrary.providerId`",
+          "원래 제공자 ID"
+        ],
+        [
+          "`allLibrary.accountId`",
+          "원래 계정 ID"
+        ],
+        [
+          "`allLibrary.albumId`",
+          "메타데이터를 제공한 일반 앨범의 ID"
+        ],
+        [
+          "`allLibrary.photoId`",
+          "그 일반 앨범에서 부여한 사진 ID"
+        ]
+      ]
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 88,
+      "end_line": 88,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "paragraph",
+      "start_line": 89,
+      "end_line": 93,
+      "raw": "`All Library`의 `Ready` 상태는 현재 모은 목록을 읽을 수 있다는 뜻이다.\n`contents.complete`는 모든 일반 앨범이 `Ready`이며 각 목록도 완전할 때만 `true`이다.\n앨범이 없으면 빈 목록이 완전하다. 조회 중·미조회·실패·권한 회수·부분 목록이 하나라도 있으면\n`false`이며, 각 앨범에 남아 있는 사진은 계속 반환한다. 개별 오류는 원래 앨범에서 조회한다.\n집계 `revision`은 비어 있으며 원격 제공자의 리비전을 대신하지 않는다.\n"
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 94,
+      "end_line": 94,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "paragraph",
+      "start_line": 95,
+      "end_line": 100,
+      "raw": "`publish()`, `setLocalPhotos()`, `refresh()`로 이 객체를 변경하려 하면 `ReadOnly` 오류이다.\n원래 앨범을 갱신한 뒤 `all->snapshot()`을 호출한다. `disconnect(all)`은 `false`를 반환하며\n객체를 제거하지 않는다. 관리자가 소멸하면 보유 중인 전체 앨범도 `Disconnected`가 되고\n빈 불완전 목록을 반환한다. 객체는 관리자의 수명을 연장하지 않는다.\n이 가상 앨범은 `maximumAlbums`에 포함되지 않으며 전체 결과를 `maximumPhotos`로 자르지 않는다.\n기존 한도는 일반 앨범마다 적용되고 집계는 조회할 때만 계산한다.\n"
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 101,
+      "end_line": 101,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "heading",
+      "start_line": 102,
+      "end_line": 102,
+      "raw": "## 스마트 앨범과 분류 API\n",
+      "level": 2,
+      "title": "스마트 앨범과 분류 API"
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 103,
+      "end_line": 103,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "paragraph",
+      "start_line": 104,
+      "end_line": 107,
+      "raw": "관리자는 여덟 개의 고정된 읽기 전용 `Album` 객체를 함께 만든다.\n`smartAlbum(kind)`와 `smartAlbums()`는 기존 객체를 반환하며 `album(id)` 조회도 지원한다.\n일반 `albums()` 목록 및 앨범 개수 한도에는 포함하지 않는다.\n`AlbumData::smartKind`, `AlbumOrigin::Smart`, `AlbumCoverage::SmartLibrary`로 구분한다.\n"
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 108,
+      "end_line": 108,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "table",
+      "start_line": 109,
+      "end_line": 118,
+      "raw": "| 종류 | 표시 이름 | 포함 조건 | 분류 API |\n| --- | --- | --- | --- |\n| `SmartAlbumKind::Screenshots` | Screenshots | `traits.screenshot=true`인 사진 | `setScreenshot(photoId, bool)` |\n| `SmartAlbumKind::Imported` | Imported Photos | `traits.imported=true`인 사진·영상 | `setImported(photoId, bool)` |\n| `SmartAlbumKind::Duplicates` | Duplicates | 같은 콘텐츠 SHA-256을 가진 서로 다른 사진·영상이 두 개 이상 | `setContentHash(photoId, sha256)`, `duplicateGroups()` |\n| `SmartAlbumKind::Hidden` | Hidden | `traits.hidden=true`인 사진·영상 | `setHidden(photoId, bool)` |\n| `SmartAlbumKind::Images` | Images | `mediaType=\"photo\"`인 항목 | `setLocalPhotos()` / `publish()` / `refresh()`의 미디어 메타데이터 |\n| `SmartAlbumKind::Videos` | Videos | `mediaType=\"video\"`인 항목 | `setLocalPhotos()` / `publish()` / `refresh()`의 미디어 메타데이터 |\n| `SmartAlbumKind::Favorite` | Favorite | 기존 `favorite=true`인 사진·영상 | `setFavorite(photoId, bool)`, `isFavorite(photoId)` |\n| `SmartAlbumKind::Deleted` | Deleted | `traits.deleted=true`인 사진·영상 | `setDeleted(photoId, bool)`, `photoTraits(photoId).deleted` |\n",
+      "columns": [
+        "종류",
+        "표시 이름",
+        "포함 조건",
+        "분류 API"
+      ],
+      "rows": [
+        [
+          "`SmartAlbumKind::Screenshots`",
+          "Screenshots",
+          "`traits.screenshot=true`인 사진",
+          "`setScreenshot(photoId, bool)`"
+        ],
+        [
+          "`SmartAlbumKind::Imported`",
+          "Imported Photos",
+          "`traits.imported=true`인 사진·영상",
+          "`setImported(photoId, bool)`"
+        ],
+        [
+          "`SmartAlbumKind::Duplicates`",
+          "Duplicates",
+          "같은 콘텐츠 SHA-256을 가진 서로 다른 사진·영상이 두 개 이상",
+          "`setContentHash(photoId, sha256)`, `duplicateGroups()`"
+        ],
+        [
+          "`SmartAlbumKind::Hidden`",
+          "Hidden",
+          "`traits.hidden=true`인 사진·영상",
+          "`setHidden(photoId, bool)`"
+        ],
+        [
+          "`SmartAlbumKind::Images`",
+          "Images",
+          "`mediaType=\"photo\"`인 항목",
+          "`setLocalPhotos()` / `publish()` / `refresh()`의 미디어 메타데이터"
+        ],
+        [
+          "`SmartAlbumKind::Videos`",
+          "Videos",
+          "`mediaType=\"video\"`인 항목",
+          "`setLocalPhotos()` / `publish()` / `refresh()`의 미디어 메타데이터"
+        ],
+        [
+          "`SmartAlbumKind::Favorite`",
+          "Favorite",
+          "기존 `favorite=true`인 사진·영상",
+          "`setFavorite(photoId, bool)`, `isFavorite(photoId)`"
+        ],
+        [
+          "`SmartAlbumKind::Deleted`",
+          "Deleted",
+          "`traits.deleted=true`인 사진·영상",
+          "`setDeleted(photoId, bool)`, `photoTraits(photoId).deleted`"
+        ]
+      ]
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 119,
+      "end_line": 119,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "paragraph",
+      "start_line": 120,
+      "end_line": 126,
+      "raw": "삭제 표시된 항목은 `Deleted`에만 포함하며, 숨김 표시도 있으면 삭제 보기를 우선한다.\n그 밖의 숨김 항목은 `Hidden`에만 포함한다. 두 상태는 `All Library` 및 나머지 스마트 앨범과\n중복 그룹에서 제외한다. 일반 앨범의 `snapshot()`은 기존 구성원을 유지하며\n각 항목의 `traits.hidden`, `traits.deleted`, 기존 `favorite` 값을 제공한다.\n스마트 앨범들의 사진 ID는 전체 보기의 제공자·계정·원본 ID 기반 식별자를 공유한다.\n분류 API는 일반 앨범 또는 가상 앨범에서 받은 `AlbumPhoto::id`를 모두 처리하며,\n`sourcePhotoId`만 전달하지 않는다. 알려지지 않은 사진 ID는 `NotFound` 오류이다.\n"
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 127,
+      "end_line": 127,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "fenced_code",
+      "start_line": 128,
+      "end_line": 154,
+      "raw": "```cpp\nauto screenshots = albums.smartAlbum(SmartAlbumKind::Screenshots);\nauto imported = albums.smartAlbum(SmartAlbumKind::Imported);\nauto duplicates = albums.smartAlbum(SmartAlbumKind::Duplicates);\nauto hidden = albums.smartAlbum(SmartAlbumKind::Hidden);\nauto images = albums.smartAlbum(SmartAlbumKind::Images);\nauto videos = albums.smartAlbum(SmartAlbumKind::Videos);\nauto favorite = albums.smartAlbum(SmartAlbumKind::Favorite);\nauto deleted = albums.smartAlbum(SmartAlbumKind::Deleted);\n// photoId는 일반 앨범 또는 가상 앨범의 snapshot()에서 받은 사진의 id이다.\nalbums.setScreenshot(photoId, true);\nalbums.setImported(photoId, true);\nalbums.setHidden(photoId, true);\nauto hiddenItems = hidden->snapshot();\nalbums.setHidden(hiddenItems.contents.photos.front().id, false);\n// 신뢰할 수 있는 원본 전체 바이트의 SHA-256을 호스트가 제공한다.\nalbums.setContentHash(photoId, originalSha256);\nauto groups = albums.duplicateGroups();\nauto traits = albums.photoTraits(photoId);\nalbums.setPhotoTraits(photoId, {.screenshot = false, .imported = true});\nalbums.setFavorite(photoId, true);\nbool marked = albums.isFavorite(photoId);\nalbums.setDeleted(photoId, true);\nauto deletedItems = deleted->snapshot();\nalbums.setDeleted(deletedItems.contents.photos.front().id, false); // 기존 분류에 따라 복원한다.\nalbums.setPhotoTraits(photoId, {.favorite = false, .deleted = false});\n```\n",
+      "language": "cpp",
+      "code": "auto screenshots = albums.smartAlbum(SmartAlbumKind::Screenshots);\nauto imported = albums.smartAlbum(SmartAlbumKind::Imported);\nauto duplicates = albums.smartAlbum(SmartAlbumKind::Duplicates);\nauto hidden = albums.smartAlbum(SmartAlbumKind::Hidden);\nauto images = albums.smartAlbum(SmartAlbumKind::Images);\nauto videos = albums.smartAlbum(SmartAlbumKind::Videos);\nauto favorite = albums.smartAlbum(SmartAlbumKind::Favorite);\nauto deleted = albums.smartAlbum(SmartAlbumKind::Deleted);\n// photoId는 일반 앨범 또는 가상 앨범의 snapshot()에서 받은 사진의 id이다.\nalbums.setScreenshot(photoId, true);\nalbums.setImported(photoId, true);\nalbums.setHidden(photoId, true);\nauto hiddenItems = hidden->snapshot();\nalbums.setHidden(hiddenItems.contents.photos.front().id, false);\n// 신뢰할 수 있는 원본 전체 바이트의 SHA-256을 호스트가 제공한다.\nalbums.setContentHash(photoId, originalSha256);\nauto groups = albums.duplicateGroups();\nauto traits = albums.photoTraits(photoId);\nalbums.setPhotoTraits(photoId, {.screenshot = false, .imported = true});\nalbums.setFavorite(photoId, true);\nbool marked = albums.isFavorite(photoId);\nalbums.setDeleted(photoId, true);\nauto deletedItems = deleted->snapshot();\nalbums.setDeleted(deletedItems.contents.photos.front().id, false); // 기존 분류에 따라 복원한다.\nalbums.setPhotoTraits(photoId, {.favorite = false, .deleted = false});\n",
+      "closed": true
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 155,
+      "end_line": 155,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "paragraph",
+      "start_line": 156,
+      "end_line": 160,
+      "raw": "`AlbumPhoto::traits`를 초기 목록에 포함해 분류를 공급할 수도 있다. 기본 표시는 모두 `false`,\n콘텐츠 해시는 빈 문자열이다. `setPhotoTraits()`는 지정한 필드만 한 번의 관리자 잠금에서\n검증하고 변경한다. 비디오를 스크린샷으로 표시하거나 잘못된 해시를 제공하면\n`InvalidSnapshot` 오류이며 기존 분류를 유지한다. 동시에 갱신 중인 캐시 사진의 분류도\n변경할 수 있고, 뒤늦게 도착한 성공 응답에 해당 변경을 다시 적용한다.\n"
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 161,
+      "end_line": 161,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "paragraph",
+      "start_line": 162,
+      "end_line": 166,
+      "raw": "이미지·비디오 분류는 기존 미디어 종류를 읽으며 파일 형식을 바꾸는 API를 추가하지 않는다.\n소스가 새 목록에서 종류를 갱신하면 두 보기의 소속도 반영된다.\nFavorite은 `AlbumPhoto::favorite`를 계속 사용한다. `setPhotoTraits()`의 선택적 `favorite`\n필드로 다른 분류와 동시에 변경할 수 있으며, `AlbumPhotoTraits`에 별도 즐겨찾기 값을 복제하지 않는다.\n즐겨찾기 지정·해제는 모든 참조와 후속 소스 갱신에 반영한다.\n"
+    },
+    {
+      "id": "b000044",
+      "kind": "blank",
+      "start_line": 167,
+      "end_line": 167,
+      "raw": "\n"
+    },
+    {
+      "id": "b000045",
+      "kind": "paragraph",
+      "start_line": 168,
+      "end_line": 172,
+      "raw": "Deleted는 SDK의 논리 삭제 보기이다. `setDeleted(id, true)`는 목록에 남은 항목에 삭제 표시를\n설정하고, `setDeleted(id, false)`는 이를 해제한다. 기존 즐겨찾기·숨김·스크린샷·가져옴·해시를\n보존하므로 복원하면 해당 상태에 맞는 보기에 다시 나타난다. 숨긴 항목을 복원하면 계속 Hidden에\n남는다. 원본 파일 삭제, OS/원격 휴지통 이동·복원 또는 기간에 따른 자동 제거는 수행하지 않는다.\n소스가 아직 제공하지 않은 OS/원격 휴지통 항목을 자동으로 가져오는 기능도 포함하지 않는다.\n"
+    },
+    {
+      "id": "b000046",
+      "kind": "blank",
+      "start_line": 173,
+      "end_line": 173,
+      "raw": "\n"
+    },
+    {
+      "id": "b000047",
+      "kind": "paragraph",
+      "start_line": 174,
+      "end_line": 180,
+      "raw": "명시적으로 변경한 분류는 같은 제공자·계정·원본 사진 ID를 가진 모든 참조에 적용되며\n일반 앨범의 후속 `refresh()`에서도 유지된다. 지정하지 않은 필드는 소스 값을 따른다.\n불완전 목록에서 기존 항목이 유지되면 분류도 유지한다. 사진의 마지막 참조가 완전한 목록\n교체·연결 해제·권한 회수로 제거되면 관련 변경 정보도 지운다. 관리자 소멸 이후에는\n각 스마트 앨범이 `Disconnected`와 빈 불완전 목록을 반환한다. SDK 분류 정보의 보관은\n이 관리자 수명 내이며, 앱 재시작 시의 지속 보관은 호스트가 맡는다.\n분류 API는 OS 사진의 숨김·즐겨찾기·삭제 상태, 원본 파일 및 원격 서비스 데이터를 변경하지 않는다.\n"
+    },
+    {
+      "id": "b000048",
+      "kind": "blank",
+      "start_line": 181,
+      "end_line": 181,
+      "raw": "\n"
+    },
+    {
+      "id": "b000049",
+      "kind": "paragraph",
+      "start_line": 182,
+      "end_line": 190,
+      "raw": "중복은 전체 원본 바이트의 SHA-256을 기준으로 하는 정확한 콘텐츠 일치이다.\n같은 사진이 여러 일반 앨범에 속하는 것은 한 사진으로 취급한다. 다른 제공자·계정의 사진은\n별도 객체로 유지하되 호스트가 제공한 해시가 같으면 같은 중복 그룹에 들어간다.\n해시는 64자리 16진수만 허용하며 소문자로 정규화한다. 빈 문자열로 해시를 지울 수 있다.\n동일 사진의 소스 참조끼리 해시가 충돌하면 집계 해시는 미확정 상태로 비우고 중복 후보에서\n제외한다. 명시적인 해시 API로 일관된 값을 지정할 수 있다.\n`duplicateGroups()`는 숨김과 삭제 표시를 제외한 확인된 중복 그룹만 반환한다. 중복 앨범의 `complete`는\n일반 앨범들이 완전하고 모든 표시 가능한 사진의 해시가 알려졌을 때만 `true`이다.\n다른 스마트 앨범은 소스 목록의 완전성을 따른다. 유사 이미지 판정은 수행하지 않는다.\n"
+    },
+    {
+      "id": "b000050",
+      "kind": "blank",
+      "start_line": 191,
+      "end_line": 191,
+      "raw": "\n"
+    },
+    {
+      "id": "b000051",
+      "kind": "paragraph",
+      "start_line": 192,
+      "end_line": 201,
+      "raw": "앨범 코어는 파일을 읽거나 해시를 계산하지 않는다. 전체 SDK를 쓰는 호스트는 기존\n`PhotoStore::digestFile(path)` 결과를 `setContentHash()`에 제공할 수 있다. 원본 한 파일의\n해시를 사용하는 계약이며 여러 리소스의 조합을 원본 전체의 해시로 오인하지 않는다.\nApple 어댑터는 [PhotoKit 미디어 하위 종류](https://developer.apple.com/documentation/photos/phassetmediasubtype)와\n[숨김 메타데이터](https://developer.apple.com/documentation/photos/phasset/ishidden)를 읽는다.\n숨김 항목의 실제 접근 범위는 OS 권한과 숨김 앨범 잠금 설정에 따른다.\n네이티브 브리지는 `Asset`의 스크린샷·가져옴·숨김·삭제 표시와 기존 즐겨찾기 값,\nSDK가 생성한 `Society-...` 리소스\n이름의 가져옴 표시를 전달한다. 다른 제공자의 분류는 호스트가 목록 또는 분류 API로 공급한다.\n스마트 앨범 조회는 새로운 OS 검색·권한 요청·네트워크 요청·원본 다운로드를 실행하지 않는다.\n"
+    },
+    {
+      "id": "b000052",
+      "kind": "blank",
+      "start_line": 202,
+      "end_line": 202,
+      "raw": "\n"
+    },
+    {
+      "id": "b000053",
+      "kind": "heading",
+      "start_line": 203,
+      "end_line": 203,
+      "raw": "## 네이티브 사진과 외부 수신\n",
+      "level": 2,
+      "title": "네이티브 사진과 외부 수신"
+    },
+    {
+      "id": "b000054",
+      "kind": "blank",
+      "start_line": 204,
+      "end_line": 204,
+      "raw": "\n"
+    },
+    {
+      "id": "b000055",
+      "kind": "fenced_code",
+      "start_line": 205,
+      "end_line": 217,
+      "raw": "```cpp\n#include <iiPhotoLibrary/iiPhotoLibrary.h>\nusing namespace iiPhotoLibrary;\nAlbumManager albums;\nauto local = albums.createLocal(\"personal\", \"Personal\");\nauto native = nativePhotoLibrary();\n// Apple에서는 GUI 스레드에서 authorize()를 호출하고 권한 완료 후 연결한다.\nauto iCloud = albums.connect(\n    {\"icloud\", \"system-photo-library\", \"iCloud Photos\", \"library\", AlbumOrigin::ICloud},\n    photoLibraryAlbumSource(native, \"icloud\"));\nalbums.refresh(iCloud); // 작업 스레드\nauto visiblePhotos = iCloud->snapshot();\n```\n",
+      "language": "cpp",
+      "code": "#include <iiPhotoLibrary/iiPhotoLibrary.h>\nusing namespace iiPhotoLibrary;\nAlbumManager albums;\nauto local = albums.createLocal(\"personal\", \"Personal\");\nauto native = nativePhotoLibrary();\n// Apple에서는 GUI 스레드에서 authorize()를 호출하고 권한 완료 후 연결한다.\nauto iCloud = albums.connect(\n    {\"icloud\", \"system-photo-library\", \"iCloud Photos\", \"library\", AlbumOrigin::ICloud},\n    photoLibraryAlbumSource(native, \"icloud\"));\nalbums.refresh(iCloud); // 작업 스레드\nauto visiblePhotos = iCloud->snapshot();\n",
+      "closed": true
+    },
+    {
+      "id": "b000056",
+      "kind": "blank",
+      "start_line": 218,
+      "end_line": 218,
+      "raw": "\n"
+    },
+    {
+      "id": "b000057",
+      "kind": "paragraph",
+      "start_line": 219,
+      "end_line": 223,
+      "raw": "Apple 어댑터는 OS에 로그인된 계정의 **시스템 사진 보관함**을 읽는다.\n[Apple PhotoKit 문서](https://developer.apple.com/documentation/photokit)의 범위에 따라 로컬 항목과 iCloud\n동기화 항목이 함께 보일 수 있으므로 `SystemPhotoLibrary` 범위를 사용한다. PhotoKit은\n임의의 Apple 계정에 별도 웹 로그인하는 인터페이스가 아니다. iCloud 동기화 사진의 실제\n접근은 OS 계정·권한에 달려 있다. Android/Windows 시스템 사진 연결에는 `device` 제공자를 쓴다.\n"
+    },
+    {
+      "id": "b000058",
+      "kind": "blank",
+      "start_line": 224,
+      "end_line": 224,
+      "raw": "\n"
+    },
+    {
+      "id": "b000059",
+      "kind": "paragraph",
+      "start_line": 225,
+      "end_line": 228,
+      "raw": "기존 `PhotoLibrary`는 프리뷰·원본 추출·등록·삭제를 계속 소유한다. 앨범은 메타데이터와\n참조만 관리하며 원본을 복사하지 않는다. 네이티브 원본 작업에는 `sourcePhotoId`를 전달한다.\n리소스 토큰은 앨범 메타데이터로 내보내지 않고 느린 `resolveIdentifiers()`를 추가 호출하지 않는다.\n같은 네이티브 인스턴스를 별도의 활성 `PhotoStore` 작업자와 공유하지 않는다.\n"
+    },
+    {
+      "id": "b000060",
+      "kind": "blank",
+      "start_line": 229,
+      "end_line": 229,
+      "raw": "\n"
+    },
+    {
+      "id": "b000061",
+      "kind": "paragraph",
+      "start_line": 230,
+      "end_line": 230,
+      "raw": "외부에서 받은 앨범에도 동일한 객체 구조를 적용한다.\n"
+    },
+    {
+      "id": "b000062",
+      "kind": "blank",
+      "start_line": 231,
+      "end_line": 231,
+      "raw": "\n"
+    },
+    {
+      "id": "b000063",
+      "kind": "fenced_code",
+      "start_line": 232,
+      "end_line": 240,
+      "raw": "```cpp\nauto received = albums.connect({\"remote\", \"peer-account\", \"Travel\", \"album-42\"});\nAlbumPhoto photo;\nphoto.sourcePhotoId = \"remote-photo-1\";\nphoto.name = \"travel.jpg\";\nalbums.publish(received, {{photo}, true, \"revision-1\"});\n// 다른 remoteAlbumId는 별도 connect()로 독립 인스턴스를 만든다.\nalbums.setLocalPhotos(local, {photo});\n```\n",
+      "language": "cpp",
+      "code": "auto received = albums.connect({\"remote\", \"peer-account\", \"Travel\", \"album-42\"});\nAlbumPhoto photo;\nphoto.sourcePhotoId = \"remote-photo-1\";\nphoto.name = \"travel.jpg\";\nalbums.publish(received, {{photo}, true, \"revision-1\"});\n// 다른 remoteAlbumId는 별도 connect()로 독립 인스턴스를 만든다.\nalbums.setLocalPhotos(local, {photo});\n",
+      "closed": true
+    },
+    {
+      "id": "b000064",
+      "kind": "blank",
+      "start_line": 241,
+      "end_line": 241,
+      "raw": "\n"
+    },
+    {
+      "id": "b000065",
+      "kind": "heading",
+      "start_line": 242,
+      "end_line": 242,
+      "raw": "## Google Photos와 호스트 계약\n",
+      "level": 2,
+      "title": "Google Photos와 호스트 계약"
+    },
+    {
+      "id": "b000066",
+      "kind": "blank",
+      "start_line": 243,
+      "end_line": 243,
+      "raw": "\n"
+    },
+    {
+      "id": "b000067",
+      "kind": "paragraph",
+      "start_line": 244,
+      "end_line": 245,
+      "raw": "Google Photos는 2025-03-31부터 Library API의 전체 개인 보관함 조회 범위를 제거했다.\n공식 [API 변경 사항](https://developers.google.com/photos/support/updates)에 따라 두 모드를 지원한다.\n"
+    },
+    {
+      "id": "b000068",
+      "kind": "blank",
+      "start_line": 246,
+      "end_line": 246,
+      "raw": "\n"
+    },
+    {
+      "id": "b000069",
+      "kind": "table",
+      "start_line": 247,
+      "end_line": 250,
+      "raw": "| 모드 | 조회 범위 | OAuth scope |\n| --- | --- | --- |\n| `PickerSelection` (기본) | 사용자가 Picker에서 선택한 사진·영상 | `https://www.googleapis.com/auth/photospicker.mediaitems.readonly` |\n| `AppCreatedItems` | 해당 앱이 Google Photos에 생성한 항목 | `https://www.googleapis.com/auth/photoslibrary.readonly.appcreateddata` |\n",
+      "columns": [
+        "모드",
+        "조회 범위",
+        "OAuth scope"
+      ],
+      "rows": [
+        [
+          "`PickerSelection` (기본)",
+          "사용자가 Picker에서 선택한 사진·영상",
+          "`https://www.googleapis.com/auth/photospicker.mediaitems.readonly`"
+        ],
+        [
+          "`AppCreatedItems`",
+          "해당 앱이 Google Photos에 생성한 항목",
+          "`https://www.googleapis.com/auth/photoslibrary.readonly.appcreateddata`"
+        ]
+      ]
+    },
+    {
+      "id": "b000070",
+      "kind": "blank",
+      "start_line": 251,
+      "end_line": 251,
+      "raw": "\n"
+    },
+    {
+      "id": "b000071",
+      "kind": "fenced_code",
+      "start_line": 252,
+      "end_line": 260,
+      "raw": "```cpp\n#include <iiPhotoLibrary/GooglePhotosAlbumSource.h>\n// 아래 세 콜백과 authenticatedAccountId는 호스트가 제공한다.\nauto source = std::make_shared<GooglePhotosAlbumSource>(\n    currentAccessToken, httpsGet, completedPickerSessionId);\nauto google = albums.connect(\n    {\"googlephotos\", authenticatedAccountId, \"Google Photos\", \"library\", AlbumOrigin::GooglePhotos}, source);\nalbums.refresh(google); // 작업 스레드\n```\n",
+      "language": "cpp",
+      "code": "#include <iiPhotoLibrary/GooglePhotosAlbumSource.h>\n// 아래 세 콜백과 authenticatedAccountId는 호스트가 제공한다.\nauto source = std::make_shared<GooglePhotosAlbumSource>(\n    currentAccessToken, httpsGet, completedPickerSessionId);\nauto google = albums.connect(\n    {\"googlephotos\", authenticatedAccountId, \"Google Photos\", \"library\", AlbumOrigin::GooglePhotos}, source);\nalbums.refresh(google); // 작업 스레드\n",
+      "closed": true
+    },
+    {
+      "id": "b000072",
+      "kind": "blank",
+      "start_line": 261,
+      "end_line": 261,
+      "raw": "\n"
+    },
+    {
+      "id": "b000073",
+      "kind": "paragraph",
+      "start_line": 262,
+      "end_line": 264,
+      "raw": "호스트는 OAuth UI·토큰 저장/갱신·HTTPS GET과 Picker 세션 생성·사용자 선택을 담당한다.\nSDK는 세션 완료 여부와 페이지별 목록을 조회한다. 선택이 완료되지 않으면 `SelectionRequired`이다.\n로그인만으로 전체 보관함을 자동 조회하지 않는다. 토큰 공급자는 요청마다 호출한다.\n"
+    },
+    {
+      "id": "b000074",
+      "kind": "blank",
+      "start_line": 265,
+      "end_line": 265,
+      "raw": "\n"
+    },
+    {
+      "id": "b000075",
+      "kind": "paragraph",
+      "start_line": 266,
+      "end_line": 269,
+      "raw": "`AlbumHttpGet`은 요청 URL·헤더·`stop_token`을 처리하며 TLS 인증서/호스트를 검증해야 한다.\nAuthorization을 로그에 남기거나 리디렉션으로 다른 호스트에 전달하지 않는다. SDK의 API 주소는\n고정된 Google HTTPS 주소이다. 전송 계층은 수신 중 본문을 16 MiB 이하로 제한해야 한다.\nSDK는 반환된 본문의 크기를 다시 검사하고 upstream 본문/예외를 오류 메시지로 노출하지 않는다.\n"
+    },
+    {
+      "id": "b000076",
+      "kind": "blank",
+      "start_line": 270,
+      "end_line": 270,
+      "raw": "\n"
+    },
+    {
+      "id": "b000077",
+      "kind": "paragraph",
+      "start_line": 271,
+      "end_line": 276,
+      "raw": "[`sessions.get`](https://developers.google.com/photos/picker/reference/rest/v1/sessions/get),\n[`Picker mediaItems.list`](https://developers.google.com/photos/picker/reference/rest/v1/mediaItems/list),\n[`PickedMediaItem`](https://developers.google.com/photos/picker/reference/rest/v1/mediaItems),\n[`Library mediaItems.list`](https://developers.google.com/photos/library/reference/rest/v1/mediaItems/list)\n응답 형식을 사용한다. `contentUrl`은 일시적인 URL이며 원본 다운로드 완료나 영구 소유를\n뜻하지 않는다. 실제 콘텐츠 접근은 호스트가 수행하고 새 조회로 URL을 갱신한다.\n"
+    },
+    {
+      "id": "b000078",
+      "kind": "blank",
+      "start_line": 277,
+      "end_line": 277,
+      "raw": "\n"
+    },
+    {
+      "id": "b000079",
+      "kind": "heading",
+      "start_line": 278,
+      "end_line": 278,
+      "raw": "## 완전성·오류·동시 실행\n",
+      "level": 2,
+      "title": "완전성·오류·동시 실행"
+    },
+    {
+      "id": "b000080",
+      "kind": "blank",
+      "start_line": 279,
+      "end_line": 279,
+      "raw": "\n"
+    },
+    {
+      "id": "b000081",
+      "kind": "list",
+      "start_line": 280,
+      "end_line": 294,
+      "raw": "- `complete=true`이면 선언된 범위의 목록을 교체한다. 앱 생성 항목의 완전한 목록도\n  전체 Google Photos 보관함의 완전한 목록을 뜻하지 않는다.\n- `complete=false`이면 ID별로 병합한다. 제한된 PhotoKit 권한·새 Picker 선택에서\n  보이지 않는 사진을 삭제로 해석하지 않는다. Picker 선택은 여러 세션의 선택을 누적한다.\n- 전송 실패·요청 제한·잘못된 응답·한도 초과에서는 기존 목록을 유지한다.\n  인증/권한 거부에서는 해당 앨범만 비우고 `AuthenticationRequired` 상태로 전환한다.\n- 한 앨범의 동시 갱신과 갱신 중 `publish()`는 `Busy`로 거부한다.\n  다른 앨범은 독립적으로 갱신할 수 있다. 가변 소스/콜백은 연결별로 소유하며 여러 연결에서\n  같은 소스나 네이티브 인스턴스를 동시 공유하지 않는다. 재연결 시 새 소스를 생성한다.\n- 재연결·연결 해제는 이전 작업에 취소를 요청한다. 네이티브 어댑터는 `cancel()`을 호출하고\n  HTTPS 계층은 `stop_token`을 처리한다. 늦은 결과는 `StaleConnection`으로 거부한다.\n  관리자 소멸 전에 진행 중인 `refresh()`를 종료·join한다.\n- 기본 한도는 관리자당 앨범 1,000개, 앨범당 사진 100,000개이다. Google 조회는 최대\n  1,000페이지, 응답당 16 MiB, JSON 깊이 32이다. 페이지/사진 한도는 설정할 수 있다.\n  중복 사진 ID·반복 페이지 토큰·잘못된 메타데이터는 부분 반영하지 않는다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`complete=true`이면 선언된 범위의 목록을 교체한다. 앱 생성 항목의 완전한 목록도",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`complete=false`이면 ID별로 병합한다. 제한된 PhotoKit 권한·새 Picker 선택에서",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "전송 실패·요청 제한·잘못된 응답·한도 초과에서는 기존 목록을 유지한다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "한 앨범의 동시 갱신과 갱신 중 `publish()`는 `Busy`로 거부한다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "재연결·연결 해제는 이전 작업에 취소를 요청한다. 네이티브 어댑터는 `cancel()`을 호출하고",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "기본 한도는 관리자당 앨범 1,000개, 앨범당 사진 100,000개이다. Google 조회는 최대",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000082",
+      "kind": "blank",
+      "start_line": 295,
+      "end_line": 295,
+      "raw": "\n"
+    },
+    {
+      "id": "b000083",
+      "kind": "heading",
+      "start_line": 296,
+      "end_line": 296,
+      "raw": "## Qt 없는 코어와 검증\n",
+      "level": 2,
+      "title": "Qt 없는 코어와 검증"
+    },
+    {
+      "id": "b000084",
+      "kind": "blank",
+      "start_line": 297,
+      "end_line": 297,
+      "raw": "\n"
+    },
+    {
+      "id": "b000085",
+      "kind": "paragraph",
+      "start_line": 298,
+      "end_line": 299,
+      "raw": "관리자와 Google 소스는 C++23 표준 타입만 공개하며 `iiPhotoLibrary::Albums`에 포함한다.\n네이티브 어댑터·기존 사진 저장/동기화·QML 계층은 기존 Qt 의존성을 유지한다.\n"
+    },
+    {
+      "id": "b000086",
+      "kind": "blank",
+      "start_line": 300,
+      "end_line": 300,
+      "raw": "\n"
+    },
+    {
+      "id": "b000087",
+      "kind": "fenced_code",
+      "start_line": 301,
+      "end_line": 304,
+      "raw": "```cmake\nfind_package(iiPhotoLibrary 0.1 CONFIG REQUIRED COMPONENTS Albums)\ntarget_link_libraries(MyApp PRIVATE iiPhotoLibrary::Albums)\n```\n",
+      "language": "cmake",
+      "code": "find_package(iiPhotoLibrary 0.1 CONFIG REQUIRED COMPONENTS Albums)\ntarget_link_libraries(MyApp PRIVATE iiPhotoLibrary::Albums)\n",
+      "closed": true
+    },
+    {
+      "id": "b000088",
+      "kind": "blank",
+      "start_line": 305,
+      "end_line": 305,
+      "raw": "\n"
+    },
+    {
+      "id": "b000089",
+      "kind": "paragraph",
+      "start_line": 306,
+      "end_line": 309,
+      "raw": "코어만 구성하려면 `cmake -S . -B build -DIIPHOTOLIBRARY_ALBUMS_ONLY=ON`을 사용한다.\n전체 SDK 설치에서도 `COMPONENTS Albums` 소비자는 Qt/iiSocietyContainer를 찾지 않는다.\n코어 전용 설치에는 `Album.h`와 `GooglePhotosAlbumSource.h`를 사용한다.\n기존 umbrella와 네이티브 어댑터는 기본 전체 패키지를 사용한다.\n"
+    },
+    {
+      "id": "b000090",
+      "kind": "blank",
+      "start_line": 310,
+      "end_line": 310,
+      "raw": "\n"
+    },
+    {
+      "id": "b000091",
+      "kind": "paragraph",
+      "start_line": 311,
+      "end_line": 320,
+      "raw": "`AllLibrary`는 중복 제거, 계정·서비스 격리, 실시간 목록 반영, 완전성·오류·취소·객체 수명·동시 소멸과\n읽기 전용 계약을 검증한다. `AlbumManager`, `GooglePhotosAlbums`, `NativeAlbumBridge` 테스트는 객체 분리, 외부 수신,\n불완전 목록 보존, 재연결·동시 실행·취소, 권한 회수, Google 응답·페이지·오류 처리를 검증한다.\n`AlbumsInstalledConsumer`는 설치 prefix를 옮긴 뒤 Qt와 iiSocietyContainer 탐색을 금지한\n외부 프로젝트에서 코어를 링크·실행한다. `InstalledConsumer`는 네이티브 어댑터 구성과\n설치된 QML 로딩을 검증한다. 실제 사용자 계정 로그인·iCloud 다운로드·Google 사진 다운로드는\nfixture 기반 검증에 포함하지 않는다. 실제 사진을 등록하거나 삭제하지 않는다.\n`SmartAlbums`는 분류·숨김/해제·해시 그룹·충돌·갱신 보존·분류 정리·동시 변경을 검증하며,\n미디어 분류, 즐겨찾기 지정·해제, 삭제·복원과 상태 유지도 검사한다.\n설치 소비자는 여덟 스마트 앨범과 분류 API를 실제 설치 패키지에서 링크·실행한다.\n"
+    },
+    {
+      "id": "b000092",
+      "kind": "blank",
+      "start_line": 321,
+      "end_line": 321,
+      "raw": "\n"
+    },
+    {
+      "id": "b000093",
+      "kind": "paragraph",
+      "start_line": 322,
+      "end_line": 322,
+      "raw": "최종 빌드·실행 결과는 [앨범 관리자 검증 기록](AlbumsValidation.md)에 기록한다.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "앨범 관리자와 외부 사진 연결",
+      "anchor": "앨범-관리자와-외부-사진-연결",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000005",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "객체와 수명",
+      "anchor": "객체와-수명",
+      "start_line": 7
+    },
+    {
+      "block_id": "b000013",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "All Library 전체 사진 앨범",
+      "anchor": "all-library-전체-사진-앨범",
+      "start_line": 35
+    },
+    {
+      "block_id": "b000031",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "스마트 앨범과 분류 API",
+      "anchor": "스마트-앨범과-분류-api",
+      "start_line": 102
+    },
+    {
+      "block_id": "b000053",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "네이티브 사진과 외부 수신",
+      "anchor": "네이티브-사진과-외부-수신",
+      "start_line": 203
+    },
+    {
+      "block_id": "b000065",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Google Photos와 호스트 계약",
+      "anchor": "google-photos와-호스트-계약",
+      "start_line": 242
+    },
+    {
+      "block_id": "b000079",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "완전성·오류·동시 실행",
+      "anchor": "완전성오류동시-실행",
+      "start_line": 278
+    },
+    {
+      "block_id": "b000083",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Qt 없는 코어와 검증",
+      "anchor": "qt-없는-코어와-검증",
+      "start_line": 296
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [
+      {
+        "block_id": "b000009",
+        "line": 27,
+        "text": "제공자의 원본 ID이고, 관리자가 부여하는 `id`는 앨범 범위를 포함하므로 서로 충돌하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000011",
+        "line": 29,
+        "text": "`connect()`는 객체만 만들며 권한·네트워크 요청을 수행하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000019",
+        "line": 65,
+        "text": "간주하지 않는다. 사진과 영상 모두 기존 `AlbumPhoto` 항목으로 반환한다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000027",
+        "line": 93,
+        "text": "집계 `revision`은 비어 있으며 원격 제공자의 리비전을 대신하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000029",
+        "line": 97,
+        "text": "객체를 제거하지 않는다. 관리자가 소멸하면 보유 중인 전체 앨범도 `Disconnected`가 되고",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000029",
+        "line": 98,
+        "text": "빈 불완전 목록을 반환한다. 객체는 관리자의 수명을 연장하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000033",
+        "line": 106,
+        "text": "일반 `albums()` 목록 및 앨범 개수 한도에는 포함하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000037",
+        "line": 126,
+        "text": "`sourcePhotoId`만 전달하지 않는다. 알려지지 않은 사진 ID는 `NotFound` 오류이다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000043",
+        "line": 162,
+        "text": "이미지·비디오 분류는 기존 미디어 종류를 읽으며 파일 형식을 바꾸는 API를 추가하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000043",
+        "line": 165,
+        "text": "필드로 다른 분류와 동시에 변경할 수 있으며, `AlbumPhotoTraits`에 별도 즐겨찾기 값을 복제하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000045",
+        "line": 171,
+        "text": "남는다. 원본 파일 삭제, OS/원격 휴지통 이동·복원 또는 기간에 따른 자동 제거는 수행하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000045",
+        "line": 172,
+        "text": "소스가 아직 제공하지 않은 OS/원격 휴지통 항목을 자동으로 가져오는 기능도 포함하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000047",
+        "line": 180,
+        "text": "분류 API는 OS 사진의 숨김·즐겨찾기·삭제 상태, 원본 파일 및 원격 서비스 데이터를 변경하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000049",
+        "line": 190,
+        "text": "다른 스마트 앨범은 소스 목록의 완전성을 따른다. 유사 이미지 판정은 수행하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000051",
+        "line": 192,
+        "text": "앨범 코어는 파일을 읽거나 해시를 계산하지 않는다. 전체 SDK를 쓰는 호스트는 기존",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000051",
+        "line": 194,
+        "text": "해시를 사용하는 계약이며 여러 리소스의 조합을 원본 전체의 해시로 오인하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000051",
+        "line": 201,
+        "text": "스마트 앨범 조회는 새로운 OS 검색·권한 요청·네트워크 요청·원본 다운로드를 실행하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000059",
+        "line": 226,
+        "text": "참조만 관리하며 원본을 복사하지 않는다. 네이티브 원본 작업에는 `sourcePhotoId`를 전달한다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000059",
+        "line": 227,
+        "text": "리소스 토큰은 앨범 메타데이터로 내보내지 않고 느린 `resolveIdentifiers()`를 추가 호출하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000059",
+        "line": 228,
+        "text": "같은 네이티브 인스턴스를 별도의 활성 `PhotoStore` 작업자와 공유하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000073",
+        "line": 264,
+        "text": "로그인만으로 전체 보관함을 자동 조회하지 않는다. 토큰 공급자는 요청마다 호출한다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000075",
+        "line": 266,
+        "text": "`AlbumHttpGet`은 요청 URL·헤더·`stop_token`을 처리하며 TLS 인증서/호스트를 검증해야 한다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000075",
+        "line": 267,
+        "text": "Authorization을 로그에 남기거나 리디렉션으로 다른 호스트에 전달하지 않는다. SDK의 API 주소는",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000075",
+        "line": 268,
+        "text": "고정된 Google HTTPS 주소이다. 전송 계층은 수신 중 본문을 16 MiB 이하로 제한해야 한다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000075",
+        "line": 269,
+        "text": "SDK는 반환된 본문의 크기를 다시 검사하고 upstream 본문/예외를 오류 메시지로 노출하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000077",
+        "line": 276,
+        "text": "뜻하지 않는다. 실제 콘텐츠 접근은 호스트가 수행하고 새 조회로 URL을 갱신한다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000081",
+        "line": 281,
+        "text": "전체 Google Photos 보관함의 완전한 목록을 뜻하지 않는다.",
+        "basis": "lexical_match",
+        "context": "list"
+      },
+      {
+        "block_id": "b000081",
+        "line": 283,
+        "text": "보이지 않는 사진을 삭제로 해석하지 않는다. Picker 선택은 여러 세션의 선택을 누적한다.",
+        "basis": "lexical_match",
+        "context": "list"
+      },
+      {
+        "block_id": "b000081",
+        "line": 288,
+        "text": "같은 소스나 네이티브 인스턴스를 동시 공유하지 않는다. 재연결 시 새 소스를 생성한다.",
+        "basis": "lexical_match",
+        "context": "list"
+      },
+      {
+        "block_id": "b000081",
+        "line": 294,
+        "text": "중복 사진 ID·반복 페이지 토큰·잘못된 메타데이터는 부분 반영하지 않는다.",
+        "basis": "lexical_match",
+        "context": "list"
+      },
+      {
+        "block_id": "b000091",
+        "line": 314,
+        "text": "`AlbumsInstalledConsumer`는 설치 prefix를 옮긴 뒤 Qt와 iiSocietyContainer 탐색을 금지한",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000091",
+        "line": 317,
+        "text": "fixture 기반 검증에 포함하지 않는다. 실제 사진을 등록하거나 삭제하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      }
+    ],
+    "commands": [],
+    "links": [
+      {
+        "block_id": "b000051",
+        "label": "PhotoKit 미디어 하위 종류",
+        "target": "https://developer.apple.com/documentation/photos/phassetmediasubtype",
+        "kind": "external",
+        "line": 195
+      },
+      {
+        "block_id": "b000051",
+        "label": "숨김 메타데이터",
+        "target": "https://developer.apple.com/documentation/photos/phasset/ishidden",
+        "kind": "external",
+        "line": 196
+      },
+      {
+        "block_id": "b000057",
+        "label": "Apple PhotoKit 문서",
+        "target": "https://developer.apple.com/documentation/photokit",
+        "kind": "external",
+        "line": 220
+      },
+      {
+        "block_id": "b000067",
+        "label": "API 변경 사항",
+        "target": "https://developers.google.com/photos/support/updates",
+        "kind": "external",
+        "line": 245
+      },
+      {
+        "block_id": "b000077",
+        "label": "`sessions.get`",
+        "target": "https://developers.google.com/photos/picker/reference/rest/v1/sessions/get",
+        "kind": "external",
+        "line": 271
+      },
+      {
+        "block_id": "b000077",
+        "label": "`Picker mediaItems.list`",
+        "target": "https://developers.google.com/photos/picker/reference/rest/v1/mediaItems/list",
+        "kind": "external",
+        "line": 272
+      },
+      {
+        "block_id": "b000077",
+        "label": "`PickedMediaItem`",
+        "target": "https://developers.google.com/photos/picker/reference/rest/v1/mediaItems",
+        "kind": "external",
+        "line": 273
+      },
+      {
+        "block_id": "b000077",
+        "label": "`Library mediaItems.list`",
+        "target": "https://developers.google.com/photos/library/reference/rest/v1/mediaItems/list",
+        "kind": "external",
+        "line": 274
+      },
+      {
+        "block_id": "b000093",
+        "label": "앨범 관리자 검증 기록",
+        "target": "AlbumsValidation.md",
+        "kind": "relative",
+        "line": 322
+      }
+    ],
+    "tables": [
+      {
+        "block_id": "b000007",
+        "columns": [
+          "객체",
+          "역할"
+        ],
+        "rows": [
+          [
+            "`AlbumManager`",
+            "생성·연결·조회·갱신·외부 수신·연결 해제"
+          ],
+          [
+            "`Album`",
+            "연결별 수명, `snapshot()`으로 동기화된 데이터 복사본 제공"
+          ],
+          [
+            "`AlbumManager::allLibrary()`",
+            "전체 앨범의 현재 사진을 모아 반환하는 읽기 전용 `All Library` 앨범"
+          ],
+          [
+            "`AlbumManager::smartAlbum()`",
+            "스크린샷·가져온 사진·중복·숨김·이미지·비디오·Favorite·Deleted의 읽기 전용 앨범"
+          ],
+          [
+            "`AlbumPhotoTraits` / `AlbumPhotoTraitsUpdate`",
+            "사진의 분류 정보 및 변경할 필드만 담은 갱신 값"
+          ],
+          [
+            "`DuplicatePhotoGroup`",
+            "동일 콘텐츠 해시를 가진 서로 다른 사진들의 묶음"
+          ],
+          [
+            "`AlbumConnection`",
+            "제공자·계정·원격 앨범 ID·표시 이름·종류"
+          ],
+          [
+            "`AlbumSnapshot`",
+            "사진 메타데이터·완전성·리비전"
+          ],
+          [
+            "`AlbumSource`",
+            "인증된 사진 연결을 읽는 교체 가능한 인터페이스"
+          ],
+          [
+            "`GooglePhotosAlbumSource`",
+            "현재 Google Photos Picker 또는 앱 생성 항목 REST 조회"
+          ],
+          [
+            "`photoLibraryAlbumSource()`",
+            "기존 네이티브 `PhotoLibrary`를 앨범 소스로 연결"
+          ]
+        ]
+      },
+      {
+        "block_id": "b000025",
+        "columns": [
+          "키",
+          "값"
+        ],
+        "rows": [
+          [
+            "`allLibrary.providerId`",
+            "원래 제공자 ID"
+          ],
+          [
+            "`allLibrary.accountId`",
+            "원래 계정 ID"
+          ],
+          [
+            "`allLibrary.albumId`",
+            "메타데이터를 제공한 일반 앨범의 ID"
+          ],
+          [
+            "`allLibrary.photoId`",
+            "그 일반 앨범에서 부여한 사진 ID"
+          ]
+        ]
+      },
+      {
+        "block_id": "b000035",
+        "columns": [
+          "종류",
+          "표시 이름",
+          "포함 조건",
+          "분류 API"
+        ],
+        "rows": [
+          [
+            "`SmartAlbumKind::Screenshots`",
+            "Screenshots",
+            "`traits.screenshot=true`인 사진",
+            "`setScreenshot(photoId, bool)`"
+          ],
+          [
+            "`SmartAlbumKind::Imported`",
+            "Imported Photos",
+            "`traits.imported=true`인 사진·영상",
+            "`setImported(photoId, bool)`"
+          ],
+          [
+            "`SmartAlbumKind::Duplicates`",
+            "Duplicates",
+            "같은 콘텐츠 SHA-256을 가진 서로 다른 사진·영상이 두 개 이상",
+            "`setContentHash(photoId, sha256)`, `duplicateGroups()`"
+          ],
+          [
+            "`SmartAlbumKind::Hidden`",
+            "Hidden",
+            "`traits.hidden=true`인 사진·영상",
+            "`setHidden(photoId, bool)`"
+          ],
+          [
+            "`SmartAlbumKind::Images`",
+            "Images",
+            "`mediaType=\"photo\"`인 항목",
+            "`setLocalPhotos()` / `publish()` / `refresh()`의 미디어 메타데이터"
+          ],
+          [
+            "`SmartAlbumKind::Videos`",
+            "Videos",
+            "`mediaType=\"video\"`인 항목",
+            "`setLocalPhotos()` / `publish()` / `refresh()`의 미디어 메타데이터"
+          ],
+          [
+            "`SmartAlbumKind::Favorite`",
+            "Favorite",
+            "기존 `favorite=true`인 사진·영상",
+            "`setFavorite(photoId, bool)`, `isFavorite(photoId)`"
+          ],
+          [
+            "`SmartAlbumKind::Deleted`",
+            "Deleted",
+            "`traits.deleted=true`인 사진·영상",
+            "`setDeleted(photoId, bool)`, `photoTraits(photoId).deleted`"
+          ]
+        ]
+      },
+      {
+        "block_id": "b000069",
+        "columns": [
+          "모드",
+          "조회 범위",
+          "OAuth scope"
+        ],
+        "rows": [
+          [
+            "`PickerSelection` (기본)",
+            "사용자가 Picker에서 선택한 사진·영상",
+            "`https://www.googleapis.com/auth/photospicker.mediaitems.readonly`"
+          ],
+          [
+            "`AppCreatedItems`",
+            "해당 앱이 Google Photos에 생성한 항목",
+            "`https://www.googleapis.com/auth/photoslibrary.readonly.appcreateddata`"
+          ]
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

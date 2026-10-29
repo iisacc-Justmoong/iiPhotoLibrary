@@ -1,0 +1,118 @@
+{
+  "format": "iisacc.agent-document-index",
+  "schema_version": 1,
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FiiPhotoLibrary",
+    "name": "iiPhotoLibrary",
+    "root": "SDK/iiPhotoLibrary",
+    "kind": "sdk"
+  },
+  "documentation_root": "docs",
+  "agent_schema": "docs/agent-document.schema.json",
+  "documents": [
+    {
+      "document_id": "urn:iisacc:document:96eb13ac539ca3515cb2d9f1754d469dbabb17223361e20bb5f861c197e86c5b",
+      "source": "AGENT.md",
+      "agent_json": "docs/entrypoints/AGENT.agent.json",
+      "source_sha256": "460659a10008d08aa29bfb3878466e55e9c708c7f822f77985180d42e0720833",
+      "role": "instructions"
+    },
+    {
+      "document_id": "urn:iisacc:document:653e4548eb79591e36c61eb907a6722f96aa12c2ee742ad05a8912bdfed35bf8",
+      "source": "README.md",
+      "agent_json": "docs/entrypoints/README.agent.json",
+      "source_sha256": "c42dac3d18c102aa3b58d9ef47226bb676a2ae977de36bd0e148e6a894bd98a5",
+      "role": "overview"
+    },
+    {
+      "document_id": "urn:iisacc:document:c23e52cd7bfa969bc308d5c64832b05ac64b335424c4c6e5deb40e2a82a6971f",
+      "source": "docs/Albums.md",
+      "agent_json": "docs/Albums.agent.json",
+      "source_sha256": "6911c9281e268d341498237be9a4d36c48adde0097c96e446ab2059b54d3090a",
+      "role": "guide"
+    },
+    {
+      "document_id": "urn:iisacc:document:d6d080f4f4e43c72ea0b7fdb6ddd440d6d0747f3e862f4dfc8f28c5994276859",
+      "source": "docs/AlbumsValidation.md",
+      "agent_json": "docs/AlbumsValidation.agent.json",
+      "source_sha256": "db996b0b8910005871a4e48964f328c9e5d71d9b6159b055e3d1e2eb68868356",
+      "role": "guide"
+    },
+    {
+      "document_id": "urn:iisacc:document:a9345b98b3c5dc1a88c5e66e54aa4e9b13b386b145e65461de16c6ba16467a23",
+      "source": "docs/BuildComponents.md",
+      "agent_json": "docs/BuildComponents.agent.json",
+      "source_sha256": "7e80cdaa52c463dbff5b1023633d0d1977efc6797ba210e154ce14a6c010541e",
+      "role": "guide"
+    },
+    {
+      "document_id": "urn:iisacc:document:94a2d2b97ae1286ba6eeafaef4e6d9ee8969c082ebeae4a902d9f64f29c81820",
+      "source": "docs/Extraction.md",
+      "agent_json": "docs/Extraction.agent.json",
+      "source_sha256": "d255f5dc3c7a4b31fdb2f69e22cbe629d78687cef07ab2eef17fcba937b02092",
+      "role": "guide"
+    },
+    {
+      "document_id": "urn:iisacc:document:da014f2484e6841c9d9cb8910c2529f6585db41660758cfdf47e01c4a2e9e355",
+      "source": "docs/FILE_PROVIDER.md",
+      "agent_json": "docs/FILE_PROVIDER.agent.json",
+      "source_sha256": "622fd78afd34f88571bf80ad321817b0d332203d5bc2c33c280f7b51fc7abff8",
+      "role": "guide"
+    },
+    {
+      "document_id": "urn:iisacc:document:639efd9462d494ebfae9199de9582cd8db7af24e3422cb1872804182a5e516c4",
+      "source": "docs/Platforms.md",
+      "agent_json": "docs/Platforms.agent.json",
+      "source_sha256": "7891ab76a296dd6af7de898b4b2a0f887e4a4a8402c30307380b6a1cf7eb4e99",
+      "role": "guide"
+    },
+    {
+      "document_id": "urn:iisacc:document:3f44fd5cb021d2026bd8e52b8767924aa8ebb254a9ef0e33e0fc4070fba4249e",
+      "source": "docs/README.md",
+      "agent_json": "docs/README.agent.json",
+      "source_sha256": "cbadc14e5f186ff85a8e05a9c6c97440055b844e2d47ce31d3db9f51ee3ea4b6",
+      "role": "overview"
+    },
+    {
+      "document_id": "urn:iisacc:document:3e409b75eaca58f45078847084a49b8865c31167fe03d80e20417eaf2c87492c",
+      "source": "docs/SocietyReference.md",
+      "agent_json": "docs/SocietyReference.agent.json",
+      "source_sha256": "cae87657e832e78127116e4714267f89f73bea9de4a05abbfedfebc8c4693f29",
+      "role": "guide"
+    },
+    {
+      "document_id": "urn:iisacc:document:f79e3dc044572db7eb00483f8e81a46b8e6b9064fa0265a0c88d74e62b932fd4",
+      "source": "docs/WindowsBuildAndRun.md",
+      "agent_json": "docs/WindowsBuildAndRun.agent.json",
+      "source_sha256": "f571cd8135aed44ba85c757c30c400e19b1b56708e2235cdc721983b5f64a5bd",
+      "role": "guide"
+    },
+    {
+      "document_id": "urn:iisacc:document:5ddc6df8f3ae37c32b1eda40606d06ab5efd126b6f2323be1ef9750e57e94d74",
+      "source": "docs/WindowsValidation.md",
+      "agent_json": "docs/WindowsValidation.agent.json",
+      "source_sha256": "7d39a23dec6c162c77c5f07d6a5fb91945ce4d7379c638dd8fd942b4913872b8",
+      "role": "guide"
+    },
+    {
+      "document_id": "urn:iisacc:document:ec9742cb7bc5f2b4177c4e3ad64472fed3db3a8c14824e77059527bc5dc1fb08",
+      "source": "docs/documentation-structure.md",
+      "agent_json": "docs/documentation-structure.agent.json",
+      "source_sha256": "932e8438db6f5ebea9eba77ecb5de638cd395536544d7a189d569510bdfbf0c0",
+      "role": "guide"
+    }
+  ],
+  "layout": {
+    "human_entry": "README.md",
+    "agent_entry": "AGENT.md",
+    "human_format": "markdown",
+    "agent_format": "structured_json",
+    "source_authority": "markdown"
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

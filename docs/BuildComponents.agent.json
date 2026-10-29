@@ -1,0 +1,107 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:a9345b98b3c5dc1a88c5e66e54aa4e9b13b386b145e65461de16c6ba16467a23",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FiiPhotoLibrary",
+    "name": "iiPhotoLibrary",
+    "root": "SDK/iiPhotoLibrary",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/BuildComponents.md",
+    "sha256": "7e80cdaa52c463dbff5b1023633d0d1977efc6797ba210e154ce14a6c010541e",
+    "bytes": 767,
+    "line_count": 15,
+    "encoding": "utf-8",
+    "language": "en"
+  },
+  "document": {
+    "title": "Dependency components",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# Dependency components\n",
+      "level": 1,
+      "title": "Dependency components"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 5,
+      "raw": "Albums is the existing Qt-free C++23 library. Its identifiers, album registry,\nsmart collections and provider-independent values do not depend on the legacy\nphoto controller.\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 7,
+      "end_line": 11,
+      "raw": "The legacy photo controller and native photo-library adapters still use Qt Core,\nGui and Concurrent. Clipboard/sharing actions now consume\n`iiSocietyContainer::Sharing` rather than the complete `Gui` target. Indexing,\noriginal transfer, and preview processing therefore no longer pull in the\ncontainer's Qt Quick image provider or application/window helpers.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 12,
+      "end_line": 12,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "paragraph",
+      "start_line": 13,
+      "end_line": 15,
+      "raw": "The public photo controller API, photo store format and native system sharing\nbehavior remain unchanged. This component split does not claim removal of the\nremaining Qt image-codec and event-loop adapters.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "Dependency components",
+      "anchor": "dependency-components",
+      "start_line": 1
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [
+      {
+        "block_id": "b000003",
+        "line": 4,
+        "text": "smart collections and provider-independent values do not depend on the legacy",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      }
+    ],
+    "commands": [],
+    "links": [],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

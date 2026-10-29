@@ -1,0 +1,296 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:639efd9462d494ebfae9199de9582cd8db7af24e3422cb1872804182a5e516c4",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FiiPhotoLibrary",
+    "name": "iiPhotoLibrary",
+    "root": "SDK/iiPhotoLibrary",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/Platforms.md",
+    "sha256": "7891ab76a296dd6af7de898b4b2a0f887e4a4a8402c30307380b6a1cf7eb4e99",
+    "bytes": 2935,
+    "line_count": 53,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "플랫폼 통합 계약",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# 플랫폼 통합 계약\n",
+      "level": 1,
+      "title": "플랫폼 통합 계약"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "html",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "<a id=\"apple\"></a>\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "heading",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "## 사과\n",
+      "level": 2,
+      "title": "사과"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "paragraph",
+      "start_line": 7,
+      "end_line": 12,
+      "raw": "PhotoKit 권한 요청 전 호스트 앱의 Info.plist에 `NSPhotoLibraryUsageDescription` 및\n`NSPhotoLibraryAddUsageDescription`을 앱 용도에 맞게 설정한다.\nmacOS Sandbox 사용 시 `com.apple.security.personal-information.photos-library` entitlement가 필요하다.\nCMake는 Photos/Foundation/UniformTypeIdentifiers와 macOS AppKit 또는 iOS UIKit을 연결한다.\n권한 요청은 GUI 스레드에서, 조회·프리뷰·원본 추출·등록·휴지통 작업은 작업 스레드에서 호출한다.\n실제 PhotoKit 동작은 서명된 호스트 앱의 권한과 시스템 보관함에 따라 달라진다.\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 13,
+      "end_line": 13,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "heading",
+      "start_line": 14,
+      "end_line": 14,
+      "raw": "## Android\n",
+      "level": 2,
+      "title": "Android"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 15,
+      "end_line": 15,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "paragraph",
+      "start_line": 16,
+      "end_line": 18,
+      "raw": "`iiPhotoLibrary_ANDROID_SOURCE_DIR`의 Java 소스를 호스트 Android 패키지에 포함한다.\n클래스는 `com.iisacc.iiphotolibrary.PhotoLibrary`이며 SocietyActivity에 의존하지 않는다.\n호스트 Activity는 다음 콜백을 전달해야 한다.\n"
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 19,
+      "end_line": 19,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "fenced_code",
+      "start_line": 20,
+      "end_line": 31,
+      "raw": "```java\n@Override public void onRequestPermissionsResult(int request, String[] permissions, int[] results) {\n    super.onRequestPermissionsResult(request, permissions, results);\n    if (request == com.iisacc.iiphotolibrary.PhotoLibrary.PERMISSION_REQUEST)\n        com.iisacc.iiphotolibrary.PhotoLibrary.photoAccessFinished();\n}\n@Override protected void onActivityResult(int request, int result, android.content.Intent data) {\n    super.onActivityResult(request, result, data);\n    if (request == com.iisacc.iiphotolibrary.PhotoLibrary.TRASH_REQUEST)\n        com.iisacc.iiphotolibrary.PhotoLibrary.consentFinished(result);\n}\n```\n",
+      "language": "java",
+      "code": "@Override public void onRequestPermissionsResult(int request, String[] permissions, int[] results) {\n    super.onRequestPermissionsResult(request, permissions, results);\n    if (request == com.iisacc.iiphotolibrary.PhotoLibrary.PERMISSION_REQUEST)\n        com.iisacc.iiphotolibrary.PhotoLibrary.photoAccessFinished();\n}\n@Override protected void onActivityResult(int request, int result, android.content.Intent data) {\n    super.onActivityResult(request, result, data);\n    if (request == com.iisacc.iiphotolibrary.PhotoLibrary.TRASH_REQUEST)\n        com.iisacc.iiphotolibrary.PhotoLibrary.consentFinished(result);\n}\n",
+      "closed": true
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 32,
+      "end_line": 32,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "paragraph",
+      "start_line": 33,
+      "end_line": 38,
+      "raw": "Manifest 권한: READ_MEDIA_IMAGES, READ_MEDIA_VIDEO, READ_MEDIA_VISUAL_USER_SELECTED,\nACCESS_MEDIA_LOCATION 및 구 OS의 READ_EXTERNAL_STORAGE(maxSdkVersion=32),\nWRITE_EXTERNAL_STORAGE(maxSdkVersion=28). compileSdk 34 이상이 필요하다.\n요청 코드 9076/9077은 호스트의 다른 기능과 중복 사용하지 않는다.\nJava 코드를 패키징하지 않거나 콜백을 전달하지 않으면 권한·휴지통 기능이 동작하지 않는다.\n최종 APK의 MediaStore·동의 UI 동작은 실제 기기에서 별도로 검증해야 한다.\n"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 39,
+      "end_line": 39,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "heading",
+      "start_line": 40,
+      "end_line": 40,
+      "raw": "## Windows 및 기타\n",
+      "level": 2,
+      "title": "Windows 및 기타"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 41,
+      "end_line": 41,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "paragraph",
+      "start_line": 42,
+      "end_line": 44,
+      "raw": "Windows는 Shell 라이브러리/썸네일/Recycle Bin을 사용하며 shell32/ole32/gdi32/uuid를 연결한다.\n별도 클라우드 웹 전용 항목이나 Photos 비공개 DB를 읽지 않는다.\n기타 플랫폼은 Access::Unsupported를 반환하고 컨테이너 원본 저장소 기능만 제공한다.\n"
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 45,
+      "end_line": 45,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "paragraph",
+      "start_line": 46,
+      "end_line": 48,
+      "raw": "Android 네이티브 fixture는 `tests/android/`에 포함한다. SDK 36/build-tools 36.0.0,\nJDK 및 ffmpeg가 준비되어 있고 에뮬레이터가 실행 중이면 다음으로 실행한다.\n테스트는 자신의 패키지와 생성한 미디어만 정리하며 물리 기기를 대상으로 실행하지 않는다.\n"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 49,
+      "end_line": 49,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "fenced_code",
+      "start_line": 50,
+      "end_line": 53,
+      "raw": "```sh\nANDROID_SDK_ROOT=<Android-SDK> JAVA_HOME=<JDK> \\\n  IIPHOTOLIBRARY_TEST_DEVICE=emulator-5554 python3 tools/test_android_photos.py\n```\n",
+      "language": "sh",
+      "code": "ANDROID_SDK_ROOT=<Android-SDK> JAVA_HOME=<JDK> \\\n  IIPHOTOLIBRARY_TEST_DEVICE=emulator-5554 python3 tools/test_android_photos.py\n",
+      "closed": true
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "플랫폼 통합 계약",
+      "anchor": "플랫폼-통합-계약",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000005",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "사과",
+      "anchor": "사과",
+      "start_line": 5
+    },
+    {
+      "block_id": "b000009",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Android",
+      "anchor": "android",
+      "start_line": 14
+    },
+    {
+      "block_id": "b000017",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Windows 및 기타",
+      "anchor": "windows-및-기타",
+      "start_line": 40
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [
+      {
+        "block_id": "b000011",
+        "line": 17,
+        "text": "클래스는 `com.iisacc.iiphotolibrary.PhotoLibrary`이며 SocietyActivity에 의존하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000011",
+        "line": 18,
+        "text": "호스트 Activity는 다음 콜백을 전달해야 한다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000015",
+        "line": 36,
+        "text": "요청 코드 9076/9077은 호스트의 다른 기능과 중복 사용하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000015",
+        "line": 37,
+        "text": "Java 코드를 패키징하지 않거나 콜백을 전달하지 않으면 권한·휴지통 기능이 동작하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000015",
+        "line": 38,
+        "text": "최종 APK의 MediaStore·동의 UI 동작은 실제 기기에서 별도로 검증해야 한다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000021",
+        "line": 48,
+        "text": "테스트는 자신의 패키지와 생성한 미디어만 정리하며 물리 기기를 대상으로 실행하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      }
+    ],
+    "commands": [
+      {
+        "block_id": "b000023",
+        "language": "sh",
+        "code": "ANDROID_SDK_ROOT=<Android-SDK> JAVA_HOME=<JDK> \\\n  IIPHOTOLIBRARY_TEST_DEVICE=emulator-5554 python3 tools/test_android_photos.py\n"
+      }
+    ],
+    "links": [],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

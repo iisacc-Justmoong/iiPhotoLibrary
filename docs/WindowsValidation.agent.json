@@ -1,0 +1,71 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:5ddc6df8f3ae37c32b1eda40606d06ab5efd126b6f2323be1ef9750e57e94d74",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FiiPhotoLibrary",
+    "name": "iiPhotoLibrary",
+    "root": "SDK/iiPhotoLibrary",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/WindowsValidation.md",
+    "sha256": "7d39a23dec6c162c77c5f07d6a5fb91945ce4d7379c638dd8fd942b4913872b8",
+    "bytes": 293,
+    "line_count": 3,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "Windows 설치 소비자 검증",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# Windows 설치 소비자 검증\n",
+      "level": 1,
+      "title": "Windows 설치 소비자 검증"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "생산자와 설치 소비자는 같은 CMake generator를 사용한다. `--fresh`로 다른 머신에서 남은 캐시를 배제한다. 설치·재배치 후 실제 소비자 실행 파일을 실행하며, 부모 빌드의 의존성 경로를 전달한다.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "Windows 설치 소비자 검증",
+      "anchor": "windows-설치-소비자-검증",
+      "start_line": 1
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

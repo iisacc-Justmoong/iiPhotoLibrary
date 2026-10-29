@@ -1,0 +1,157 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:da014f2484e6841c9d9cb8910c2529f6585db41660758cfdf47e01c4a2e9e355",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FiiPhotoLibrary",
+    "name": "iiPhotoLibrary",
+    "root": "SDK/iiPhotoLibrary",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/FILE_PROVIDER.md",
+    "sha256": "622fd78afd34f88571bf80ad321817b0d332203d5bc2c33c280f7b51fc7abff8",
+    "bytes": 893,
+    "line_count": 19,
+    "encoding": "utf-8",
+    "language": "en"
+  },
+  "document": {
+    "title": "File creation ownership in iiPhotoLibrary",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# File creation ownership in iiPhotoLibrary\n",
+      "level": 1,
+      "title": "File creation ownership in iiPhotoLibrary"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "Photo previews, originals and local staging use provider devices. The Albums target and Albums-only installed consumers remain independent of Qt and file-device adapters.\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 8,
+      "raw": "The common [ownership contract](../../iiFileProvider/docs/FILE_OWNERSHIP.md) defines stream, staging, control-file and\ninstalled-package rules. Source regression tests remain with this module; the\nworkspace creation audit also checks these boundaries. Build/deployment and target\nruntime validation are separate evidence.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "paragraph",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "Changed boundaries:\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 11,
+      "end_line": 12,
+      "raw": "\n\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "list",
+      "start_line": 13,
+      "end_line": 16,
+      "raw": "- `platform/android/src/com/iisacc/iiphotolibrary/PhotoLibrary.java`\n- `src/iiPhotoLibrary/PhotoLibraryApple.mm`\n- `src/iiPhotoLibrary/PhotoLibraryWindows.cpp`\n- `src/iiPhotoLibrary/PhotoStore.cpp`\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`platform/android/src/com/iisacc/iiphotolibrary/PhotoLibrary.java`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`src/iiPhotoLibrary/PhotoLibraryApple.mm`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`src/iiPhotoLibrary/PhotoLibraryWindows.cpp`",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`src/iiPhotoLibrary/PhotoStore.cpp`",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 17,
+      "end_line": 17,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "paragraph",
+      "start_line": 18,
+      "end_line": 19,
+      "raw": "The `Albums` target stays independent of Qt and provider adapters. Only the\nlegacy photo/UI target imports Qt file-device adapters.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "File creation ownership in iiPhotoLibrary",
+      "anchor": "file-creation-ownership-in-iiphotolibrary",
+      "start_line": 1
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [
+      {
+        "block_id": "b000005",
+        "label": "ownership contract",
+        "target": "../../iiFileProvider/docs/FILE_OWNERSHIP.md",
+        "kind": "relative",
+        "line": 5
+      }
+    ],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}
