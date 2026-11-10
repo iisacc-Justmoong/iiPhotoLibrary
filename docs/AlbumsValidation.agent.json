@@ -10,9 +10,9 @@
   },
   "source": {
     "path": "docs/AlbumsValidation.md",
-    "sha256": "db996b0b8910005871a4e48964f328c9e5d71d9b6159b055e3d1e2eb68868356",
-    "bytes": 11887,
-    "line_count": 176,
+    "sha256": "3f2575b3211ef2ded5eeacb259ed8aa88d83e39fd3d00bbbd12b8149c8a99936",
+    "bytes": 12111,
+    "line_count": 178,
     "encoding": "utf-8",
     "language": "ko"
   },
@@ -626,6 +626,20 @@
       "start_line": 171,
       "end_line": 176,
       "raw": "실제 Apple/Google 계정 로그인·PhotoKit 권한 승인·iCloud 사진 다운로드·Google 미디어 다운로드는\n이번 실행에서 검증하지 않았다. 로그인 UI, OAuth 토큰 관리, Picker 선택 UI, TLS 전송은 호스트가\n제공하는 계약이다. Google 전체 개인 보관함 자동 조회를 지원한다고 간주하지 않는다.\niCloud 어댑터는 iCloud 동기화 항목을 포함할 수 있는 시스템 사진 보관함을 읽는다.\n실제 사진 등록·삭제 작업은 수행하지 않았다. Android/Windows/iOS 타깃 빌드·기기 검증은 별도이다.\n기존 `~/.local/SDK/iiPhotoLibrary` 설치본이나 제품 앱 실행본은 이 검증용 패키지와 구분한다.\n"
+    },
+    {
+      "id": "b000060",
+      "kind": "blank",
+      "start_line": 177,
+      "end_line": 177,
+      "raw": "\n"
+    },
+    {
+      "id": "b000061",
+      "kind": "paragraph",
+      "start_line": 178,
+      "end_line": 178,
+      "raw": "이 문서의 과거 `build/...` 경로는 당시의 검증 기록이며 현재 유지되는 산출물 경로가 아니다. 현재 소비자 검사는 임시 빌드와 설치 사본을 사용하고 종료 시 정리한다.\n"
     }
   ],
   "outline": [

@@ -10,9 +10,9 @@
   },
   "source": {
     "path": "docs/README.md",
-    "sha256": "cbadc14e5f186ff85a8e05a9c6c97440055b844e2d47ce31d3db9f51ee3ea4b6",
-    "bytes": 1298,
-    "line_count": 22,
+    "sha256": "81ddc1afa1372b3139f3f686daeadbfa01a99cc34651324b1286c573f0fbb73d",
+    "bytes": 1384,
+    "line_count": 23,
     "encoding": "utf-8",
     "language": "en"
   },
@@ -79,8 +79,8 @@
       "id": "b000008",
       "kind": "table",
       "start_line": 8,
-      "end_line": 21,
-      "raw": "| Document | Agent JSON |\n| --- | --- |\n| [`AGENT.md`](../AGENT.md) | [JSON](entrypoints/AGENT.agent.json) |\n| [`README.md`](../README.md) | [JSON](entrypoints/README.agent.json) |\n| [`docs/Albums.md`](Albums.md) | [JSON](Albums.agent.json) |\n| [`docs/AlbumsValidation.md`](AlbumsValidation.md) | [JSON](AlbumsValidation.agent.json) |\n| [`docs/BuildComponents.md`](BuildComponents.md) | [JSON](BuildComponents.agent.json) |\n| [`docs/Extraction.md`](Extraction.md) | [JSON](Extraction.agent.json) |\n| [`docs/FILE_PROVIDER.md`](FILE_PROVIDER.md) | [JSON](FILE_PROVIDER.agent.json) |\n| [`docs/Platforms.md`](Platforms.md) | [JSON](Platforms.agent.json) |\n| [`docs/SocietyReference.md`](SocietyReference.md) | [JSON](SocietyReference.agent.json) |\n| [`docs/WindowsBuildAndRun.md`](WindowsBuildAndRun.md) | [JSON](WindowsBuildAndRun.agent.json) |\n| [`docs/WindowsValidation.md`](WindowsValidation.md) | [JSON](WindowsValidation.agent.json) |\n| [`docs/documentation-structure.md`](documentation-structure.md) | [JSON](documentation-structure.agent.json) |\n",
+      "end_line": 22,
+      "raw": "| Document | Agent JSON |\n| --- | --- |\n| [`AGENT.md`](../AGENT.md) | [JSON](entrypoints/AGENT.agent.json) |\n| [`README.md`](../README.md) | [JSON](entrypoints/README.agent.json) |\n| [`docs/Albums.md`](Albums.md) | [JSON](Albums.agent.json) |\n| [`docs/AlbumsValidation.md`](AlbumsValidation.md) | [JSON](AlbumsValidation.agent.json) |\n| [`docs/BuildComponents.md`](BuildComponents.md) | [JSON](BuildComponents.agent.json) |\n| [`docs/DynamicLinking.md`](DynamicLinking.md) | [JSON](DynamicLinking.agent.json) |\n| [`docs/Extraction.md`](Extraction.md) | [JSON](Extraction.agent.json) |\n| [`docs/FILE_PROVIDER.md`](FILE_PROVIDER.md) | [JSON](FILE_PROVIDER.agent.json) |\n| [`docs/Platforms.md`](Platforms.md) | [JSON](Platforms.agent.json) |\n| [`docs/SocietyReference.md`](SocietyReference.md) | [JSON](SocietyReference.agent.json) |\n| [`docs/WindowsBuildAndRun.md`](WindowsBuildAndRun.md) | [JSON](WindowsBuildAndRun.agent.json) |\n| [`docs/WindowsValidation.md`](WindowsValidation.md) | [JSON](WindowsValidation.agent.json) |\n| [`docs/documentation-structure.md`](documentation-structure.md) | [JSON](documentation-structure.agent.json) |\n",
       "columns": [
         "Document",
         "Agent JSON"
@@ -105,6 +105,10 @@
         [
           "[`docs/BuildComponents.md`](BuildComponents.md)",
           "[JSON](BuildComponents.agent.json)"
+        ],
+        [
+          "[`docs/DynamicLinking.md`](DynamicLinking.md)",
+          "[JSON](DynamicLinking.agent.json)"
         ],
         [
           "[`docs/Extraction.md`](Extraction.md)",
@@ -139,8 +143,8 @@
     {
       "id": "b000009",
       "kind": "html",
-      "start_line": 22,
-      "end_line": 22,
+      "start_line": 23,
+      "end_line": 23,
       "raw": "<!-- workspace-docs:document-map:end -->\n"
     }
   ],
@@ -238,101 +242,115 @@
       },
       {
         "block_id": "b000008",
+        "label": "`docs/DynamicLinking.md`",
+        "target": "DynamicLinking.md",
+        "kind": "relative",
+        "line": 15
+      },
+      {
+        "block_id": "b000008",
+        "label": "JSON",
+        "target": "DynamicLinking.agent.json",
+        "kind": "relative",
+        "line": 15
+      },
+      {
+        "block_id": "b000008",
         "label": "`docs/Extraction.md`",
         "target": "Extraction.md",
         "kind": "relative",
-        "line": 15
+        "line": 16
       },
       {
         "block_id": "b000008",
         "label": "JSON",
         "target": "Extraction.agent.json",
         "kind": "relative",
-        "line": 15
+        "line": 16
       },
       {
         "block_id": "b000008",
         "label": "`docs/FILE_PROVIDER.md`",
         "target": "FILE_PROVIDER.md",
         "kind": "relative",
-        "line": 16
+        "line": 17
       },
       {
         "block_id": "b000008",
         "label": "JSON",
         "target": "FILE_PROVIDER.agent.json",
         "kind": "relative",
-        "line": 16
+        "line": 17
       },
       {
         "block_id": "b000008",
         "label": "`docs/Platforms.md`",
         "target": "Platforms.md",
         "kind": "relative",
-        "line": 17
+        "line": 18
       },
       {
         "block_id": "b000008",
         "label": "JSON",
         "target": "Platforms.agent.json",
         "kind": "relative",
-        "line": 17
+        "line": 18
       },
       {
         "block_id": "b000008",
         "label": "`docs/SocietyReference.md`",
         "target": "SocietyReference.md",
         "kind": "relative",
-        "line": 18
+        "line": 19
       },
       {
         "block_id": "b000008",
         "label": "JSON",
         "target": "SocietyReference.agent.json",
         "kind": "relative",
-        "line": 18
+        "line": 19
       },
       {
         "block_id": "b000008",
         "label": "`docs/WindowsBuildAndRun.md`",
         "target": "WindowsBuildAndRun.md",
         "kind": "relative",
-        "line": 19
+        "line": 20
       },
       {
         "block_id": "b000008",
         "label": "JSON",
         "target": "WindowsBuildAndRun.agent.json",
         "kind": "relative",
-        "line": 19
+        "line": 20
       },
       {
         "block_id": "b000008",
         "label": "`docs/WindowsValidation.md`",
         "target": "WindowsValidation.md",
         "kind": "relative",
-        "line": 20
+        "line": 21
       },
       {
         "block_id": "b000008",
         "label": "JSON",
         "target": "WindowsValidation.agent.json",
         "kind": "relative",
-        "line": 20
+        "line": 21
       },
       {
         "block_id": "b000008",
         "label": "`docs/documentation-structure.md`",
         "target": "documentation-structure.md",
         "kind": "relative",
-        "line": 21
+        "line": 22
       },
       {
         "block_id": "b000008",
         "label": "JSON",
         "target": "documentation-structure.agent.json",
         "kind": "relative",
-        "line": 21
+        "line": 22
       }
     ],
     "tables": [
@@ -362,6 +380,10 @@
           [
             "[`docs/BuildComponents.md`](BuildComponents.md)",
             "[JSON](BuildComponents.agent.json)"
+          ],
+          [
+            "[`docs/DynamicLinking.md`](DynamicLinking.md)",
+            "[JSON](DynamicLinking.agent.json)"
           ],
           [
             "[`docs/Extraction.md`](Extraction.md)",

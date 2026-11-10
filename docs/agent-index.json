@@ -35,14 +35,21 @@
       "document_id": "urn:iisacc:document:d6d080f4f4e43c72ea0b7fdb6ddd440d6d0747f3e862f4dfc8f28c5994276859",
       "source": "docs/AlbumsValidation.md",
       "agent_json": "docs/AlbumsValidation.agent.json",
-      "source_sha256": "db996b0b8910005871a4e48964f328c9e5d71d9b6159b055e3d1e2eb68868356",
+      "source_sha256": "3f2575b3211ef2ded5eeacb259ed8aa88d83e39fd3d00bbbd12b8149c8a99936",
       "role": "guide"
     },
     {
       "document_id": "urn:iisacc:document:a9345b98b3c5dc1a88c5e66e54aa4e9b13b386b145e65461de16c6ba16467a23",
       "source": "docs/BuildComponents.md",
       "agent_json": "docs/BuildComponents.agent.json",
-      "source_sha256": "7e80cdaa52c463dbff5b1023633d0d1977efc6797ba210e154ce14a6c010541e",
+      "source_sha256": "c679045be2c5a5a9df4f53bd2ce5ca04c95f56497481ba4f30ad289c778d7cf9",
+      "role": "guide"
+    },
+    {
+      "document_id": "urn:iisacc:document:b83c9436ad8dccd88ab6ee12c7f2f542ffa8a0e350aabb61b1c451b66de06bc0",
+      "source": "docs/DynamicLinking.md",
+      "agent_json": "docs/DynamicLinking.agent.json",
+      "source_sha256": "681c7afbaaa2034b1a3d128f441fc0857df3fb750eb9183075e1986afcbb99f6",
       "role": "guide"
     },
     {
@@ -70,14 +77,14 @@
       "document_id": "urn:iisacc:document:3f44fd5cb021d2026bd8e52b8767924aa8ebb254a9ef0e33e0fc4070fba4249e",
       "source": "docs/README.md",
       "agent_json": "docs/README.agent.json",
-      "source_sha256": "cbadc14e5f186ff85a8e05a9c6c97440055b844e2d47ce31d3db9f51ee3ea4b6",
+      "source_sha256": "81ddc1afa1372b3139f3f686daeadbfa01a99cc34651324b1286c573f0fbb73d",
       "role": "overview"
     },
     {
       "document_id": "urn:iisacc:document:3e409b75eaca58f45078847084a49b8865c31167fe03d80e20417eaf2c87492c",
       "source": "docs/SocietyReference.md",
       "agent_json": "docs/SocietyReference.agent.json",
-      "source_sha256": "cae87657e832e78127116e4714267f89f73bea9de4a05abbfedfebc8c4693f29",
+      "source_sha256": "81605a4809c6dbc66bc874af7252a15cdfbfaca8c248f40ff783119544c535df",
       "role": "guide"
     },
     {

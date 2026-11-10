@@ -12,6 +12,7 @@
 #include <QTemporaryDir>
 #include <QTest>
 #include <QSignalSpy>
+#include <QElapsedTimer>
 #include <QSemaphore>
 #include <QScopeGuard>
 #include <QLockFile>
@@ -21,6 +22,7 @@
 #include <QQuickItem>
 #include "backend/runtime/appbootstrap.h"
 #include <iiSocietyHelper/Sync/Sync.h>
+#include <thread>
 
 using namespace iiPhotoLibrary;
 namespace {
@@ -119,6 +121,40 @@ struct Fixture {
 class PhotosTest : public QObject {
     Q_OBJECT
 private slots:
+    void finalShutdownDoesNotWaitForABlockedPhotoOperation() {
+        Fixture f;
+        f.library->add("slow.jpg", "fixture original");
+        const auto baselineOwners = f.library.use_count();
+        auto entered = std::make_shared<QSemaphore>(), release = std::make_shared<QSemaphore>();
+        const auto unblock = qScopeGuard([release] { release->release(); });
+        std::jthread watchdog([release](std::stop_token stop) {
+            for (int i = 0; i < 300 && !stop.stop_requested(); ++i)
+                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            if (!stop.stop_requested()) release->release();
+        });
+        f.library->beforePreview = [entered, release](const QString &) { entered->release(); release->acquire(); };
+        auto controller = std::make_unique<PhotoController>(PhotoController::Sender{}, nullptr, f.library);
+        controller->configure(f.temporary.path() + "/drive.societycontainer", true);
+        QTRY_VERIFY_WITH_TIMEOUT(!controller->busy(), 10000);
+        controller->connectLibrary();
+        QTRY_VERIFY_WITH_TIMEOUT(entered->available() > 0, 10000);
+        QElapsedTimer elapsed; elapsed.start();
+        controller->shutdownAsync();
+        controller.reset();
+        QVERIFY2(elapsed.elapsed() < 500, "Photo shutdown waited for a blocked operation");
+        release->release();
+        QTRY_COMPARE_WITH_TIMEOUT(f.library.use_count(), baselineOwners, 10000);
+        QCoreApplication::processEvents();
+        QFile original(f.library->directory + "/slow.jpg");
+        QVERIFY(original.open(QIODevice::ReadOnly)); QCOMPARE(original.readAll(), QByteArray("fixture original"));
+    }
+    void fixtureRootIsProjectResources() {
+        const QFileInfo root(QStringLiteral(IIPHOTOLIBRARY_TEST_DIRECTORY));
+        QCOMPARE(root.fileName(), QStringLiteral("resources"));
+        QVERIFY(root.isDir());
+        QTemporaryDir temporary(root.absoluteFilePath() + "/photos-test-XXXXXX");
+        QVERIFY(temporary.isValid());
+    }
     void defaultRefreshIgnoresUnselectedNativePhotosAndPreservesContainerFiles() {
         Fixture f; f.library->add("outside.jpg", "native library original");
         const auto root = f.temporary.path() + "/drive.societycontainer";

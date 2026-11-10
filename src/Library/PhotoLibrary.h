@@ -1,4 +1,5 @@
 #pragma once
+#include "PhotoLibraryExport.h"
 #include <QDateTime>
 #include <QJsonObject>
 #include <QStringList>
@@ -28,7 +29,7 @@ struct Snapshot {
 // Native originals remain owned by the OS library. PhotoStore reads selected
 // originals into its container and never calls import/trash; those low-level
 // mutations remain available to consumers that explicitly request OS changes.
-class PhotoLibrary {
+class IIPHOTOLIBRARY_EXPORT PhotoLibrary {
 public:
     virtual ~PhotoLibrary() = default;
     virtual QString name() const = 0;

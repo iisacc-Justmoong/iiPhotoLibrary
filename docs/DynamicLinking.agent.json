@@ -1,0 +1,85 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:b83c9436ad8dccd88ab6ee12c7f2f542ffa8a0e350aabb61b1c451b66de06bc0",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FiiPhotoLibrary",
+    "name": "iiPhotoLibrary",
+    "root": "SDK/iiPhotoLibrary",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/DynamicLinking.md",
+    "sha256": "681c7afbaaa2034b1a3d128f441fc0857df3fb750eb9183075e1986afcbb99f6",
+    "bytes": 617,
+    "line_count": 9,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "동적 라이브러리 빌드",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# 동적 라이브러리 빌드\n",
+      "level": 1,
+      "title": "동적 라이브러리 빌드"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 6,
+      "raw": "앨범 코어와 선택적 기존 사진 라이브러리는 기본적으로 별도 공유 라이브러리로\n빌드한다. `BUILD_SHARED_LIBS=OFF`는 정적 연결을 선택한다. 기존 CMake 타깃을\n유지하며 Windows DLL, iOS 프레임워크, WebAssembly 사이드 모듈을 지원한다.\nQt 객체의 내보내기 계약은 Windows DLL 소비자의 메타객체 접근을 포함한다.\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 8,
+      "end_line": 9,
+      "raw": "앱은 선택한 구성 요소와 필요한 플랫폼 런타임을 포함한다. 테스트 프로그램의\n통과는 앱이나 기기의 사진 접근을 실행했다는 뜻이 아니다.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "동적 라이브러리 빌드",
+      "anchor": "동적-라이브러리-빌드",
+      "start_line": 1
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

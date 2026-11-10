@@ -4,14 +4,14 @@
 #include <QAbstractListModel>
 #include <QFuture>
 #include <QObject>
-#include <QThreadPool>
 #include <QTimer>
 #include <QUrl>
 #include <QVariantList>
 
 namespace iiPhotoLibrary {
+namespace detail { class PhotoWorker; class CallbackGate; }
 // Preserve delegates and decoded images when only preview metadata changes.
-class PhotoGalleryModel final : public QAbstractListModel {
+class IIPHOTOLIBRARY_EXPORT PhotoGalleryModel final : public QAbstractListModel {
 public:
     explicit PhotoGalleryModel(QObject *parent = nullptr) : QAbstractListModel(parent) {}
     int rowCount(const QModelIndex &parent = {}) const override { return parent.isValid() ? 0 : m_rows.size(); }
@@ -21,7 +21,7 @@ public:
 private:
     QVariantList m_rows;
 };
-class PhotoController final : public QObject {
+class IIPHOTOLIBRARY_EXPORT PhotoController final : public QObject {
     Q_OBJECT
     Q_PROPERTY(QVariantList entries READ entries NOTIFY entriesChanged)
     Q_PROPERTY(QAbstractItemModel *galleryModel READ galleryModel CONSTANT)
@@ -39,7 +39,10 @@ public:
     ~PhotoController() override;
     void configure(const QString &container, bool active, const QStringList &authorized = {}, const QStringList &hosts = {});
     // Call after disabling the controller, before returning a background grant.
-    void waitForDone() { m_worker.waitForDone(); }
+    void waitForDone();
+    // Final shutdown cancels queued work and never waits for an active provider.
+    // The controller cannot be reused afterwards.
+    void shutdownAsync();
     QJsonObject handle(const QString &peer, const QJsonObject &packet);
     void receive(const QString &request, const QJsonObject &reply);
     QVariantList entries() const { return m_entries; }
@@ -90,7 +93,8 @@ private:
     Sender m_send;
     std::shared_ptr<PhotoLibrary> m_library;
     std::shared_ptr<PhotoStore> m_store;
-    QThreadPool m_worker;
+    std::unique_ptr<detail::PhotoWorker> m_worker;
+    std::shared_ptr<detail::CallbackGate> m_callbacks;
     QTimer m_timer, m_timeout, m_galleryTimer;
     QString m_container, m_identifier, m_status, m_host, m_request, m_lease;
     QStringList m_authorized, m_hosts;
@@ -109,6 +113,7 @@ private:
     bool m_refreshing = false, m_cycle = false, m_uploading = false;
     bool m_customLibrary = false, m_transferred = false;
     bool m_applicationActive = false, m_authorizing = false, m_importLibraryRequested = false;
+    bool m_retired = false;
     int m_photoIndex = 0, m_resourceIndex = 0;
     int m_waitingOriginals = 0;
     qint64 m_offset = 0;

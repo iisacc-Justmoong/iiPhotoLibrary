@@ -1,29 +1,79 @@
 #include <iiPhotoLibrary/PhotoController.h>
+#include "PhotoWorker_p.h"
 #include <FileActions.h>
 #include <QDesktopServices>
 #include <QDebug>
 #include <QFileInfo>
 #include <QFutureWatcher>
 #include <QJsonDocument>
-#include <QPointer>
 #include <QUuid>
-#include <QtConcurrent/QtConcurrentRun>
 #include <algorithm>
 #include <utility>
 
 namespace iiPhotoLibrary {
+namespace {
+QString galleryIdentity(const QVariant &value) {
+    const auto row = value.toMap();
+    const auto key = row.value("galleryKey").toString();
+    if (!key.isEmpty()) return QStringLiteral("gallery:") + key;
+    const auto id = row.value("id").toString();
+    return id.isEmpty() ? QString() : QStringLiteral("id:") + id;
+}
+bool galleryPositions(const QVariantList &rows, QHash<QString, int> &positions) {
+    positions.reserve(rows.size());
+    for (int i = 0; i < rows.size(); ++i) {
+        const auto key = galleryIdentity(rows[i]);
+        if (key.isEmpty() || positions.contains(key)) return false;
+        positions.insert(key, i);
+    }
+    return true;
+}
+}
 QVariant PhotoGalleryModel::data(const QModelIndex &index, int role) const {
     if (role != Qt::UserRole || !index.isValid() || index.row() < 0 || index.row() >= m_rows.size()) return {};
     return m_rows[index.row()];
 }
 void PhotoGalleryModel::replace(const QVariantList &rows) {
-    bool sameOrder = rows.size() == m_rows.size();
-    for (int i = 0; sameOrder && i < rows.size(); ++i) {
-        const auto before = m_rows[i].toMap(), after = rows[i].toMap();
-        sameOrder = before.value("id") == after.value("id")
-            || (!before.value("galleryKey").toString().isEmpty() && before.value("galleryKey") == after.value("galleryKey"));
+    QHash<QString, int> oldPositions, desired;
+    if (!galleryPositions(m_rows, oldPositions) || !galleryPositions(rows, desired)) {
+        beginResetModel(); m_rows = rows; endResetModel(); return;
     }
-    if (!sameOrder) { beginResetModel(); m_rows = rows; endResetModel(); return; }
+    // Remove absent identities in runs, from the end so earlier positions stay valid.
+    for (int i = int(m_rows.size()) - 1; i >= 0;) {
+        if (desired.contains(galleryIdentity(m_rows[i]))) { --i; continue; }
+        const int last = i;
+        while (i >= 0 && !desired.contains(galleryIdentity(m_rows[i]))) --i;
+        const int first = i + 1;
+        beginRemoveRows({}, first, last);
+        m_rows.remove(first, last - first + 1);
+        endRemoveRows();
+    }
+    QVariantList additions;
+    for (const auto &row : rows) if (!oldPositions.contains(galleryIdentity(row))) additions.append(row);
+    if (!additions.isEmpty()) {
+        const int first = m_rows.size();
+        beginInsertRows({}, first, first + additions.size() - 1);
+        m_rows.append(additions);
+        endInsertRows();
+    }
+    bool reordered = false;
+    for (int i = 0; i < rows.size(); ++i)
+        if (galleryIdentity(m_rows[i]) != galleryIdentity(rows[i])) { reordered = true; break; }
+    if (reordered) {
+        QHash<QString, QVariant> retained;
+        retained.reserve(m_rows.size());
+        for (const auto &row : m_rows) retained.insert(galleryIdentity(row), row);
+        QVariantList ordered; ordered.reserve(rows.size());
+        for (const auto &row : rows) ordered.append(retained.value(galleryIdentity(row)));
+        emit layoutAboutToBeChanged({}, QAbstractItemModel::VerticalSortHint);
+        const auto previous = persistentIndexList();
+        QModelIndexList next; next.reserve(previous.size());
+        for (const auto &item : previous)
+            next.append(index(desired.value(galleryIdentity(m_rows[item.row()])), item.column()));
+        m_rows.swap(ordered);
+        changePersistentIndexList(previous, next);
+        emit layoutChanged({}, QAbstractItemModel::VerticalSortHint);
+    }
     int first = -1;
     for (int i = 0; i < rows.size(); ++i) {
         if (m_rows[i] != rows[i]) {
@@ -47,8 +97,8 @@ QJsonObject photoSnapshot(PhotoStore &store, bool ok) {
 }
 }
 PhotoController::PhotoController(Sender sender, QObject *parent, std::shared_ptr<PhotoLibrary> library)
-    : QObject(parent), m_galleryModel(this), m_send(std::move(sender)), m_library(library ? library : nativePhotoLibrary()), m_customLibrary(bool(library)) {
-    m_worker.setMaxThreadCount(1);
+    : QObject(parent), m_galleryModel(this), m_send(std::move(sender)), m_library(library ? library : nativePhotoLibrary()),
+      m_callbacks(std::make_shared<detail::CallbackGate>(this)), m_customLibrary(bool(library)) {
     m_galleryTimer.setSingleShot(true); m_galleryTimer.setInterval(32);
     connect(&m_galleryTimer, &QTimer::timeout, this, [this] { updateEntries(m_records); });
     m_timer.setInterval(30000); connect(&m_timer, &QTimer::timeout, this, &PhotoController::refresh);
@@ -63,8 +113,29 @@ PhotoController::PhotoController(Sender sender, QObject *parent, std::shared_ptr
         }
     });
 }
-PhotoController::~PhotoController() { if (m_store) m_store->cancel(); m_worker.waitForDone(); }
+PhotoController::~PhotoController() {
+    m_callbacks->close();
+    if (m_store) m_store->cancel();
+    if (m_worker) m_worker->shutdown(m_retired);
+}
+void PhotoController::waitForDone() { if (m_worker) m_worker->waitForDone(); }
+void PhotoController::shutdownAsync() {
+    if (m_retired) return;
+    m_retired = true;
+    ++m_generation;
+    m_timer.stop(); m_timeout.stop(); m_galleryTimer.stop();
+    m_callbacks->close();
+    auto store = std::exchange(m_store, {});
+    if (store) {
+        store->requestCancellation();
+        // A platform provider may take an unbounded time to cancel its own
+        // request. The store remains alive until that call has returned.
+        std::thread([store] { try { store->cancel(); } catch (...) {} }).detach();
+    }
+    if (m_worker) m_worker->shutdown(true);
+}
 void PhotoController::configure(const QString &container, bool enabled, const QStringList &authorized, const QStringList &hosts) {
+    if (m_retired) return;
     if (qEnvironmentVariableIntValue("IIPHOTOLIBRARY_DISABLE_PHOTOS") == 1) enabled = false;
     m_authorized = authorized; m_hosts = hosts;
     auto drive = enabled ? iiSocietyContainer::SocietyDrive::open(container) : std::nullopt;
@@ -84,13 +155,13 @@ void PhotoController::configure(const QString &container, bool enabled, const QS
     if (identifier.isEmpty()) { emit changed(); return; }
     m_store = std::make_shared<PhotoStore>(container, m_library);
     m_refreshing = true;
-    const QPointer<PhotoController> guard(this); const auto generation = m_generation;
-    work([guard, generation](PhotoStore &store) {
-        const bool ok = store.open([guard, generation](const QJsonArray &rows, bool reset) {
-            if (!guard || rows.isEmpty()) return;
-            QMetaObject::invokeMethod(guard, [guard, generation, rows, reset] {
-                if (guard && guard->m_generation == generation) guard->updateGallery(rows, reset);
-            }, Qt::QueuedConnection);
+    const auto gate = m_callbacks; auto *owner = this; const auto generation = m_generation;
+    work([gate, owner, generation](PhotoStore &store) {
+        const bool ok = store.open([gate, owner, generation](const QJsonArray &rows, bool reset) {
+            if (rows.isEmpty()) return;
+            gate->post([owner, generation, rows, reset] {
+                if (owner->m_generation == generation) owner->updateGallery(rows, reset);
+            });
         });
         return photoSnapshot(store, ok);
     }, [this](const auto &result) {
@@ -105,15 +176,20 @@ void PhotoController::configure(const QString &container, bool enabled, const QS
 }
 void PhotoController::work(std::function<QJsonObject(PhotoStore &)> operation, Completion done) {
     if (!m_store) { done({{"ok", false}, {"error", "photo_session_unavailable"}}); return; }
+    if (!m_worker) m_worker = std::make_unique<detail::PhotoWorker>();
     const auto store = m_store; const auto generation = m_generation;
     auto *watcher = new QFutureWatcher<QJsonObject>(this);
     connect(watcher, &QFutureWatcher<QJsonObject>::finished, this, [this, watcher, generation, done = std::move(done)] {
+        if (generation != m_generation || m_retired || watcher->future().resultCount() == 0) {
+            watcher->deleteLater(); return;
+        }
         const auto result = watcher->result(); watcher->deleteLater();
-        if (generation == m_generation) done(result);
+        done(result);
     });
-    watcher->setFuture(QtConcurrent::run(&m_worker, [store, operation = std::move(operation)] { return operation(*store); }));
+    watcher->setFuture(m_worker->submit([store, operation = std::move(operation)] { return operation(*store); }));
 }
 void PhotoController::setApplicationActive(bool active) {
+    if (m_retired) return;
     if (m_applicationActive == active) return;
     m_applicationActive = active;
     if (active) refresh();
@@ -127,13 +203,15 @@ void PhotoController::connectLibrary() {
     qInfo() << "iiPhotoLibrary: requesting library access; current access:" << access();
     const auto library = m_library;
     const auto generation = m_generation;
-    QPointer<PhotoController> self(this);
-    library->authorize([self, library, generation] {
-        if (!self || self->m_generation != generation) return;
-        self->m_authorizing = false;
-        self->m_importLibraryRequested = true;
-        emit self->changed();
-        self->refresh();
+    const auto gate = m_callbacks; auto *owner = this;
+    library->authorize([gate, owner, library, generation] {
+        gate->post([owner, library, generation] {
+            if (owner->m_generation != generation) return;
+            owner->m_authorizing = false;
+            owner->m_importLibraryRequested = true;
+            emit owner->changed();
+            owner->refresh();
+        });
     });
 }
 void PhotoController::prioritizeVisible(const QStringList &keys) {
@@ -179,8 +257,8 @@ void PhotoController::refresh() {
     if (!m_store || busy()) return;
     const bool includeLibrary = std::exchange(m_importLibraryRequested, false);
     m_refreshing = true; m_status = tr("Updating photos and videos…"); emit changed();
-    const QPointer<PhotoController> guard(this); const auto generation = m_generation;
-    work([guard, generation, includeLibrary](PhotoStore &store) {
+    const auto gate = m_callbacks; auto *owner = this; const auto generation = m_generation;
+    work([gate, owner, generation, includeLibrary](PhotoStore &store) {
         QElapsedTimer published;
         QJsonArray pendingRecords; QJsonObject pendingPreviews;
         const auto refresh = includeLibrary ? &PhotoStore::importLibrary : &PhotoStore::refresh;
@@ -197,33 +275,31 @@ void PhotoController::refresh() {
             const auto records = publish ? std::exchange(pendingRecords, {}) : QJsonArray{};
             const auto previews = publish ? std::exchange(pendingPreviews, {}) : QJsonObject{};
             if (publish) published.start();
-            if (!guard) return;
-            QMetaObject::invokeMethod(guard, [guard, generation, record, records, previews] {
-                if (!guard || guard->m_generation != generation) return;
+            gate->post([owner, generation, record, records, previews] {
+                if (owner->m_generation != generation) return;
                 const auto resources = record.value("resources").toArray();
                 for (int i = 0; i < resources.size(); ++i) {
                     const auto bytes = resources[i].toObject().value("size").toString().toLongLong();
-                    emit guard->progress("Photos/index/" + record.value("id").toString() + '/' + QString::number(i), bytes, bytes);
+                    emit owner->progress("Photos/index/" + record.value("id").toString() + '/' + QString::number(i), bytes, bytes);
                 }
                 if (!records.isEmpty()) {
-                    auto merged = guard->m_records;
+                    auto merged = owner->m_records;
                     for (const auto &value : records) {
                         const auto id = value.toObject().value("id").toString();
                         qsizetype index = 0;
                         while (index < merged.size() && merged[index].toObject().value("id") != id) ++index;
                         if (index == merged.size()) merged.append(value); else merged[index] = value;
-                        guard->m_previewStamps[id] = previews.value(id);
+                        owner->m_previewStamps[id] = previews.value(id);
                     }
-                    guard->updateEntries(merged);
-                    guard->m_status = tr("Updating photos and videos… %1 available").arg(guard->m_entries.size());
-                    emit guard->changed(); emit guard->contentsChanged();
+                    owner->updateEntries(merged);
+                    owner->m_status = tr("Updating photos and videos… %1 available").arg(owner->m_entries.size());
+                    emit owner->changed(); emit owner->contentsChanged();
                 }
-            }, Qt::QueuedConnection);
-        }, [guard, generation](const QJsonArray &rows, bool reset) {
-            if (!guard) return;
-            QMetaObject::invokeMethod(guard, [guard, generation, rows, reset] {
-                if (guard && guard->m_generation == generation) guard->updateGallery(rows, reset);
-            }, Qt::QueuedConnection);
+            });
+        }, [gate, owner, generation](const QJsonArray &rows, bool reset) {
+            gate->post([owner, generation, rows, reset] {
+                if (owner->m_generation == generation) owner->updateGallery(rows, reset);
+            });
         });
         return photoSnapshot(store, ok);
     }, [this](const auto &result) {
@@ -324,7 +400,8 @@ QJsonObject PhotoController::handle(const QString &peer, const QJsonObject &pack
         m_jobs.erase(oldest);
     }
     const auto store = m_store;
-    m_jobs.insert(key, {QtConcurrent::run(&m_worker, [store, packet] { return store->command(packet); }), bytes, now});
+    if (!m_worker) m_worker = std::make_unique<detail::PhotoWorker>();
+    m_jobs.insert(key, {m_worker->submit([store, packet] { return store->command(packet); }), bytes, now});
     return {{"ok", true}, {"pending", true}};
 }
 void PhotoController::local(const QJsonObject &command, Completion done) {

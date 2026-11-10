@@ -11,7 +11,7 @@
 namespace iiPhotoLibrary {
 // Serialized by PhotoController's worker, with a process lock for GUI/daemon
 // handoff. Only validated IDs and resource indices are accepted from peers.
-class PhotoStore final {
+class IIPHOTOLIBRARY_EXPORT PhotoStore final {
 public:
     PhotoStore(QString container, std::shared_ptr<PhotoLibrary> library);
     using GalleryProgress = std::function<void(const QJsonArray &, bool reset)>;
@@ -38,7 +38,8 @@ public:
     bool duplicate(const QString &id);
     QString errorString() const { return m_error; }
     QString containerId() const;
-    void cancel() { m_cancelled = true; m_library->cancel(); }
+    void requestCancellation() { m_cancelled = true; }
+    void cancel() { requestCancellation(); m_library->cancel(); }
     bool cancelled() const { return m_cancelled; }
     void releaseExports();
     static bool validRecord(const QJsonObject &record);
