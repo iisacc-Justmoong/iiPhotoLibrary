@@ -1,0 +1,7 @@
+@PACKAGE_INIT@
+include(CMakeFindDependencyMacro)
+find_dependency(iiPhotoLibrary 0.1 CONFIG COMPONENTS Library)
+find_dependency(iiPhotoLibraryPresentation 0.1 CONFIG)
+find_dependency(Qt6 6.8 COMPONENTS Core)
+include("${CMAKE_CURRENT_LIST_DIR}/iiPhotoLibraryQtPresentationBridgeTargets.cmake")
+check_required_components(iiPhotoLibraryQtPresentationBridge)

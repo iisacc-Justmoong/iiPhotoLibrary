@@ -1,0 +1,7 @@
+@PACKAGE_INIT@
+set_and_check(iiPhotoLibraryPresentation_VIEWS_DIR "${PACKAGE_PREFIX_DIR}/@CMAKE_INSTALL_DATADIR@/iiPhotoLibraryPresentation/views")
+set_and_check(iiPhotoLibraryPresentation_STRINGS_DIR "${PACKAGE_PREFIX_DIR}/@CMAKE_INSTALL_DATADIR@/iiPhotoLibraryPresentation/strings")
+include(CMakeFindDependencyMacro)
+find_dependency(iiSDKCore 0.20 CONFIG COMPONENTS Runtime HINTS "$ENV{HOME}/.local/SDK/iiSDKCore")
+include("${CMAKE_CURRENT_LIST_DIR}/iiPhotoLibraryPresentationTargets.cmake")
+check_required_components(iiPhotoLibraryPresentation)

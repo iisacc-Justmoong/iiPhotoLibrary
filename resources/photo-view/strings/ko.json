@@ -1,0 +1,20 @@
+{
+  "locale": "ko-KR",
+  "strings": {
+    "photo.title": "사진",
+    "photo.import_library": "사진 보관함 가져오기…",
+    "photo.add": "사진 또는 동영상 추가…",
+    "photo.refresh": "새로고침",
+    "photo.size": "크기",
+    "photo.loading": "사진 보관함을 읽는 중…",
+    "photo.empty": "이 컨테이너에 사진과 동영상을 추가하거나 사진 보관함을 직접 가져오세요.",
+    "photo.video": "동영상",
+    "photo.image": "사진",
+    "photo.information": "파일 정보",
+    "photo.open": "원본 보기",
+    "photo.copy": "복사",
+    "photo.duplicate": "복제",
+    "photo.share": "공유…",
+    "photo.trash": "휴지통으로 이동"
+  }
+}

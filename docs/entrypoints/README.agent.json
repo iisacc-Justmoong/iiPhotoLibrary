@@ -10,9 +10,9 @@
   },
   "source": {
     "path": "README.md",
-    "sha256": "7e0c7385eef0c01e6f412bbf37165526a7f2d14a65ca2e0e247efc43328cb769",
-    "bytes": 12816,
-    "line_count": 127,
+    "sha256": "986b775f6f62c92de14c1e6e6b599e746795563c2571f67f9a14fdaa39572f87",
+    "bytes": 13494,
+    "line_count": 137,
     "encoding": "utf-8",
     "language": "ko"
   },
@@ -114,8 +114,8 @@
       "id": "b000013",
       "kind": "list",
       "start_line": 16,
-      "end_line": 24,
-      "raw": "- `AlbumManager` / `Album`: independently instantiated local, iCloud Photos, Google Photos and received external albums, with per-connection identity, snapshots and lifetime management.\n- `AlbumManager::allLibrary()`: a stable, read-only album named **All Library** that returns the union of currently loaded, visible photos across those albums. Photos are deduplicated by provider/account/source-photo identity, with source references retained in metadata. Reads reflect album updates and disconnections without performing I/O.\n- `AlbumManager::smartAlbum()` / `smartAlbums()`: eight live **Screenshots**, **Imported Photos**, **Duplicates**, **Hidden**, **Images**, **Videos**, **Favorite** and **Deleted** views. Media views use the existing photo/video type; favorites use the existing `AlbumPhoto::favorite` field. Typed traits and `setScreenshot()`, `setImported()`, `setHidden()`, `setContentHash()`, `setFavorite()` and `setDeleted()` drive classification; `setPhotoTraits()` updates several fields atomically. Exact duplicates use supplied SHA-256 digests and are available through `duplicateGroups()`. Deleted items appear only in Deleted, and the remaining hidden items appear only in Hidden. `setDeleted(id, false)` restores the item's previous classifications. These changes affect SDK metadata; originals and native/remote trash are handled by their owning host. Apple scans forward PhotoKit screenshot/hidden/favorite metadata; hosts provide hashes and import classifications.\n- `AlbumSource` / `GooglePhotosAlbumSource`: replaceable sources and current Google Photos Picker/app-created-item REST readers. OAuth, Picker UI and HTTPS transport are supplied by the host.\n- `PhotoLibrary`: Low-level native access, preview, extraction and explicitly requested OS registration/trash interface.\n- `PhotoStore` : permanent gallery index, visible region priority preview, alias, original cache/lease, chunk handover/SHA-256 validation, prevent deletion of limited access and incomplete query.\n- `PhotoController` : QML model, work thread/cancel, authentication peer and container check, upload/selective original download. Inject transport layer via `Sender` callback.\n- `PhotosView`: LVRS based screens and GalleryTile / GalleryInfo / GalleryZoom.\n- Apple PhotoKit, Android MediaStore, Windows Shell adapter and unsupported platform storage-only adapter.\n",
+      "end_line": 28,
+      "raw": "- `AlbumManager` / `Album`: independently instantiated local, iCloud Photos, Google Photos and received external albums, with per-connection identity, snapshots and lifetime management.\n- `AlbumManager::allLibrary()`: a stable, read-only album named **All Library** that returns the union of currently loaded, visible photos across those albums. Photos are deduplicated by provider/account/source-photo identity, with source references retained in metadata. Reads reflect album updates and disconnections without performing I/O.\n- `AlbumManager::smartAlbum()` / `smartAlbums()`: eight live **Screenshots**, **Imported Photos**, **Duplicates**, **Hidden**, **Images**, **Videos**, **Favorite** and **Deleted** views. Media views use the existing photo/video type; favorites use the existing `AlbumPhoto::favorite` field. Typed traits and `setScreenshot()`, `setImported()`, `setHidden()`, `setContentHash()`, `setFavorite()` and `setDeleted()` drive classification; `setPhotoTraits()` updates several fields atomically. Exact duplicates use supplied SHA-256 digests and are available through `duplicateGroups()`. Deleted items appear only in Deleted, and the remaining hidden items appear only in Hidden. `setDeleted(id, false)` restores the item's previous classifications. These changes affect SDK metadata; originals and native/remote trash are handled by their owning host. Apple scans forward PhotoKit screenshot/hidden/favorite metadata; hosts provide hashes and import classifications.\n- `AlbumSource` / `GooglePhotosAlbumSource`: replaceable sources and current Google Photos Picker/app-created-item REST readers. OAuth, Picker UI and HTTPS transport are supplied by the host.\n- `PhotoLibrary`: Low-level native access, preview, extraction and explicitly requested OS registration/trash interface.\n- `PhotoStore` : permanent gallery index, visible region priority preview, alias, original cache/lease, chunk handover/SHA-256 validation, prevent deletion of limited access and incomplete query.\n- `PhotoController` : QML model, work thread/cancel, authentication peer and container check, upload/selective original download. Inject transport layer via `Sender` callback.\n- `iiPhotoLibrary::Presentation`: a Qt-free C++23 photo view model and LVUI\n  gallery declaration. Applications provide an LVUI/iiGUI host, image loader,\n  file picker and service connection; see [native photo views](docs/NativePhotoViews.md).\n- The previous LVRS `PhotosView`, `GalleryTile`, `GalleryInfo` and `GalleryZoom`\n  remain in an isolated legacy QML import path for existing consumers.\n- Apple PhotoKit, Android MediaStore, Windows Shell adapter and unsupported platform storage-only adapter.\n",
       "items": [
         {
           "marker": "-",
@@ -154,7 +154,12 @@
         },
         {
           "marker": "-",
-          "text": "`PhotosView`: LVRS based screens and GalleryTile / GalleryInfo / GalleryZoom.",
+          "text": "`iiPhotoLibrary::Presentation`: a Qt-free C++23 photo view model and LVUI",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "The previous LVRS `PhotosView`, `GalleryTile`, `GalleryInfo` and `GalleryZoom`",
           "checked": null
         },
         {
@@ -167,43 +172,43 @@
     {
       "id": "b000014",
       "kind": "blank",
-      "start_line": 25,
-      "end_line": 25,
-      "raw": "\n"
-    },
-    {
-      "id": "b000015",
-      "kind": "paragraph",
-      "start_line": 26,
-      "end_line": 26,
-      "raw": "This 0.1 extraction preserves the existing Qt implementation. **The transition to a standard C++ SDK without Qt is not complete.** Qt 6.8.3 Core/Gui/Concurrent and iiSocietyContainer 0.14 Gui are required, and Qt types remain in the public API. Existing Qt dependencies are present in storage and synchronization code as well as GUI image processing and QML models. This is a compatibility package separated without rewriting its features; these dependencies must not be mistaken for a pure C++ core. Using QML requires LVRS and Qt Quick/QuickControls2/Dialogs. `iiSocietyHelper` 0.10.0 and `iiWebServer` are required only for integration tests and are not direct dependencies of the library.\n"
-    },
-    {
-      "id": "b000016",
-      "kind": "blank",
-      "start_line": 27,
-      "end_line": 27,
-      "raw": "\n"
-    },
-    {
-      "id": "b000017",
-      "kind": "html",
-      "start_line": 28,
-      "end_line": 28,
-      "raw": "<a id=\"빌드테스트설치\"></a>\n"
-    },
-    {
-      "id": "b000018",
-      "kind": "blank",
       "start_line": 29,
       "end_line": 29,
       "raw": "\n"
     },
     {
-      "id": "b000019",
-      "kind": "heading",
+      "id": "b000015",
+      "kind": "paragraph",
       "start_line": 30,
       "end_line": 30,
+      "raw": "This 0.1 extraction preserves the existing Qt implementation. **The transition to a standard C++ SDK without Qt is not complete.** Qt 6.8.3 Core/Gui/Concurrent and iiSocietyContainer 0.14 Gui are required, and Qt types remain in the public API. Existing Qt dependencies are present in storage and synchronization code as well as GUI image processing and QML models. This is a compatibility package separated without rewriting its features; these dependencies must not be mistaken for a pure C++ core. Using QML requires LVRS and Qt Quick/QuickControls2/Dialogs. `iiSocietyHelper` 0.10.0 and `iiWebServer` are required only for integration tests and are not direct dependencies of the library.\n"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 31,
+      "end_line": 31,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "html",
+      "start_line": 32,
+      "end_line": 32,
+      "raw": "<a id=\"빌드테스트설치\"></a>\n"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 33,
+      "end_line": 33,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "heading",
+      "start_line": 34,
+      "end_line": 34,
       "raw": "## Build·Test·Install\n",
       "level": 2,
       "title": "Build·Test·Install"
@@ -211,43 +216,43 @@
     {
       "id": "b000020",
       "kind": "blank",
-      "start_line": 31,
-      "end_line": 31,
-      "raw": "\n"
-    },
-    {
-      "id": "b000021",
-      "kind": "paragraph",
-      "start_line": 32,
-      "end_line": 32,
-      "raw": "The new `iiPhotoLibrary::Albums` target is a standard C++23 core without Qt. The existing native photo/storage/controller layer retains its Qt dependencies. Use `find_package(iiPhotoLibrary CONFIG REQUIRED COMPONENTS Albums)` and include `Album.h` or `GooglePhotosAlbumSource.h` for the core alone. `-DIIPHOTOLIBRARY_ALBUMS_ONLY=ON` builds only that core. See [album objects and external service contracts](docs/Albums.md) for iCloud System Photo Library coverage, Google API limits, host integration and validation.\n"
-    },
-    {
-      "id": "b000022",
-      "kind": "blank",
-      "start_line": 33,
-      "end_line": 33,
-      "raw": "\n"
-    },
-    {
-      "id": "b000023",
-      "kind": "paragraph",
-      "start_line": 34,
-      "end_line": 34,
-      "raw": "All artifacts are placed under `build/`. The path of the existing SDK installation is added to `CMAKE_PREFIX_PATH`. If the LVRS installation location differs from the default, pass `-DLVRS_DIR=<installation>/lib/cmake/LVRS`.\n"
-    },
-    {
-      "id": "b000024",
-      "kind": "blank",
       "start_line": 35,
       "end_line": 35,
       "raw": "\n"
     },
     {
+      "id": "b000021",
+      "kind": "paragraph",
+      "start_line": 36,
+      "end_line": 36,
+      "raw": "The new `iiPhotoLibrary::Albums` target is a standard C++23 core without Qt. The existing native photo/storage/controller layer retains its Qt dependencies. Use `find_package(iiPhotoLibrary CONFIG REQUIRED COMPONENTS Albums)` and include `Album.h` or `GooglePhotosAlbumSource.h` for the core alone. `-DIIPHOTOLIBRARY_ALBUMS_ONLY=ON` builds only that core. See [album objects and external service contracts](docs/Albums.md) for iCloud System Photo Library coverage, Google API limits, host integration and validation.\n"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 37,
+      "end_line": 37,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "paragraph",
+      "start_line": 38,
+      "end_line": 38,
+      "raw": "All artifacts are placed under `build/`. The path of the existing SDK installation is added to `CMAKE_PREFIX_PATH`. If the LVRS installation location differs from the default, pass `-DLVRS_DIR=<installation>/lib/cmake/LVRS`.\n"
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 39,
+      "end_line": 39,
+      "raw": "\n"
+    },
+    {
       "id": "b000025",
       "kind": "fenced_code",
-      "start_line": 36,
-      "end_line": 43,
+      "start_line": 40,
+      "end_line": 47,
       "raw": "```sh\ncmake -S . -B build -DCMAKE_BUILD_TYPE=Release \\\n  -DCMAKE_PREFIX_PATH=\"<Qt>;<iiSocietyContainer>;<iiSocietyHelper>;<iiWebServer>;<LVRS>\" \\\n  -DCMAKE_INSTALL_PREFIX=\"$PWD/build/install\"\ncmake --build build --parallel\nctest --test-dir build --output-on-failure\ncmake --install build\n```\n",
       "language": "sh",
       "code": "cmake -S . -B build -DCMAKE_BUILD_TYPE=Release \\\n  -DCMAKE_PREFIX_PATH=\"<Qt>;<iiSocietyContainer>;<iiSocietyHelper>;<iiWebServer>;<LVRS>\" \\\n  -DCMAKE_INSTALL_PREFIX=\"$PWD/build/install\"\ncmake --build build --parallel\nctest --test-dir build --output-on-failure\ncmake --install build\n",
@@ -256,46 +261,46 @@
     {
       "id": "b000026",
       "kind": "blank",
-      "start_line": 44,
-      "end_line": 44,
+      "start_line": 48,
+      "end_line": 48,
       "raw": "\n"
     },
     {
       "id": "b000027",
       "kind": "paragraph",
-      "start_line": 45,
-      "end_line": 45,
+      "start_line": 49,
+      "end_line": 49,
       "raw": "Product consumption builds can omit test `-DBUILD_TESTING=OFF` LVRS and iiSocietyHelper test dependency discovery. SDK is the target for CMake automatic search of the integrated installer and does not require separate central list registration.\n"
     },
     {
       "id": "b000028",
       "kind": "blank",
-      "start_line": 46,
-      "end_line": 46,
+      "start_line": 50,
+      "end_line": 50,
       "raw": "\n"
     },
     {
       "id": "b000029",
       "kind": "fenced_code",
-      "start_line": 47,
-      "end_line": 51,
-      "raw": "```cmake\nfind_package(iiPhotoLibrary 0.1 CONFIG REQUIRED)\ntarget_link_libraries(MyApp PRIVATE iiPhotoLibrary::iiPhotoLibrary)\n# Pass iiPhotoLibrary_QML_IMPORT_PATH to QQmlEngine::addImportPath().\n```\n",
+      "start_line": 51,
+      "end_line": 59,
+      "raw": "```cmake\nfind_package(iiPhotoLibrary 0.1 CONFIG REQUIRED) # Legacy Qt service, if needed\ntarget_link_libraries(MyApp PRIVATE iiPhotoLibrary::iiPhotoLibrary)\n# iiPhotoLibrary_QML_IMPORT_PATH aliases iiPhotoLibrary_LEGACY_QML_IMPORT_PATH.\n# New UI consumers combine the separate presentation package with LVUI and iiGUI:\nfind_package(iiPhotoLibraryPresentation 0.1 CONFIG REQUIRED)\ntarget_link_libraries(MyApp PRIVATE iiPhotoLibrary::Presentation)\n# The package supplies iiPhotoLibraryPresentation_VIEWS_DIR and STRINGS_DIR.\n```\n",
       "language": "cmake",
-      "code": "find_package(iiPhotoLibrary 0.1 CONFIG REQUIRED)\ntarget_link_libraries(MyApp PRIVATE iiPhotoLibrary::iiPhotoLibrary)\n# Pass iiPhotoLibrary_QML_IMPORT_PATH to QQmlEngine::addImportPath().\n",
+      "code": "find_package(iiPhotoLibrary 0.1 CONFIG REQUIRED) # Legacy Qt service, if needed\ntarget_link_libraries(MyApp PRIVATE iiPhotoLibrary::iiPhotoLibrary)\n# iiPhotoLibrary_QML_IMPORT_PATH aliases iiPhotoLibrary_LEGACY_QML_IMPORT_PATH.\n# New UI consumers combine the separate presentation package with LVUI and iiGUI:\nfind_package(iiPhotoLibraryPresentation 0.1 CONFIG REQUIRED)\ntarget_link_libraries(MyApp PRIVATE iiPhotoLibrary::Presentation)\n# The package supplies iiPhotoLibraryPresentation_VIEWS_DIR and STRINGS_DIR.\n",
       "closed": true
     },
     {
       "id": "b000030",
       "kind": "blank",
-      "start_line": 52,
-      "end_line": 52,
+      "start_line": 60,
+      "end_line": 60,
       "raw": "\n"
     },
     {
       "id": "b000031",
       "kind": "fenced_code",
-      "start_line": 53,
-      "end_line": 61,
+      "start_line": 61,
+      "end_line": 69,
       "raw": "```cpp\n#include <iiPhotoLibrary/iiPhotoLibrary.h>\niiPhotoLibrary::PhotoController photos(sender, parent);\n// Pass only peers verified by the existing authentication layer.\nphotos.configure(containerPath, true, authorizedPeers, hostPeers);\nphotos.setApplicationActive(true);\n// society.photos request -> photos.handle(authenticatedPeer, packet)\n// Transfer response -> photos.receive(requestId, reply)\n```\n",
       "language": "cpp",
       "code": "#include <iiPhotoLibrary/iiPhotoLibrary.h>\niiPhotoLibrary::PhotoController photos(sender, parent);\n// Pass only peers verified by the existing authentication layer.\nphotos.configure(containerPath, true, authorizedPeers, hostPeers);\nphotos.setApplicationActive(true);\n// society.photos request -> photos.handle(authenticatedPeer, packet)\n// Transfer response -> photos.receive(requestId, reply)\n",
@@ -304,345 +309,359 @@
     {
       "id": "b000032",
       "kind": "blank",
-      "start_line": 62,
-      "end_line": 62,
+      "start_line": 70,
+      "end_line": 70,
       "raw": "\n"
     },
     {
       "id": "b000033",
+      "kind": "paragraph",
+      "start_line": 71,
+      "end_line": 71,
+      "raw": "Legacy QML compatibility example:\n"
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 72,
+      "end_line": 72,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
       "kind": "fenced_code",
-      "start_line": 63,
-      "end_line": 66,
+      "start_line": 73,
+      "end_line": 76,
       "raw": "```qml\nimport iiPhotoLibrary 1.0\nPhotosView { controller: photoController }\n```\n",
       "language": "qml",
       "code": "import iiPhotoLibrary 1.0\nPhotosView { controller: photoController }\n",
       "closed": true
     },
     {
-      "id": "b000034",
-      "kind": "blank",
-      "start_line": 67,
-      "end_line": 67,
-      "raw": "\n"
-    },
-    {
-      "id": "b000035",
-      "kind": "paragraph",
-      "start_line": 68,
-      "end_line": 68,
-      "raw": "The caller provides the prepared iiSocietyContainer container and the authenticated transfer path. File synchronization of metadata and preview is handled by a separate layer such as iiSocietyHelper Sync. It delivers app foreground/background changes and job ownership release, and waits for termination after `waitForDone()` deactivation. `IIPHOTOLIBRARY_DISABLE_PHOTOS=1` disables this SDK's controller.\n"
-    },
-    {
       "id": "b000036",
-      "kind": "blank",
-      "start_line": 69,
-      "end_line": 69,
-      "raw": "\n"
-    },
-    {
-      "id": "b000037",
-      "kind": "heading",
-      "start_line": 70,
-      "end_line": 70,
-      "raw": "## Photo storage directory lifetime\n",
-      "level": 2,
-      "title": "Photo storage directory lifetime"
-    },
-    {
-      "id": "b000038",
-      "kind": "blank",
-      "start_line": 71,
-      "end_line": 71,
-      "raw": "\n"
-    },
-    {
-      "id": "b000039",
-      "kind": "paragraph",
-      "start_line": 72,
-      "end_line": 72,
-      "raw": "Opening an empty `PhotoStore`, publishing its startup catalog, and reading its gallery, aliases or resource paths do not create `.society-photos/<container-id>/` or `Photos/.previews/`. The store validates these locations even when they are absent. Existing photo records and native references retain their format and identity.\n"
-    },
-    {
-      "id": "b000040",
-      "kind": "blank",
-      "start_line": 73,
-      "end_line": 73,
-      "raw": "\n"
-    },
-    {
-      "id": "b000041",
-      "kind": "paragraph",
-      "start_line": 74,
-      "end_line": 74,
-      "raw": "An initial refresh with no stored photo state or Photos payload succeeds without writing an operation lock, index or startup catalog, even when the OS library contains photos. Ordinary refresh does not scan that library. This also applies to empty directories prepared by an older session. Existing records, references, tombstones and unknown files retain the normal refresh path. An explicitly requested nonempty native scan is reused by the writer instead of scanning twice; if another process committed photo history meanwhile, the store scans again under its operation lock.\n"
-    },
-    {
-      "id": "b000042",
-      "kind": "blank",
-      "start_line": 75,
-      "end_line": 75,
-      "raw": "\n"
-    },
-    {
-      "id": "b000043",
-      "kind": "paragraph",
-      "start_line": 76,
-      "end_line": 76,
-      "raw": "Each write prepares only its required parent: gallery and reference JSON files create their respective directories, preview writes create `Photos/.previews/`, and native exports or incoming chunks create `incoming/`. Committing or explicitly preparing an original creates `originals/`; gallery discovery alone leaves that cache absent. Viewing and sharing exports create `viewing/` on demand. Storage capacity checks use the existing container root so that the first transfer can begin before the private directory exists. Empty staging/cache directories removed between completed operations are recreated by the next writer, with path confinement checks retained.\n"
-    },
-    {
-      "id": "b000044",
       "kind": "blank",
       "start_line": 77,
       "end_line": 77,
       "raw": "\n"
     },
     {
-      "id": "b000045",
+      "id": "b000037",
       "kind": "paragraph",
       "start_line": 78,
       "end_line": 78,
-      "raw": "The `iiPhotoLibrary.Photos` regression suite covers repeated empty opens/reads/refreshes, container connection without OS scans or permission prompts, explicit library reads, older empty scaffolding, preservation of unknown and user-supplied files, discovery before original staging, recreation of unused write parents, and the first received transfer without an initial refresh. `iiPhotoLibrary` is a static library: consumers such as the Society GUI and daemon must be relinked to use this behavior. A process already running the previous implementation can still depend on directories prepared when its session opened. Do not remove those session directories while preserving that process; installing a new bundle does not replace the code in its existing session.\n"
+      "raw": "The caller provides the prepared iiSocietyContainer container and the authenticated transfer path. File synchronization of metadata and preview is handled by a separate layer such as iiSocietyHelper Sync. It delivers app foreground/background changes and job ownership release, and waits for termination after `waitForDone()` deactivation. `IIPHOTOLIBRARY_DISABLE_PHOTOS=1` disables this SDK's controller.\n"
     },
     {
-      "id": "b000046",
+      "id": "b000038",
       "kind": "blank",
       "start_line": 79,
       "end_line": 79,
       "raw": "\n"
     },
     {
-      "id": "b000047",
+      "id": "b000039",
       "kind": "heading",
       "start_line": 80,
       "end_line": 80,
-      "raw": "## Container-owned photo operations\n",
+      "raw": "## Photo storage directory lifetime\n",
       "level": 2,
-      "title": "Container-owned photo operations"
+      "title": "Photo storage directory lifetime"
     },
     {
-      "id": "b000048",
+      "id": "b000040",
       "kind": "blank",
       "start_line": 81,
       "end_line": 81,
       "raw": "\n"
     },
     {
-      "id": "b000049",
+      "id": "b000041",
       "kind": "paragraph",
       "start_line": 82,
       "end_line": 82,
-      "raw": "`PhotoStore::refresh()` manages only files, aliases, existing references and caches in the selected `.societycontainer`. It does not enumerate the OS library, request permission, register an OS asset or delete one. Images supplied in `Photos/` remain at their original container paths. Their portable aliases and verified resource caches are stored inside the same container. `consume()` validates complete cached resources without exporting them to Apple Photos, Android MediaStore or Windows Pictures. `trash()` records a container tombstone; both local and remote tombstones leave native assets unchanged.\n"
+      "raw": "Opening an empty `PhotoStore`, publishing its startup catalog, and reading its gallery, aliases or resource paths do not create `.society-photos/<container-id>/` or `Photos/.previews/`. The store validates these locations even when they are absent. Existing photo records and native references retain their format and identity.\n"
     },
     {
-      "id": "b000050",
+      "id": "b000042",
       "kind": "blank",
       "start_line": 83,
       "end_line": 83,
       "raw": "\n"
     },
     {
-      "id": "b000051",
+      "id": "b000043",
       "kind": "paragraph",
       "start_line": 84,
       "end_line": 84,
-      "raw": "An application can explicitly call `PhotoStore::importLibrary()` to read the permitted OS library into container aliases, references and previews. `PhotoController::connectLibrary()` performs that one read after an explicit permission request when required. Configuring a container, entering the foreground and periodic refresh do not initiate native discovery. Later native assets require another explicit connection/import; viewing or transferring an existing reference can read that selected original into the container. The independent `PhotoLibrary::import()` and `PhotoLibrary::trash()` APIs remain available for other consumers that intentionally mutate an OS library.\n"
+      "raw": "An initial refresh with no stored photo state or Photos payload succeeds without writing an operation lock, index or startup catalog, even when the OS library contains photos. Ordinary refresh does not scan that library. This also applies to empty directories prepared by an older session. Existing records, references, tombstones and unknown files retain the normal refresh path. An explicitly requested nonempty native scan is reused by the writer instead of scanning twice; if another process committed photo history meanwhile, the store scans again under its operation lock.\n"
     },
     {
-      "id": "b000052",
+      "id": "b000044",
       "kind": "blank",
       "start_line": 85,
       "end_line": 85,
       "raw": "\n"
     },
     {
-      "id": "b000053",
+      "id": "b000045",
       "kind": "paragraph",
       "start_line": 86,
       "end_line": 86,
-      "raw": "Container-owned duplicates and received resource revisions keep their verified originals when transient native exports are released or pruned. Shared hashes are retained while any live alias lacks a matching available native reference. A regular refresh can repair a damaged stored gallery preview from its existing canonical container preview without a native scan or export.\n"
+      "raw": "Each write prepares only its required parent: gallery and reference JSON files create their respective directories, preview writes create `Photos/.previews/`, and native exports or incoming chunks create `incoming/`. Committing or explicitly preparing an original creates `originals/`; gallery discovery alone leaves that cache absent. Viewing and sharing exports create `viewing/` on demand. Storage capacity checks use the existing container root so that the first transfer can begin before the private directory exists. Empty staging/cache directories removed between completed operations are recreated by the next writer, with path confinement checks retained.\n"
     },
     {
-      "id": "b000054",
+      "id": "b000046",
       "kind": "blank",
       "start_line": 87,
       "end_line": 87,
       "raw": "\n"
     },
     {
-      "id": "b000055",
-      "kind": "html",
+      "id": "b000047",
+      "kind": "paragraph",
       "start_line": 88,
       "end_line": 88,
-      "raw": "<a id=\"호환성검증\"></a>\n"
+      "raw": "The `iiPhotoLibrary.Photos` regression suite covers repeated empty opens/reads/refreshes, container connection without OS scans or permission prompts, explicit library reads, older empty scaffolding, preservation of unknown and user-supplied files, discovery before original staging, recreation of unused write parents, and the first received transfer without an initial refresh. `iiPhotoLibrary` is a static library: consumers such as the Society GUI and daemon must be relinked to use this behavior. A process already running the previous implementation can still depend on directories prepared when its session opened. Do not remove those session directories while preserving that process; installing a new bundle does not replace the code in its existing session.\n"
     },
     {
-      "id": "b000056",
+      "id": "b000048",
       "kind": "blank",
       "start_line": 89,
       "end_line": 89,
       "raw": "\n"
     },
     {
-      "id": "b000057",
+      "id": "b000049",
       "kind": "heading",
       "start_line": 90,
       "end_line": 90,
-      "raw": "## Compatibility·Validation\n",
+      "raw": "## Container-owned photo operations\n",
       "level": 2,
-      "title": "Compatibility·Validation"
+      "title": "Container-owned photo operations"
     },
     {
-      "id": "b000058",
+      "id": "b000050",
       "kind": "blank",
       "start_line": 91,
       "end_line": 91,
       "raw": "\n"
     },
     {
-      "id": "b000059",
+      "id": "b000051",
       "kind": "paragraph",
       "start_line": 92,
       "end_line": 92,
-      "raw": "`.societyphoto`, `.society-photos`, `society.photos` and `Society-<id>-<index>-<name>` remain compatible with existing data and transfers. The low-level native import adapter retains its Pictures/Society destination for explicit OS-library consumers; PhotoStore does not invoke it. C++ namespace and Android class are independent to avoid conflicts with the app. Do not enable the old implementation and SDK controller simultaneously in the same container.\n"
+      "raw": "`PhotoStore::refresh()` manages only files, aliases, existing references and caches in the selected `.societycontainer`. It does not enumerate the OS library, request permission, register an OS asset or delete one. Images supplied in `Photos/` remain at their original container paths. Their portable aliases and verified resource caches are stored inside the same container. `consume()` validates complete cached resources without exporting them to Apple Photos, Android MediaStore or Windows Pictures. `trash()` records a container tombstone; both local and remote tombstones leave native assets unchanged.\n"
     },
     {
-      "id": "b000060",
+      "id": "b000052",
       "kind": "blank",
       "start_line": 93,
       "end_line": 93,
       "raw": "\n"
     },
     {
-      "id": "b000061",
+      "id": "b000053",
       "kind": "paragraph",
       "start_line": 94,
-      "end_line": 96,
-      "raw": "The original SHA-256 and extraction criteria Git revision are at [source-manifest.json](docs/source-manifest.json). Existing Society uncommitted changes are not changed regardless of inclusion or exclusion.\n[original operation contract](docs/SocietyReference.md)is the reference document at the time of extraction, and the existing product's platform verification written in that document does not mean the new verification of this SDK.\nRefer to [platform integration](docs/Platforms.md), [extraction and verification results](docs/Extraction.md).\n"
+      "end_line": 94,
+      "raw": "An application can explicitly call `PhotoStore::importLibrary()` to read the permitted OS library into container aliases, references and previews. `PhotoController::connectLibrary()` performs that one read after an explicit permission request when required. Configuring a container, entering the foreground and periodic refresh do not initiate native discovery. Later native assets require another explicit connection/import; viewing or transferring an existing reference can read that selected original into the container. The independent `PhotoLibrary::import()` and `PhotoLibrary::trash()` APIs remain available for other consumers that intentionally mutate an OS library.\n"
     },
     {
-      "id": "b000062",
+      "id": "b000054",
+      "kind": "blank",
+      "start_line": 95,
+      "end_line": 95,
+      "raw": "\n"
+    },
+    {
+      "id": "b000055",
+      "kind": "paragraph",
+      "start_line": 96,
+      "end_line": 96,
+      "raw": "Container-owned duplicates and received resource revisions keep their verified originals when transient native exports are released or pruned. Shared hashes are retained while any live alias lacks a matching available native reference. A regular refresh can repair a damaged stored gallery preview from its existing canonical container preview without a native scan or export.\n"
+    },
+    {
+      "id": "b000056",
       "kind": "blank",
       "start_line": 97,
       "end_line": 97,
       "raw": "\n"
     },
     {
-      "id": "b000063",
-      "kind": "heading",
+      "id": "b000057",
+      "kind": "html",
       "start_line": 98,
       "end_line": 98,
-      "raw": "## License\n",
-      "level": 2,
-      "title": "License"
+      "raw": "<a id=\"호환성검증\"></a>\n"
     },
     {
-      "id": "b000064",
+      "id": "b000058",
       "kind": "blank",
       "start_line": 99,
       "end_line": 99,
       "raw": "\n"
     },
     {
-      "id": "b000065",
-      "kind": "paragraph",
+      "id": "b000059",
+      "kind": "heading",
       "start_line": 100,
       "end_line": 100,
-      "raw": "SPDX-License-Identifier: MIT\n"
+      "raw": "## Compatibility·Validation\n",
+      "level": 2,
+      "title": "Compatibility·Validation"
     },
     {
-      "id": "b000066",
+      "id": "b000060",
       "kind": "blank",
       "start_line": 101,
       "end_line": 101,
       "raw": "\n"
     },
     {
-      "id": "b000067",
+      "id": "b000061",
       "kind": "paragraph",
       "start_line": 102,
-      "end_line": 104,
-      "raw": "The original code and documentation in this repository are licensed under the\n[MIT License](LICENSE). Third-party code, libraries, fonts, tools, and model\nweights retain their respective licenses.\n"
+      "end_line": 102,
+      "raw": "`.societyphoto`, `.society-photos`, `society.photos` and `Society-<id>-<index>-<name>` remain compatible with existing data and transfers. The low-level native import adapter retains its Pictures/Society destination for explicit OS-library consumers; PhotoStore does not invoke it. C++ namespace and Android class are independent to avoid conflicts with the app. Do not enable the old implementation and SDK controller simultaneously in the same container.\n"
     },
     {
-      "id": "b000068",
+      "id": "b000062",
       "kind": "blank",
-      "start_line": 105,
-      "end_line": 105,
+      "start_line": 103,
+      "end_line": 103,
       "raw": "\n"
     },
     {
-      "id": "b000069",
-      "kind": "heading",
-      "start_line": 106,
+      "id": "b000063",
+      "kind": "paragraph",
+      "start_line": 104,
       "end_line": 106,
-      "raw": "## Source header layout\n",
-      "level": 2,
-      "title": "Source header layout"
+      "raw": "The original SHA-256 and extraction criteria Git revision are at [source-manifest.json](docs/source-manifest.json). Existing Society uncommitted changes are not changed regardless of inclusion or exclusion.\n[original operation contract](docs/SocietyReference.md)is the reference document at the time of extraction, and the existing product's platform verification written in that document does not mean the new verification of this SDK.\nRefer to [platform integration](docs/Platforms.md), [extraction and verification results](docs/Extraction.md).\n"
     },
     {
-      "id": "b000070",
+      "id": "b000064",
       "kind": "blank",
       "start_line": 107,
       "end_line": 107,
       "raw": "\n"
     },
     {
-      "id": "b000071",
-      "kind": "paragraph",
+      "id": "b000065",
+      "kind": "heading",
       "start_line": 108,
-      "end_line": 114,
-      "raw": "Public headers and implementations live together under `src/Albums/`,\n`src/Library/`, and `src/Platform/` according to responsibility. Existing\n`<iiPhotoLibrary/...>` public include names remain unchanged.\nThere is no separate authored `include/` tree. Existing public `#include` names\nand exported CMake targets are unchanged; installation still places only public\nheaders in the package include directory. Generated export headers belong to\n`build/`, not to the authored source tree.\n"
+      "end_line": 108,
+      "raw": "## License\n",
+      "level": 2,
+      "title": "License"
     },
     {
-      "id": "b000072",
+      "id": "b000066",
+      "kind": "blank",
+      "start_line": 109,
+      "end_line": 109,
+      "raw": "\n"
+    },
+    {
+      "id": "b000067",
+      "kind": "paragraph",
+      "start_line": 110,
+      "end_line": 110,
+      "raw": "SPDX-License-Identifier: MIT\n"
+    },
+    {
+      "id": "b000068",
+      "kind": "blank",
+      "start_line": 111,
+      "end_line": 111,
+      "raw": "\n"
+    },
+    {
+      "id": "b000069",
+      "kind": "paragraph",
+      "start_line": 112,
+      "end_line": 114,
+      "raw": "The original code and documentation in this repository are licensed under the\n[MIT License](LICENSE). Third-party code, libraries, fonts, tools, and model\nweights retain their respective licenses.\n"
+    },
+    {
+      "id": "b000070",
       "kind": "blank",
       "start_line": 115,
       "end_line": 115,
       "raw": "\n"
     },
     {
+      "id": "b000071",
+      "kind": "heading",
+      "start_line": 116,
+      "end_line": 116,
+      "raw": "## Source header layout\n",
+      "level": 2,
+      "title": "Source header layout"
+    },
+    {
+      "id": "b000072",
+      "kind": "blank",
+      "start_line": 117,
+      "end_line": 117,
+      "raw": "\n"
+    },
+    {
       "id": "b000073",
       "kind": "paragraph",
-      "start_line": 116,
-      "end_line": 118,
-      "raw": "Validate this layout from the SDK workspace with\n`python3 -B tests/test_source_header_layout.py`. Reconfigure, build, run CTest,\nand verify a staged installed consumer after changing source/header paths.\n"
+      "start_line": 118,
+      "end_line": 124,
+      "raw": "Public headers and implementations live together under `src/Albums/`,\n`src/Library/`, and `src/Platform/` according to responsibility. Existing\n`<iiPhotoLibrary/...>` public include names remain unchanged.\nThere is no separate authored `include/` tree. Existing public `#include` names\nand exported CMake targets are unchanged; installation still places only public\nheaders in the package include directory. Generated export headers belong to\n`build/`, not to the authored source tree.\n"
     },
     {
       "id": "b000074",
       "kind": "blank",
-      "start_line": 119,
-      "end_line": 119,
+      "start_line": 125,
+      "end_line": 125,
       "raw": "\n"
     },
     {
       "id": "b000075",
-      "kind": "html",
-      "start_line": 120,
-      "end_line": 120,
-      "raw": "<!-- workspace-docs:readme:start -->\n"
+      "kind": "paragraph",
+      "start_line": 126,
+      "end_line": 128,
+      "raw": "Validate this layout from the SDK workspace with\n`python3 -B tests/test_source_header_layout.py`. Reconfigure, build, run CTest,\nand verify a staged installed consumer after changing source/header paths.\n"
     },
     {
       "id": "b000076",
+      "kind": "blank",
+      "start_line": 129,
+      "end_line": 129,
+      "raw": "\n"
+    },
+    {
+      "id": "b000077",
+      "kind": "html",
+      "start_line": 130,
+      "end_line": 130,
+      "raw": "<!-- workspace-docs:readme:start -->\n"
+    },
+    {
+      "id": "b000078",
       "kind": "heading",
-      "start_line": 121,
-      "end_line": 121,
+      "start_line": 131,
+      "end_line": 131,
       "raw": "## Documentation entry points\n",
       "level": 2,
       "title": "Documentation entry points"
     },
     {
-      "id": "b000077",
+      "id": "b000079",
       "kind": "blank",
-      "start_line": 122,
-      "end_line": 122,
+      "start_line": 132,
+      "end_line": 132,
       "raw": "\n"
     },
     {
-      "id": "b000078",
+      "id": "b000080",
       "kind": "list",
-      "start_line": 123,
-      "end_line": 126,
+      "start_line": 133,
+      "end_line": 136,
       "raw": "- Human overview: this English `README.md`.\n- Agent instructions: [AGENT.md](AGENT.md).\n- Human documentation: [documentation index](docs/README.md).\n- Structured agent documentation: [agent index](docs/agent-index.json).\n",
       "items": [
         {
@@ -668,10 +687,10 @@
       ]
     },
     {
-      "id": "b000079",
+      "id": "b000081",
       "kind": "html",
-      "start_line": 127,
-      "end_line": 127,
+      "start_line": 137,
+      "end_line": 137,
       "raw": "<!-- workspace-docs:readme:end -->\n"
     }
   ],
@@ -698,104 +717,104 @@
       "level": 2,
       "title": "Build·Test·Install",
       "anchor": "buildtestinstall",
-      "start_line": 30
+      "start_line": 34
     },
     {
-      "block_id": "b000037",
+      "block_id": "b000039",
       "parent_id": "b000001",
       "level": 2,
       "title": "Photo storage directory lifetime",
       "anchor": "photo-storage-directory-lifetime",
-      "start_line": 70
+      "start_line": 80
     },
     {
-      "block_id": "b000047",
+      "block_id": "b000049",
       "parent_id": "b000001",
       "level": 2,
       "title": "Container-owned photo operations",
       "anchor": "container-owned-photo-operations",
-      "start_line": 80
+      "start_line": 90
     },
     {
-      "block_id": "b000057",
+      "block_id": "b000059",
       "parent_id": "b000001",
       "level": 2,
       "title": "Compatibility·Validation",
       "anchor": "compatibilityvalidation",
-      "start_line": 90
+      "start_line": 100
     },
     {
-      "block_id": "b000063",
+      "block_id": "b000065",
       "parent_id": "b000001",
       "level": 2,
       "title": "License",
       "anchor": "license",
-      "start_line": 98
+      "start_line": 108
     },
     {
-      "block_id": "b000069",
+      "block_id": "b000071",
       "parent_id": "b000001",
       "level": 2,
       "title": "Source header layout",
       "anchor": "source-header-layout",
-      "start_line": 106
+      "start_line": 116
     },
     {
-      "block_id": "b000076",
+      "block_id": "b000078",
       "parent_id": "b000001",
       "level": 2,
       "title": "Documentation entry points",
       "anchor": "documentation-entry-points",
-      "start_line": 121
+      "start_line": 131
     }
   ],
   "indexes": {
     "directive_candidates": [
       {
         "block_id": "b000015",
-        "line": 26,
+        "line": 30,
         "text": "This 0.1 extraction preserves the existing Qt implementation. **The transition to a standard C++ SDK without Qt is not complete.** Qt 6.8.3 Core/Gui/Concurrent and iiSocietyContainer 0.14 Gui are required, and Qt types remain in the public API. Existing Qt dependencies are present in storage and synchronization code as well as GUI image processing and QML models. This is a compatibility package separated without rewriting its features; these dependencies must not be mistaken for a pure C++ core. Using QML requires LVRS and Qt Quick/QuickControls2/Dialogs. `iiSocietyHelper` 0.10.0 and `iiWebServer` are required only for integration tests and are not direct dependencies of the library.",
         "basis": "lexical_match",
         "context": "paragraph"
       },
       {
         "block_id": "b000021",
-        "line": 32,
+        "line": 36,
         "text": "The new `iiPhotoLibrary::Albums` target is a standard C++23 core without Qt. The existing native photo/storage/controller layer retains its Qt dependencies. Use `find_package(iiPhotoLibrary CONFIG REQUIRED COMPONENTS Albums)` and include `Album.h` or `GooglePhotosAlbumSource.h` for the core alone. `-DIIPHOTOLIBRARY_ALBUMS_ONLY=ON` builds only that core. See [album objects and external service contracts](docs/Albums.md) for iCloud System Photo Library coverage, Google API limits, host integration and validation.",
         "basis": "lexical_match",
         "context": "paragraph"
       },
       {
-        "block_id": "b000039",
-        "line": 72,
+        "block_id": "b000041",
+        "line": 82,
         "text": "Opening an empty `PhotoStore`, publishing its startup catalog, and reading its gallery, aliases or resource paths do not create `.society-photos/<container-id>/` or `Photos/.previews/`. The store validates these locations even when they are absent. Existing photo records and native references retain their format and identity.",
         "basis": "lexical_match",
         "context": "paragraph"
       },
       {
-        "block_id": "b000043",
-        "line": 76,
+        "block_id": "b000045",
+        "line": 86,
         "text": "Each write prepares only its required parent: gallery and reference JSON files create their respective directories, preview writes create `Photos/.previews/`, and native exports or incoming chunks create `incoming/`. Committing or explicitly preparing an original creates `originals/`; gallery discovery alone leaves that cache absent. Viewing and sharing exports create `viewing/` on demand. Storage capacity checks use the existing container root so that the first transfer can begin before the private directory exists. Empty staging/cache directories removed between completed operations are recreated by the next writer, with path confinement checks retained.",
         "basis": "lexical_match",
         "context": "paragraph"
       },
       {
-        "block_id": "b000045",
-        "line": 78,
+        "block_id": "b000047",
+        "line": 88,
         "text": "The `iiPhotoLibrary.Photos` regression suite covers repeated empty opens/reads/refreshes, container connection without OS scans or permission prompts, explicit library reads, older empty scaffolding, preservation of unknown and user-supplied files, discovery before original staging, recreation of unused write parents, and the first received transfer without an initial refresh. `iiPhotoLibrary` is a static library: consumers such as the Society GUI and daemon must be relinked to use this behavior. A process already running the previous implementation can still depend on directories prepared when its session opened. Do not remove those session directories while preserving that process; installing a new bundle does not replace the code in its existing session.",
         "basis": "lexical_match",
         "context": "paragraph"
       },
       {
-        "block_id": "b000051",
-        "line": 84,
+        "block_id": "b000053",
+        "line": 94,
         "text": "An application can explicitly call `PhotoStore::importLibrary()` to read the permitted OS library into container aliases, references and previews. `PhotoController::connectLibrary()` performs that one read after an explicit permission request when required. Configuring a container, entering the foreground and periodic refresh do not initiate native discovery. Later native assets require another explicit connection/import; viewing or transferring an existing reference can read that selected original into the container. The independent `PhotoLibrary::import()` and `PhotoLibrary::trash()` APIs remain available for other consumers that intentionally mutate an OS library.",
         "basis": "lexical_match",
         "context": "paragraph"
       },
       {
-        "block_id": "b000059",
-        "line": 92,
+        "block_id": "b000061",
+        "line": 102,
         "text": "`.societyphoto`, `.society-photos`, `society.photos` and `Society-<id>-<index>-<name>` remain compatible with existing data and transfers. The low-level native import adapter retains its Pictures/Society destination for explicit OS-library consumers; PhotoStore does not invoke it. C++ namespace and Android class are independent to avoid conflicts with the app. Do not enable the old implementation and SDK controller simultaneously in the same container.",
         "basis": "lexical_match",
         "context": "paragraph"
@@ -817,67 +836,74 @@
         "line": 3
       },
       {
+        "block_id": "b000013",
+        "label": "native photo views",
+        "target": "docs/NativePhotoViews.md",
+        "kind": "relative",
+        "line": 25
+      },
+      {
         "block_id": "b000021",
         "label": "album objects and external service contracts",
         "target": "docs/Albums.md",
         "kind": "relative",
-        "line": 32
+        "line": 36
       },
       {
-        "block_id": "b000061",
+        "block_id": "b000063",
         "label": "source-manifest.json",
         "target": "docs/source-manifest.json",
         "kind": "relative",
-        "line": 94
+        "line": 104
       },
       {
-        "block_id": "b000061",
+        "block_id": "b000063",
         "label": "original operation contract",
         "target": "docs/SocietyReference.md",
         "kind": "relative",
-        "line": 95
+        "line": 105
       },
       {
-        "block_id": "b000061",
+        "block_id": "b000063",
         "label": "platform integration",
         "target": "docs/Platforms.md",
         "kind": "relative",
-        "line": 96
+        "line": 106
       },
       {
-        "block_id": "b000061",
+        "block_id": "b000063",
         "label": "extraction and verification results",
         "target": "docs/Extraction.md",
         "kind": "relative",
-        "line": 96
+        "line": 106
       },
       {
-        "block_id": "b000067",
+        "block_id": "b000069",
         "label": "MIT License",
         "target": "LICENSE",
         "kind": "relative",
-        "line": 103
+        "line": 113
       },
       {
-        "block_id": "b000078",
+        "block_id": "b000080",
         "label": "AGENT.md",
         "target": "AGENT.md",
         "kind": "relative",
-        "line": 124
+        "line": 134
       },
       {
-        "block_id": "b000078",
+        "block_id": "b000080",
         "label": "documentation index",
         "target": "docs/README.md",
         "kind": "relative",
-        "line": 125
+        "line": 135
       },
       {
-        "block_id": "b000078",
+        "block_id": "b000080",
         "label": "agent index",
         "target": "docs/agent-index.json",
         "kind": "relative",
-        "line": 126
+        "line": 136
       }
     ],
     "tables": []

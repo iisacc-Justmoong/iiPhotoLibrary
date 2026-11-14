@@ -1,0 +1,81 @@
+import vm iiPhotoLibrary.presentation.PhotoBackend
+
+Window {
+  ZStack {
+    EventListener(id: "galleryDrop", sizeToContent: true, onDrop: vm.dropFiles, onSizeChanged: vm.viewportSize) {
+    VStack(alignment: .stretch, spacing: Metric.space12) {
+        Label(id: "photosTitle", text: localized("photo.title"), style: .title2)
+        if (vm.compactLayout) {
+            VStack(alignment: .leading, spacing: Metric.space12) {
+                PushButton(id: "connectLibrary", text: localized("photo.import_library"),
+                           visible: vm.access != "unsupported", enabled: !vm.busy, onClick: vm.connectLibrary)
+                PushButton(id: "addPhotos", text: localized("photo.add"), enabled: vm.active && !vm.busy, onClick: vm.pickFiles)
+                PushButton(id: "refresh", text: localized("photo.refresh"), enabled: vm.active && !vm.busy, onClick: vm.refresh)
+            }
+        } else {
+            HStack(alignment: .center, spacing: Metric.space8) {
+                PushButton(id: "connectLibrary", text: localized("photo.import_library"),
+                           visible: vm.access != "unsupported", enabled: !vm.busy, onClick: vm.connectLibrary)
+                PushButton(id: "addPhotos", text: localized("photo.add"), enabled: vm.active && !vm.busy, onClick: vm.pickFiles)
+                PushButton(id: "refresh", text: localized("photo.refresh"), enabled: vm.active && !vm.busy, onClick: vm.refresh)
+            }
+        }
+        HStack(alignment: .center, spacing: Metric.space12) {
+            Label(text: localized("photo.size"), style: .title2)
+            Slider(id: "photoSizeSlider", from: 56, to: 400, stepSize: 1, value: vm.thumbnailSize,
+                   width: 160, showLabels: false, showSymbol: false, accessibilityName: localized("photo.size"))
+        }
+        if (vm.empty && vm.busy) { Label(id: "loading", text: localized("photo.loading"), style: .description) }
+        if (vm.empty && !vm.busy) { Label(id: "empty", text: localized("photo.empty"), style: .description) }
+        EventListener(id: "galleryZoom", sizeToContent: true, flex: 1) {
+        for (photo in vm.rows, key: photo.id, id: "photoGrid",
+             itemHeight: vm.thumbnailSize, itemWidth: vm.thumbnailSize, spacing: Metric.space2,
+             overscan: 2, width: vm.viewportWidth, height: vm.viewportHeight, flex: 1,
+             onVisibleChanged: vm.visibleItems, onPinch: vm.pinch, onDragZoom: vm.dragZoom, dragZoomDistance: 180, revealKey: vm.revealKey,
+             revealRevision: vm.revealRevision, revealAlignment: .End) {
+            ZStack {
+                Card(id: "photoTile", type: .FilePreview, title: photo.name,
+                     previewSource: photo.preview, selected: photo.selected, selectable: true,
+                     showAction: false, showMenu: true, width: vm.thumbnailSize, height: vm.thumbnailSize,
+                     onClick: photo.select, onMenuRequested: photo.select)
+                ContextMenu(id: "photoMenu", targetId: "photoTile", showIconSlot: false,
+                            accessibilityName: localized("photo.information"), onOpened: photo.selectForMenu) {
+                    ContextMenuItem(id: "photoOpen", label: localized("photo.open"), enabled: !vm.busy,
+                                    hasChildItems: false, onClick: photo.open)
+                    ContextMenuItem(id: "photoCopy", label: localized("photo.copy"), enabled: !vm.busy,
+                                    hasChildItems: false, onClick: photo.copy)
+                    ContextMenuItem(id: "photoDuplicate", label: localized("photo.duplicate"), enabled: !vm.busy,
+                                    hasChildItems: false, onClick: photo.duplicate)
+                    ContextMenuItem(id: "photoShare", label: localized("photo.share"), enabled: !vm.busy && vm.canShare,
+                                    hasChildItems: false, onClick: photo.share)
+                    ContextMenuItem(id: "photoTrash", label: localized("photo.trash"), enabled: !vm.busy,
+                                    hasChildItems: false, onClick: photo.trash)
+                }
+                if (photo.video) { Label(id: "videoBadge", text: localized("photo.video"), style: .caption) }
+            }
+        }
+        }
+        Label(id: "photoStatus", text: vm.status, style: .description)
+    }
+    }
+    Sheet(id: "photoInformation", open: vm.informationOpen, title: localized("photo.information"),
+          scrollContent: true, dismissOnEscape: true, motionEnabled: vm.motionEnabled, onCanceled: vm.closeInformation) {
+        VStack(alignment: .stretch, spacing: Metric.space12) {
+            Image(id: "photoPreview", source: vm.selectedPreview, width: vm.thumbnailSize,
+                  height: vm.thumbnailSize, fit: .Contain, accessibilityName: vm.selectedName)
+            Label(id: "photoName", text: vm.selectedName, style: .header)
+            if (vm.selectedVideo) { Label(text: localized("photo.video"), style: .description) }
+            if (!vm.selectedVideo) { Label(text: localized("photo.image"), style: .description) }
+            Label(id: "photoCreated", text: vm.selectedCreated, style: .description)
+            Label(id: "photoBytes", text: vm.selectedBytes, style: .description)
+            VStack(alignment: .stretch, spacing: Metric.space8) {
+                PushButton(id: "viewOriginal", text: localized("photo.open"), enabled: !vm.busy, onClick: vm.openOriginal)
+                PushButton(id: "copyPhoto", text: localized("photo.copy"), enabled: !vm.busy, onClick: vm.copy)
+                PushButton(id: "duplicatePhoto", text: localized("photo.duplicate"), enabled: !vm.busy, onClick: vm.duplicate)
+                PushButton(id: "sharePhoto", text: localized("photo.share"), enabled: !vm.busy && vm.canShare, onClick: vm.share)
+                PushButton(id: "trashPhoto", text: localized("photo.trash"), enabled: !vm.busy, onClick: vm.trash)
+            }
+        }
+    }
+  }
+}

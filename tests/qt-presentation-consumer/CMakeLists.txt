@@ -1,0 +1,16 @@
+cmake_minimum_required(VERSION 3.24)
+project(PhotoQtPresentationConsumer LANGUAGES CXX)
+
+find_package(iiPhotoLibraryQtPresentationBridge 0.1 CONFIG REQUIRED)
+find_package(Qt6 6.8 REQUIRED COMPONENTS Test)
+enable_testing()
+set(CMAKE_AUTOMOC ON)
+add_executable(PhotoQtPresentationConsumer ../photo_qt_compatibility.cpp)
+target_compile_features(PhotoQtPresentationConsumer PRIVATE cxx_std_23)
+target_link_libraries(PhotoQtPresentationConsumer PRIVATE iiPhotoLibrary::QtPresentationBridge Qt6::Test)
+add_test(NAME Photo.QtPresentationConsumer COMMAND PhotoQtPresentationConsumer)
+set_tests_properties(Photo.QtPresentationConsumer PROPERTIES TIMEOUT 30)
+if(APPLE)
+    set_tests_properties(Photo.QtPresentationConsumer PROPERTIES ENVIRONMENT_MODIFICATION
+        "DYLD_LIBRARY_PATH=unset:;DYLD_FALLBACK_LIBRARY_PATH=unset:;DYLD_FRAMEWORK_PATH=unset:;DYLD_FALLBACK_FRAMEWORK_PATH=unset:")
+endif()

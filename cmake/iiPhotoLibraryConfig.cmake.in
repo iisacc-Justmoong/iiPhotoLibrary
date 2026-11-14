@@ -22,7 +22,8 @@ if(NOT iiPhotoLibrary_FIND_COMPONENTS OR "Library" IN_LIST iiPhotoLibrary_FIND_C
         return()
     endif()
     # Save paths before dependency package configs modify PACKAGE_PREFIX_DIR.
-    set_and_check(iiPhotoLibrary_QML_IMPORT_PATH "@PACKAGE_CMAKE_INSTALL_DATADIR@/iiPhotoLibrary/qml")
+    set_and_check(iiPhotoLibrary_LEGACY_QML_IMPORT_PATH "@PACKAGE_CMAKE_INSTALL_DATADIR@/iiPhotoLibrary/legacy/qml")
+    set(iiPhotoLibrary_QML_IMPORT_PATH "${iiPhotoLibrary_LEGACY_QML_IMPORT_PATH}")
     set_and_check(iiPhotoLibrary_ANDROID_SOURCE_DIR "@PACKAGE_CMAKE_INSTALL_DATADIR@/iiPhotoLibrary/platform/android/src")
     find_dependency(iiFileProvider 0.6 CONFIG HINTS "$ENV{IIFILEPROVIDER_PREFIX}" "$ENV{HOME}/.local/SDK/iiFileProvider")
     find_dependency(Qt6 6.8.3 EXACT COMPONENTS Core Gui)

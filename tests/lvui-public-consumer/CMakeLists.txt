@@ -1,0 +1,18 @@
+cmake_minimum_required(VERSION 3.31)
+project(PhotoLvuiPublicConsumer LANGUAGES CXX)
+include(CTest)
+find_package(iiPhotoLibraryPresentation CONFIG REQUIRED)
+find_package(LVUI 0.1 CONFIG REQUIRED COMPONENTS Native)
+find_package(iiGUI 0.5 CONFIG REQUIRED)
+lvui_generate(NAME PhotosView SOURCE "${iiPhotoLibraryPresentation_VIEWS_DIR}/PhotosView.lvui"
+    FRAMEWORK iiGUI INCLUDES iiPhotoLibrary/PhotoViewModel.h OUTPUT_VARIABLE generated)
+add_executable(PhotoLvuiPublicConsumer consumer.cpp "${generated}")
+target_compile_features(PhotoLvuiPublicConsumer PRIVATE cxx_std_23)
+target_include_directories(PhotoLvuiPublicConsumer PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
+target_link_libraries(PhotoLvuiPublicConsumer PRIVATE iiPhotoLibrary::Presentation LVUI::Native iiGUI::iiGUI)
+add_test(NAME iiPhotoLibrary.LvuiPublicConsumer COMMAND PhotoLvuiPublicConsumer)
+set_tests_properties(iiPhotoLibrary.LvuiPublicConsumer PROPERTIES TIMEOUT 30)
+if(APPLE)
+    set_tests_properties(iiPhotoLibrary.LvuiPublicConsumer PROPERTIES ENVIRONMENT_MODIFICATION
+        "DYLD_LIBRARY_PATH=unset:;DYLD_FALLBACK_LIBRARY_PATH=unset:;DYLD_FRAMEWORK_PATH=unset:;DYLD_FALLBACK_FRAMEWORK_PATH=unset:")
+endif()

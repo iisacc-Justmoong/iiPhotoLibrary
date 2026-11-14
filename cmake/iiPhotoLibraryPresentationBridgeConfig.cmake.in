@@ -1,0 +1,6 @@
+@PACKAGE_INIT@
+include(CMakeFindDependencyMacro)
+find_dependency(iiPhotoLibrary CONFIG COMPONENTS Library HINTS "${CMAKE_CURRENT_LIST_DIR}/../iiPhotoLibrary")
+find_dependency(iiPhotoLibraryPresentation CONFIG HINTS "${CMAKE_CURRENT_LIST_DIR}/../iiPhotoLibraryPresentation")
+include("${CMAKE_CURRENT_LIST_DIR}/iiPhotoLibraryPresentationBridgeTargets.cmake")
+check_required_components(iiPhotoLibraryPresentationBridge)

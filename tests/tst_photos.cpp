@@ -827,10 +827,9 @@ private slots:
         // This is a state assertion, not a five-second storage benchmark.
         // External-volume fixture I/O exceeded 5 s while the UI was already ready.
         QTRY_VERIFY_WITH_TIMEOUT(settled(), 15000);
-        QVERIFY(QDir().mkpath(QStringLiteral(IIPHOTOLIBRARY_TEST_DIRECTORY "/photos")));
         QTest::qWait(100);
-        QVERIFY(window->grabWindow().save(QStringLiteral(IIPHOTOLIBRARY_TEST_DIRECTORY "/photos/chronological-%1.png")
-            .arg(QString::fromLatin1(QTest::currentDataTag()))));
+        QVERIFY(window->grabWindow().save(f.temporary.filePath(QStringLiteral("chronological-%1.png")
+            .arg(QString::fromLatin1(QTest::currentDataTag())))));
 
         // Checking unchanged content does not replace rows or move the camera.
         const auto endScroll = grid->property("contentY").toReal();
@@ -932,9 +931,8 @@ private slots:
         QTest::touchEvent(window, touchDevice).release(0, center).commit();
         QTRY_VERIFY(info->property("visible").toBool());
         QCOMPARE(info->property("fileName").toString(), tile->property("name").toString());
-        QVERIFY(QDir().mkpath(QStringLiteral(IIPHOTOLIBRARY_TEST_DIRECTORY "/photos")));
         QTest::qWait(250);
-        QVERIFY(window->grabWindow().save(QStringLiteral(IIPHOTOLIBRARY_TEST_DIRECTORY "/photos/information-desktop.png")));
+        QVERIFY(window->grabWindow().save(f.temporary.filePath(QStringLiteral("information-desktop.png"))));
         QVERIFY(QMetaObject::invokeMethod(info, "close")); QTRY_VERIFY(!info->property("visible").toBool()); QTest::qWait(250);
         const auto beforePinch = grid->property("cellWidth").toReal();
         const auto middle = grid->mapToScene(QPointF(grid->width()/2, grid->height()/2)).toPoint();
@@ -957,12 +955,11 @@ private slots:
         auto *zoom = view->findChild<QObject *>("galleryZoom"); QVERIFY(zoom);
         zoom->setProperty("thumbnailSize", 128.0);
         view->setProperty("selectedId", id);
-        QVERIFY(QDir().mkpath(QStringLiteral(IIPHOTOLIBRARY_TEST_DIRECTORY "/photos")));
-        QTest::qWait(100); QVERIFY(window->grabWindow().save(QStringLiteral(IIPHOTOLIBRARY_TEST_DIRECTORY "/photos/gallery-desktop.png")));
+        QTest::qWait(100); QVERIFY(window->grabWindow().save(f.temporary.filePath(QStringLiteral("gallery-desktop.png"))));
         window->resize(390, 844); QTest::qWait(100);
         const auto *add = visualItem(view, "addPhotos"); QVERIFY(add);
         QVERIFY(add->mapToItem(view, QPointF(add->width(), 0)).x() <= view->width());
-        QVERIFY(window->grabWindow().save(QStringLiteral(IIPHOTOLIBRARY_TEST_DIRECTORY "/photos/gallery-mobile.png")));
+        QVERIFY(window->grabWindow().save(f.temporary.filePath(QStringLiteral("gallery-mobile.png"))));
         auto deleted = records.first().toObject(); deleted["deleted"] = true;
         write(f.photos() + '/' + id + ".societyphoto", QJsonDocument(deleted).toJson());
         controller.refresh(); QTRY_VERIFY_WITH_TIMEOUT(!controller.busy(), 5000);

@@ -34,6 +34,15 @@ if(PROJECT_IS_TOP_LEVEL AND CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 endif()
 
 option(IIPHOTOLIBRARY_ALBUMS_ONLY "Build the C++23 album core without the legacy Qt photo/UI layer" OFF)
+if(IIPHOTOLIBRARY_ALBUMS_ONLY)
+    set(_photo_presentation_default OFF)
+else()
+    set(_photo_presentation_default ON)
+endif()
+option(IIPHOTOLIBRARY_BUILD_PRESENTATION "Build the Qt-free photo view model" ${_photo_presentation_default})
+if(IIPHOTOLIBRARY_BUILD_PRESENTATION)
+    add_subdirectory(src/Presentation)
+endif()
 find_package(Threads REQUIRED)
 set(_photo_public_headers
     "${CMAKE_CURRENT_SOURCE_DIR}/src/Albums/Album.h"
@@ -43,6 +52,9 @@ set(_photo_public_headers
     "${CMAKE_CURRENT_SOURCE_DIR}/src/Library/PhotoLibraryAlbumSource.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/Library/PhotoStore.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/Library/iiPhotoLibrary.h")
+if(IIPHOTOLIBRARY_BUILD_PRESENTATION AND NOT IIPHOTOLIBRARY_ALBUMS_ONLY)
+    list(APPEND _photo_public_headers "${CMAKE_CURRENT_SOURCE_DIR}/src/Presentation/PhotoPresentationBridge.h")
+endif()
 foreach(_header IN LISTS _photo_public_headers)
     get_filename_component(_name "${_header}" NAME)
     file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/include/iiPhotoLibrary/${_name}"
@@ -116,6 +128,36 @@ target_include_directories(iiPhotoLibrary PUBLIC
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 target_link_libraries(iiPhotoLibrary PUBLIC iiPhotoLibrary::Albums Qt6::Gui iiSocietyContainer::Sharing
     PRIVATE iiFileProvider::iiFileProvider Threads::Threads)
+if(IIPHOTOLIBRARY_BUILD_PRESENTATION)
+    add_library(iiPhotoLibraryPresentationBridge src/Presentation/PhotoPresentationBridge.cpp src/Presentation/PhotoPresentationBridge.h)
+    add_library(iiPhotoLibrary::PresentationBridge ALIAS iiPhotoLibraryPresentationBridge)
+    target_compile_features(iiPhotoLibraryPresentationBridge PUBLIC cxx_std_23)
+    target_compile_definitions(iiPhotoLibraryPresentationBridge PRIVATE IIPHOTO_BRIDGE_BUILD)
+    if(NOT BUILD_SHARED_LIBS)
+        target_compile_definitions(iiPhotoLibraryPresentationBridge PUBLIC IIPHOTO_BRIDGE_STATIC)
+    endif()
+    target_include_directories(iiPhotoLibraryPresentationBridge PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Library>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+    target_link_libraries(iiPhotoLibraryPresentationBridge PUBLIC iiPhotoLibrary::iiPhotoLibrary iiPhotoLibrary::Presentation)
+    set_target_properties(iiPhotoLibraryPresentationBridge PROPERTIES EXPORT_NAME PresentationBridge CXX_EXTENSIONS OFF
+        POSITION_INDEPENDENT_CODE ON WINDOWS_EXPORT_ALL_SYMBOLS ON)
+    iiphoto_configure_shared(iiPhotoLibraryPresentationBridge)
+    install(TARGETS iiPhotoLibraryPresentationBridge EXPORT iiPhotoLibraryPresentationBridgeTargets
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} FRAMEWORK DESTINATION ${CMAKE_INSTALL_LIBDIR})
+    install(FILES src/Presentation/PhotoPresentationBridge.h src/Presentation/PresentationBridgeExport.h
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/iiPhotoLibrary)
+    set(_photo_bridge_package "${CMAKE_INSTALL_LIBDIR}/cmake/iiPhotoLibraryPresentationBridge")
+    install(EXPORT iiPhotoLibraryPresentationBridgeTargets NAMESPACE iiPhotoLibrary:: DESTINATION "${_photo_bridge_package}")
+    configure_package_config_file(cmake/iiPhotoLibraryPresentationBridgeConfig.cmake.in
+        "${CMAKE_CURRENT_BINARY_DIR}/iiPhotoLibraryPresentationBridgeConfig.cmake" INSTALL_DESTINATION "${_photo_bridge_package}")
+    write_basic_package_version_file("${CMAKE_CURRENT_BINARY_DIR}/iiPhotoLibraryPresentationBridgeConfigVersion.cmake"
+        VERSION ${PROJECT_VERSION} COMPATIBILITY SameMajorVersion)
+    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/iiPhotoLibraryPresentationBridgeConfig.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/iiPhotoLibraryPresentationBridgeConfigVersion.cmake" DESTINATION "${_photo_bridge_package}")
+endif()
 set_target_properties(iiPhotoLibrary PROPERTIES AUTOMOC ON CXX_EXTENSIONS OFF POSITION_INDEPENDENT_CODE ON WINDOWS_EXPORT_ALL_SYMBOLS ON)
 target_compile_definitions(iiPhotoLibrary PRIVATE IIPHOTOLIBRARY_BUILDING_LIBRARY)
 if(NOT BUILD_SHARED_LIBS)
@@ -161,6 +203,13 @@ if(BUILD_TESTING AND NOT CMAKE_CROSSCOMPILING)
     set_target_properties(iiPhotoLibraryGalleryModelTests PROPERTIES AUTOMOC ON)
     add_test(NAME iiPhotoLibrary.gallery_model COMMAND iiPhotoLibraryGalleryModelTests)
     set_tests_properties(iiPhotoLibrary.gallery_model PROPERTIES TIMEOUT 30)
+    if(IIPHOTOLIBRARY_BUILD_PRESENTATION)
+        add_executable(iiPhotoLibraryPresentationBridgeTests tests/photo_presentation_bridge.cpp)
+        target_link_libraries(iiPhotoLibraryPresentationBridgeTests PRIVATE iiPhotoLibrary::PresentationBridge Qt6::Test)
+        set_target_properties(iiPhotoLibraryPresentationBridgeTests PROPERTIES AUTOMOC ON)
+        add_test(NAME iiPhotoLibrary.PresentationBridge COMMAND iiPhotoLibraryPresentationBridgeTests)
+        set_tests_properties(iiPhotoLibrary.PresentationBridge PROPERTIES TIMEOUT 30)
+    endif()
     # Native LVRS and the Qt test-support package can coexist in the SDK prefix.
     # Respect an explicit selection; otherwise prefer the macOS Qt package for these tests.
     if(APPLE AND NOT CMAKE_CROSSCOMPILING AND NOT LVRS_DIR AND "$ENV{LVRS_DIR}" STREQUAL "")
@@ -182,8 +231,8 @@ if(BUILD_TESTING AND NOT CMAKE_CROSSCOMPILING)
     set_target_properties(iiPhotoLibraryTests PROPERTIES AUTOMOC ON)
     target_compile_definitions(iiPhotoLibraryTests PRIVATE
         IIPHOTOLIBRARY_TEST_DIRECTORY="${CMAKE_CURRENT_SOURCE_DIR}/resources"
-        IIPHOTOLIBRARY_QML_FILE="${CMAKE_CURRENT_SOURCE_DIR}/tests/PhotosHarness.qml"
-        IIPHOTOLIBRARY_QML_IMPORT_PATH="${CMAKE_CURRENT_SOURCE_DIR}/qml"
+        IIPHOTOLIBRARY_QML_FILE="${CMAKE_CURRENT_SOURCE_DIR}/tests/Legacy/PhotosHarness.qml"
+        IIPHOTOLIBRARY_QML_IMPORT_PATH="${CMAKE_CURRENT_SOURCE_DIR}/src/Legacy/qml"
         IIPHOTOLIBRARY_LVRS_QML_IMPORT_PATH="${LVRS_QML_IMPORT_PATH}")
     add_test(NAME iiPhotoLibrary.Photos COMMAND iiPhotoLibraryTests)
     set_tests_properties(iiPhotoLibrary.Photos PROPERTIES TIMEOUT 180
@@ -213,7 +262,7 @@ install(FILES
     src/Library/PhotoStore.h
     src/Library/iiPhotoLibrary.h
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/iiPhotoLibrary)
-install(DIRECTORY qml/ DESTINATION ${CMAKE_INSTALL_DATADIR}/iiPhotoLibrary/qml)
+install(DIRECTORY src/Legacy/qml/ DESTINATION ${CMAKE_INSTALL_DATADIR}/iiPhotoLibrary/legacy/qml)
 install(DIRECTORY platform/ DESTINATION ${CMAKE_INSTALL_DATADIR}/iiPhotoLibrary/platform)
 endif()
 

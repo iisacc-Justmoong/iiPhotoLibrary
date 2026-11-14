@@ -1,0 +1,20 @@
+{
+  "locale": "en",
+  "strings": {
+    "photo.title": "Photos",
+    "photo.import_library": "Import photo library…",
+    "photo.add": "Add photos or videos…",
+    "photo.refresh": "Refresh",
+    "photo.size": "Size",
+    "photo.loading": "Reading your photo library…",
+    "photo.empty": "Add photos and videos to this container, or explicitly import your photo library.",
+    "photo.video": "Video",
+    "photo.image": "Photo",
+    "photo.information": "File information",
+    "photo.open": "View original",
+    "photo.copy": "Copy",
+    "photo.duplicate": "Duplicate",
+    "photo.share": "Share…",
+    "photo.trash": "Move to trash"
+  }
+}

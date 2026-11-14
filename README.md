@@ -20,7 +20,11 @@ C++23 is an SDK extracted as an independent package from the implementation of P
 - `PhotoLibrary`: Low-level native access, preview, extraction and explicitly requested OS registration/trash interface.
 - `PhotoStore` : permanent gallery index, visible region priority preview, alias, original cache/lease, chunk handover/SHA-256 validation, prevent deletion of limited access and incomplete query.
 - `PhotoController` : QML model, work thread/cancel, authentication peer and container check, upload/selective original download. Inject transport layer via `Sender` callback.
-- `PhotosView`: LVRS based screens and GalleryTile / GalleryInfo / GalleryZoom.
+- `iiPhotoLibrary::Presentation`: a Qt-free C++23 photo view model and LVUI
+  gallery declaration. Applications provide an LVUI/iiGUI host, image loader,
+  file picker and service connection; see [native photo views](docs/NativePhotoViews.md).
+- The previous LVRS `PhotosView`, `GalleryTile`, `GalleryInfo` and `GalleryZoom`
+  remain in an isolated legacy QML import path for existing consumers.
 - Apple PhotoKit, Android MediaStore, Windows Shell adapter and unsupported platform storage-only adapter.
 
 This 0.1 extraction preserves the existing Qt implementation. **The transition to a standard C++ SDK without Qt is not complete.** Qt 6.8.3 Core/Gui/Concurrent and iiSocietyContainer 0.14 Gui are required, and Qt types remain in the public API. Existing Qt dependencies are present in storage and synchronization code as well as GUI image processing and QML models. This is a compatibility package separated without rewriting its features; these dependencies must not be mistaken for a pure C++ core. Using QML requires LVRS and Qt Quick/QuickControls2/Dialogs. `iiSocietyHelper` 0.10.0 and `iiWebServer` are required only for integration tests and are not direct dependencies of the library.
@@ -45,9 +49,13 @@ cmake --install build
 Product consumption builds can omit test `-DBUILD_TESTING=OFF` LVRS and iiSocietyHelper test dependency discovery. SDK is the target for CMake automatic search of the integrated installer and does not require separate central list registration.
 
 ```cmake
-find_package(iiPhotoLibrary 0.1 CONFIG REQUIRED)
+find_package(iiPhotoLibrary 0.1 CONFIG REQUIRED) # Legacy Qt service, if needed
 target_link_libraries(MyApp PRIVATE iiPhotoLibrary::iiPhotoLibrary)
-# Pass iiPhotoLibrary_QML_IMPORT_PATH to QQmlEngine::addImportPath().
+# iiPhotoLibrary_QML_IMPORT_PATH aliases iiPhotoLibrary_LEGACY_QML_IMPORT_PATH.
+# New UI consumers combine the separate presentation package with LVUI and iiGUI:
+find_package(iiPhotoLibraryPresentation 0.1 CONFIG REQUIRED)
+target_link_libraries(MyApp PRIVATE iiPhotoLibrary::Presentation)
+# The package supplies iiPhotoLibraryPresentation_VIEWS_DIR and STRINGS_DIR.
 ```
 
 ```cpp
@@ -59,6 +67,8 @@ photos.setApplicationActive(true);
 // society.photos request -> photos.handle(authenticatedPeer, packet)
 // Transfer response -> photos.receive(requestId, reply)
 ```
+
+Legacy QML compatibility example:
 
 ```qml
 import iiPhotoLibrary 1.0

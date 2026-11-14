@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.24)
 project(PhotoLibraryConsumer LANGUAGES CXX)
 find_package(iiPhotoLibrary 0.1 CONFIG REQUIRED)
+if(NOT iiPhotoLibrary_QML_IMPORT_PATH STREQUAL iiPhotoLibrary_LEGACY_QML_IMPORT_PATH OR
+   NOT EXISTS "${iiPhotoLibrary_LEGACY_QML_IMPORT_PATH}/iiPhotoLibrary/PhotosView.qml")
+    message(FATAL_ERROR "The QML compatibility import must resolve to the isolated legacy view")
+endif()
 find_package(Qt6 6.8.3 EXACT REQUIRED COMPONENTS Quick QuickControls2)
 find_package(LVRS CONFIG REQUIRED)
 qt_add_executable(PhotoLibraryConsumer main.cpp)
