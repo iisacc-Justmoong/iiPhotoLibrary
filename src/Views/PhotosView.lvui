@@ -58,16 +58,18 @@ Window {
         Label(id: "photoStatus", text: vm.status, style: .description)
     }
     }
-    Sheet(id: "photoInformation", open: vm.informationOpen, title: localized("photo.information"),
+    Sheet(id: "photoInformation", open: vm.informationOpen, title: localized("photo.information"), presentation: .automatic,
           scrollContent: true, dismissOnEscape: true, motionEnabled: vm.motionEnabled, onCanceled: vm.closeInformation) {
         VStack(alignment: .stretch, spacing: Metric.space12) {
             Image(id: "photoPreview", source: vm.selectedPreview, width: vm.thumbnailSize,
                   height: vm.thumbnailSize, fit: .Contain, accessibilityName: vm.selectedName)
             Label(id: "photoName", text: vm.selectedName, style: .header)
-            if (vm.selectedVideo) { Label(text: localized("photo.video"), style: .description) }
-            if (!vm.selectedVideo) { Label(text: localized("photo.image"), style: .description) }
-            Label(id: "photoCreated", text: vm.selectedCreated, style: .description)
-            Label(id: "photoBytes", text: vm.selectedBytes, style: .description)
+            if (vm.selectedVideo) { Label(id: "photoTypeVideo", text: vm.formatField(localized("photo.field_type"), localized("photo.video")), style: .description) }
+            if (!vm.selectedVideo) { Label(id: "photoTypeImage", text: vm.formatField(localized("photo.field_type"), localized("photo.image")), style: .description) }
+            Label(id: "photoBytes", text: vm.formatField(localized("photo.field_size"),
+                  vm.formatSize(vm.selectedBytes, localized("photo.unit_bytes"), localized("photo.unit_kb"),
+                                localized("photo.unit_mb"), localized("photo.unit_gb"))), style: .description)
+            Label(id: "photoCreated", text: vm.formatField(localized("photo.field_created"), vm.formatTimestamp(vm.selectedCreated)), style: .description)
             VStack(alignment: .stretch, spacing: Metric.space8) {
                 PushButton(id: "viewOriginal", text: localized("photo.open"), enabled: !vm.busy, onClick: vm.openOriginal)
                 PushButton(id: "copyPhoto", text: localized("photo.copy"), enabled: !vm.busy, onClick: vm.copy)

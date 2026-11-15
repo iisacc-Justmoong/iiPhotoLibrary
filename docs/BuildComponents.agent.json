@@ -10,9 +10,9 @@
   },
   "source": {
     "path": "docs/BuildComponents.md",
-    "sha256": "c679045be2c5a5a9df4f53bd2ce5ca04c95f56497481ba4f30ad289c778d7cf9",
-    "bytes": 1617,
-    "line_count": 25,
+    "sha256": "df8106ba1de69f949fc0ed099dd394375c84fa0d4ce8dab7f94c5603a9ac288c",
+    "bytes": 3035,
+    "line_count": 48,
     "encoding": "utf-8",
     "language": "en"
   },
@@ -98,8 +98,36 @@
       "id": "b000011",
       "kind": "paragraph",
       "start_line": 25,
-      "end_line": 25,
-      "raw": "On native macOS, if `LVRS_DIR` is not specified, the photo tests prefer the Qt LVRS package in the SDK macOS platform directory. Set `LVRS_DIR` explicitly for a different Qt LVRS installation.\n"
+      "end_line": 35,
+      "raw": "The default test configuration keeps the photo service, album, gallery-model,\nand installed-library consumer checks, without requiring Qt Quick or LVRS.\nThe two historical QML gallery checks and their relocated QML consumer are\nisolated behind `IIPHOTOLIBRARY_TEST_LEGACY_QML=ON`; enabling this adds those\nchecks without removing the default service tests. Their existing time limits\nremain unchanged. On native macOS, the opt-in legacy tests prefer the Qt LVRS\npackage in the SDK macOS platform directory when `LVRS_DIR` is unspecified.\nThe opt-in test inventory compares both executables and confirms that the 40\nservice test functions are still present and only the two legacy view functions\nare separated. The LVUI presentation's independent consumer tests remain a\nseparate integration check.\n"
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 36,
+      "end_line": 36,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "paragraph",
+      "start_line": 37,
+      "end_line": 40,
+      "raw": "The installed-consumer test puts its disposable install inputs under\n`resources/` and compilation output below `build/`. It redirects the private\ninstallation manifest, preserving the project's existing install manifest,\nand removes its own test workspaces after success or a reported command failure.\n"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 41,
+      "end_line": 41,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "paragraph",
+      "start_line": 42,
+      "end_line": 48,
+      "raw": "On 2026-11-15 the macOS default configuration built with LVRS and Qt Quick\npackage discovery disabled and passed all 21 tests. The opt-in legacy build\npassed six focused tests, including both original gallery checks and the\nrelocated QML consumer. A missing iiSharedCanvas runtime search path initially\nprevented the service test from starting; the test target now supplies the\nselected shared-library directory, and the full default suite passed on retry.\nNo user application or system installation was run.\n"
     }
   ],
   "outline": [

@@ -70,8 +70,10 @@ private:
     bool active_=true;
 };
 
-// Owner-thread state. Queries are invoked by the host only on change; no timer
-// or asynchronous work is created by the presentation model.
+// All model and row operations require their constructing thread, including
+// no-op requests. Direct foreign-thread calls throw; query ports report failure.
+// Destroy on that thread after the current model query returns. Queries are
+// invoked only on change; this model creates no timer or asynchronous work.
 class IIPHOTO_PRESENTATION_EXPORT PhotoViewModel final {
 public:
     PhotoViewModel();
@@ -99,6 +101,11 @@ public:
     bool pinch(double scale);
     bool dragZoom(double scale,bool first);
     void setViewportSize(double width,double height);
+    // Returns false for an unknown ID; selection still follows the normal
+    // visibility and reentrancy policy of PhotoRow::select().
+    [[nodiscard]] bool selectById(std::string_view id,bool information=true);
+    // A retained row is retired when removed and cannot affect another row.
+    [[nodiscard]] std::shared_ptr<PhotoRow> findById(std::string_view id) const;
     void closeInformation();
     void openOriginal();
     void copy();
@@ -145,6 +152,10 @@ public:
     ii::core::Observable<std::uint64_t>& selectedBytes,&revealRevision;
     ii::core::Observable<double>& thumbnailSize,&viewportWidth,&viewportHeight;
     ii::core::Observable<std::string>& access,&status,&selectedId,&selectedName,&selectedPreview,&selectedCreated,&revealKey;
+    [[nodiscard]] std::string formatField(std::string_view pattern,std::string_view value) const;
+    [[nodiscard]] std::string formatSize(std::uint64_t bytes,std::string_view bytesPattern,
+        std::string_view kilobytesPattern,std::string_view megabytesPattern,std::string_view gigabytesPattern) const;
+    [[nodiscard]] std::string formatTimestamp(std::string_view timestamp) const;
     void connectLibrary(){model->connectLibrary();} void pickFiles(){model->pickFiles();} void refresh(){model->refresh();}
     void closeInformation(){model->closeInformation();} void openOriginal(){model->openOriginal();}
     bool dropFiles(const std::vector<std::string>& files){return model->dropFiles(files);}

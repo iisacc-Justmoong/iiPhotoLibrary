@@ -18,8 +18,9 @@ PhotoEntry entry(const QVariant& data){
     const auto values=data.toMap();PhotoEntry result;
     result.id=utf8(values.value("id").toString());result.galleryKey=utf8(values.value("galleryKey").toString());
     result.name=utf8(values.value("name").toString());result.created=utf8(values.value("created").toString());
-    result.preview=utf8(values.value("preview").toUrl().toString(QUrl::FullyEncoded));
-    result.previewRevision=utf8(values.value("previewStamp").toString());result.video=values.value("media").toString()=="video";
+    result.previewRevision=utf8(values.value("previewStamp").toString());
+    if(!result.previewRevision.empty())result.preview=utf8(values.value("preview").toUrl().toString(QUrl::FullyEncoded));
+    result.video=values.value("media").toString()=="video";
     for(const auto& resource:values.value("resources").toList()){
         const auto bytes=resource.toMap().value("size").toLongLong();
         if(bytes>0){const auto amount=std::uint64_t(bytes);result.bytes=amount>UINT64_MAX-result.bytes?UINT64_MAX:result.bytes+amount;}

@@ -4,11 +4,9 @@
 #include <QDir>
 #include <QDirIterator>
 #include <QImage>
-#include <QPointingDevice>
 #include <QPainter>
 #include <QLinearGradient>
 #include <QJsonDocument>
-#include <QJSValue>
 #include <QTemporaryDir>
 #include <QTest>
 #include <QSignalSpy>
@@ -17,20 +15,27 @@
 #include <QScopeGuard>
 #include <QLockFile>
 #include <QCryptographicHash>
+#include <QGuiApplication>
+#ifdef IIPHOTOLIBRARY_TEST_LEGACY_QML
+#include <QPointingDevice>
+#include <QJSValue>
 #include <QQmlApplicationEngine>
 #include <QQuickWindow>
 #include <QQuickItem>
 #include "backend/runtime/appbootstrap.h"
+#endif
 #include <iiSocietyHelper/Sync/Sync.h>
 #include <thread>
 
 using namespace iiPhotoLibrary;
 namespace {
+#ifdef IIPHOTOLIBRARY_TEST_LEGACY_QML
 QQuickItem *visualItem(QQuickItem *parent, const QString &name) {
     if (parent->objectName() == name) return parent;
     for (auto *child : parent->childItems()) if (auto *found = visualItem(child, name)) return found;
     return nullptr;
 }
+#endif
 void write(const QString &path, const QByteArray &bytes) {
     QFile file(path); QVERIFY(file.open(QIODevice::WriteOnly)); QCOMPARE(file.write(bytes), bytes.size());
 }
@@ -779,6 +784,7 @@ private slots:
         QCOMPARE(entries[1].toMap().value("created"), entries[2].toMap().value("created"));
         QVERIFY(entries[1].toMap().value("galleryKey").toString() < entries[2].toMap().value("galleryKey").toString());
     }
+#ifdef IIPHOTOLIBRARY_TEST_LEGACY_QML
     void chronologicalGalleryOpensAtNewestAndPreservesBrowsing_data() {
         QTest::addColumn<QSize>("viewport");
         QTest::newRow("mobile") << QSize(390, 844);
@@ -968,6 +974,7 @@ private slots:
         QVERIFY2(warnings.isEmpty(), qPrintable(warnings.join('\n')));
         window->close();
     }
+#endif
     void authenticatedExchangeUploadsLocalAndDownloadsOnlySelectedOriginal() {
         Fixture host, client;
         const auto hostDrive = iiSocietyContainer::SocietyDrive::open(host.temporary.path() + "/drive.societycontainer");
@@ -1088,12 +1095,17 @@ private slots:
     }
 };
 int main(int argc, char **argv) {
+#ifdef IIPHOTOLIBRARY_TEST_LEGACY_QML
     lvrs::AppBootstrapOptions options;
     options.applicationName = "iiPhotoLibraryTests"; options.quickStyleName = "Basic";
     options.bootstrapGraphicsBackend = false; options.configureRenderQualityDefaults = false;
     options.logBootstrapDiagnostics = false; options.logGraphicsBackend = false;
     if (!lvrs::preApplicationBootstrap(options).ok) return 1;
-    QGuiApplication app(argc, argv); lvrs::postApplicationBootstrap(app, options);
+#endif
+    QGuiApplication app(argc, argv);
+#ifdef IIPHOTOLIBRARY_TEST_LEGACY_QML
+    lvrs::postApplicationBootstrap(app, options);
+#endif
     PhotosTest test; return QTest::qExec(&test, argc, argv);
 }
 #include "tst_photos.moc"

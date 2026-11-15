@@ -1,0 +1,12 @@
+cmake_minimum_required(VERSION 3.24)
+project(iiPhotoPresentationCConsumer LANGUAGES C CXX)
+include(CTest)
+find_package(iiPhotoLibraryPresentation CONFIG REQUIRED)
+if(NOT iiPhotoLibraryPresentation_PYTHON_DIR OR
+   NOT EXISTS "${iiPhotoLibraryPresentation_PYTHON_DIR}/iiphotolibrary_presentation.py")
+    message(FATAL_ERROR "The installed shared presentation package has no Python API")
+endif()
+add_executable(iiPhotoPresentationCConsumer main.c)
+target_compile_features(iiPhotoPresentationCConsumer PRIVATE c_std_17)
+target_link_libraries(iiPhotoPresentationCConsumer PRIVATE iiPhotoLibrary::Presentation)
+add_test(NAME iiPhotoPresentationCConsumer COMMAND iiPhotoPresentationCConsumer)

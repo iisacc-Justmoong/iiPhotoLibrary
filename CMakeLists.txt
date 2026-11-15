@@ -8,6 +8,27 @@ project(iiPhotoLibrary VERSION 0.1.1 LANGUAGES CXX)
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 include(CTest)
+include(cmake/LegacyViewOptions.cmake)
+if(BUILD_TESTING)
+    foreach(_legacy_case IN ITEMS default on off)
+        set(_legacy_option_arg)
+        set(_legacy_expected OFF)
+        if(_legacy_case STREQUAL "on")
+            set(_legacy_option_arg "-DIIPHOTOLIBRARY_TEST_LEGACY_QML:BOOL=ON")
+            set(_legacy_expected ON)
+        elseif(_legacy_case STREQUAL "off")
+            set(_legacy_option_arg "-DIIPHOTOLIBRARY_TEST_LEGACY_QML:BOOL=OFF")
+        endif()
+        add_test(NAME iiPhotoLibrary.LegacyViewOption.${_legacy_case}
+            COMMAND "${CMAKE_COMMAND}" "-DPHOTO_OPTIONS=${CMAKE_CURRENT_SOURCE_DIR}/cmake/LegacyViewOptions.cmake"
+                "-DEXPECTED_LEGACY=${_legacy_expected}" ${_legacy_option_arg}
+                -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/legacy_view_option.cmake")
+    endforeach()
+    add_test(NAME iiPhotoLibrary.InstalledConsumerPathGuard
+        COMMAND "${CMAKE_COMMAND}" "-DSOURCE_ROOT=${CMAKE_CURRENT_SOURCE_DIR}"
+            "-DCONSUMER_SCRIPT=${CMAKE_CURRENT_SOURCE_DIR}/tests/installed_consumer.cmake"
+            -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/installed_consumer_policy.cmake")
+endif()
 option(BUILD_SHARED_LIBS "Build photo components as shared libraries" ON)
 if(EMSCRIPTEN AND BUILD_SHARED_LIBS)
     set_property(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS TRUE)
@@ -197,7 +218,7 @@ if(BUILD_TESTING AND NOT CMAKE_CROSSCOMPILING)
     endif()
     add_test(NAME iiPhotoLibrary.NativeAlbumBridge COMMAND iiPhotoLibraryAlbumBridgeTests)
     set_tests_properties(iiPhotoLibrary.NativeAlbumBridge PROPERTIES TIMEOUT 30)
-    find_package(Qt6 6.8.3 EXACT REQUIRED COMPONENTS Test Quick QuickControls2)
+    find_package(Qt6 6.8.3 EXACT REQUIRED COMPONENTS Test)
     add_executable(iiPhotoLibraryGalleryModelTests tests/gallery_model.cpp)
     target_link_libraries(iiPhotoLibraryGalleryModelTests PRIVATE iiPhotoLibrary::iiPhotoLibrary Qt6::Test)
     set_target_properties(iiPhotoLibraryGalleryModelTests PROPERTIES AUTOMOC ON)
@@ -210,43 +231,76 @@ if(BUILD_TESTING AND NOT CMAKE_CROSSCOMPILING)
         add_test(NAME iiPhotoLibrary.PresentationBridge COMMAND iiPhotoLibraryPresentationBridgeTests)
         set_tests_properties(iiPhotoLibrary.PresentationBridge PROPERTIES TIMEOUT 30)
     endif()
-    # Native LVRS and the Qt test-support package can coexist in the SDK prefix.
-    # Respect an explicit selection; otherwise prefer the macOS Qt package for these tests.
-    if(APPLE AND NOT CMAKE_CROSSCOMPILING AND NOT LVRS_DIR AND "$ENV{LVRS_DIR}" STREQUAL "")
-        set(_photo_lvrs_qt "$ENV{HOME}/.local/SDK/LVRS/platforms/macos/lib/cmake/LVRS")
-        if(EXISTS "${_photo_lvrs_qt}/LVRSConfig.cmake")
-            find_package(LVRS CONFIG QUIET PATHS "${_photo_lvrs_qt}" NO_DEFAULT_PATH)
-        endif()
-    endif()
-    find_package(LVRS CONFIG REQUIRED HINTS "$ENV{HOME}/.local/LVRS" "$ENV{HOME}/.local/SDK/LVRS")
-    if(NOT COMMAND lvrs_configure_qml_app)
-        message(FATAL_ERROR "Photo tests require the Qt LVRS package; set LVRS_DIR to its CMake package directory")
-    endif()
-
     find_package(iiSocietyHelper 0.10.0 CONFIG REQUIRED)
     qt_add_executable(iiPhotoLibraryTests tests/tst_photos.cpp)
     target_link_libraries(iiPhotoLibraryTests PRIVATE iiPhotoLibrary::iiPhotoLibrary
-        iiSocietyHelper::iiSocietyHelper Qt6::Test Qt6::Quick Qt6::QuickControls2)
-    lvrs_configure_qml_app(iiPhotoLibraryTests NO_PLATFORM_RUNTIME_TARGETS)
+        iiSocietyHelper::iiSocietyHelper Qt6::Test Qt6::Gui)
+    if(UNIX AND TARGET iiSharedCanvas::Core)
+        # CMake may treat this SDK directory as implicit because of LIBRARY_PATH,
+        # but the helper's transitive shared libraries still need it at runtime.
+        set_property(TARGET iiPhotoLibraryTests APPEND PROPERTY BUILD_RPATH "$<TARGET_FILE_DIR:iiSharedCanvas::Core>")
+    endif()
     set_target_properties(iiPhotoLibraryTests PROPERTIES AUTOMOC ON)
     target_compile_definitions(iiPhotoLibraryTests PRIVATE
-        IIPHOTOLIBRARY_TEST_DIRECTORY="${CMAKE_CURRENT_SOURCE_DIR}/resources"
-        IIPHOTOLIBRARY_QML_FILE="${CMAKE_CURRENT_SOURCE_DIR}/tests/Legacy/PhotosHarness.qml"
-        IIPHOTOLIBRARY_QML_IMPORT_PATH="${CMAKE_CURRENT_SOURCE_DIR}/src/Legacy/qml"
-        IIPHOTOLIBRARY_LVRS_QML_IMPORT_PATH="${LVRS_QML_IMPORT_PATH}")
+        IIPHOTOLIBRARY_TEST_DIRECTORY="${CMAKE_CURRENT_SOURCE_DIR}/resources")
     add_test(NAME iiPhotoLibrary.Photos COMMAND iiPhotoLibraryTests)
     set_tests_properties(iiPhotoLibrary.Photos PROPERTIES TIMEOUT 180
         ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software;QML_DISABLE_DISK_CACHE=1")
     if(WIN32)
         set_property(TEST iiPhotoLibrary.Photos PROPERTY TIMEOUT 300)
     endif()
-    add_test(NAME iiPhotoLibrary.InstalledConsumer COMMAND ${CMAKE_COMMAND}
-        "-DGENERATOR=${CMAKE_GENERATOR}" "-DPROJECT_BUILD=${CMAKE_CURRENT_BINARY_DIR}" "-DPROJECT_SOURCE=${CMAKE_CURRENT_SOURCE_DIR}"
-        "-DPREFIX_PATH=${CMAKE_PREFIX_PATH}" "-DQt6_DIR=${Qt6_DIR}"
-        "-DiiSocietyContainer_DIR=${iiSocietyContainer_DIR}"
-        "-DLVRS_DIR=${LVRS_DIR}" "-DLVRS_QML_IMPORT_PATH=${LVRS_QML_IMPORT_PATH}"
-        -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/installed_consumer.cmake")
-    set_tests_properties(iiPhotoLibrary.InstalledConsumer PROPERTIES TIMEOUT 120)
+    if(IIPHOTOLIBRARY_TEST_LEGACY_QML)
+        find_package(Qt6 6.8.3 EXACT REQUIRED COMPONENTS Quick QuickControls2)
+        # Native LVRS and the Qt test-support package can coexist in the SDK prefix.
+        if(APPLE AND NOT LVRS_DIR AND "$ENV{LVRS_DIR}" STREQUAL "")
+            set(_photo_lvrs_qt "$ENV{HOME}/.local/SDK/LVRS/platforms/macos/lib/cmake/LVRS")
+            if(EXISTS "${_photo_lvrs_qt}/LVRSConfig.cmake")
+                find_package(LVRS CONFIG QUIET PATHS "${_photo_lvrs_qt}" NO_DEFAULT_PATH)
+            endif()
+        endif()
+        find_package(LVRS CONFIG REQUIRED HINTS "$ENV{HOME}/.local/LVRS" "$ENV{HOME}/.local/SDK/LVRS")
+        if(NOT COMMAND lvrs_configure_qml_app)
+            message(FATAL_ERROR "Legacy photo view tests require the Qt LVRS package; set LVRS_DIR to its CMake package directory")
+        endif()
+        qt_add_executable(iiPhotoLibraryLegacyViewTests tests/tst_photos.cpp)
+        target_link_libraries(iiPhotoLibraryLegacyViewTests PRIVATE iiPhotoLibrary::iiPhotoLibrary
+            iiSocietyHelper::iiSocietyHelper Qt6::Test Qt6::Quick Qt6::QuickControls2)
+        if(UNIX AND TARGET iiSharedCanvas::Core)
+            set_property(TARGET iiPhotoLibraryLegacyViewTests APPEND PROPERTY BUILD_RPATH "$<TARGET_FILE_DIR:iiSharedCanvas::Core>")
+        endif()
+        lvrs_configure_qml_app(iiPhotoLibraryLegacyViewTests NO_PLATFORM_RUNTIME_TARGETS)
+        set_target_properties(iiPhotoLibraryLegacyViewTests PROPERTIES AUTOMOC ON)
+        target_compile_definitions(iiPhotoLibraryLegacyViewTests PRIVATE IIPHOTOLIBRARY_TEST_LEGACY_QML=1
+            IIPHOTOLIBRARY_TEST_DIRECTORY="${CMAKE_CURRENT_SOURCE_DIR}/resources"
+            IIPHOTOLIBRARY_QML_FILE="${CMAKE_CURRENT_SOURCE_DIR}/tests/Legacy/PhotosHarness.qml"
+            IIPHOTOLIBRARY_QML_IMPORT_PATH="${CMAKE_CURRENT_SOURCE_DIR}/src/Legacy/qml"
+            IIPHOTOLIBRARY_LVRS_QML_IMPORT_PATH="${LVRS_QML_IMPORT_PATH}")
+        add_test(NAME iiPhotoLibrary.LegacyViews COMMAND iiPhotoLibraryLegacyViewTests
+            chronologicalGalleryOpensAtNewestAndPreservesBrowsing galleryRendersAndLatePreviewKeepsBrowsingPosition)
+        set_tests_properties(iiPhotoLibrary.LegacyViews PROPERTIES TIMEOUT 180
+            ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software;QML_DISABLE_DISK_CACHE=1")
+        if(WIN32)
+            set_property(TEST iiPhotoLibrary.LegacyViews PROPERTY TIMEOUT 300)
+        endif()
+        find_package(Python3 REQUIRED COMPONENTS Interpreter)
+        add_test(NAME iiPhotoLibrary.LegacyTestInventory COMMAND "${Python3_EXECUTABLE}"
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/legacy_test_inventory.py"
+            "$<TARGET_FILE:iiPhotoLibraryTests>" "$<TARGET_FILE:iiPhotoLibraryLegacyViewTests>")
+        set_tests_properties(iiPhotoLibrary.LegacyTestInventory PROPERTIES TIMEOUT 30)
+    endif()
+    function(iiphoto_add_installed_consumer name legacy)
+        add_test(NAME "${name}" COMMAND ${CMAKE_COMMAND}
+            "-DGENERATOR=${CMAKE_GENERATOR}" "-DPROJECT_BUILD=${CMAKE_CURRENT_BINARY_DIR}" "-DPROJECT_SOURCE=${CMAKE_CURRENT_SOURCE_DIR}"
+            "-DPREFIX_PATH=${CMAKE_PREFIX_PATH}" "-DQt6_DIR=${Qt6_DIR}"
+            "-DiiSocietyContainer_DIR=${iiSocietyContainer_DIR}" "-DiiSDKCore_DIR=${iiSDKCore_DIR}" "-DINSTALL_LIBDIR=${CMAKE_INSTALL_LIBDIR}"
+            "-DLVRS_DIR=${LVRS_DIR}" "-DLVRS_QML_IMPORT_PATH=${LVRS_QML_IMPORT_PATH}" "-DLEGACY_QML=${legacy}"
+            -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/installed_consumer.cmake")
+        set_tests_properties("${name}" PROPERTIES TIMEOUT 120)
+    endfunction()
+    iiphoto_add_installed_consumer(iiPhotoLibrary.InstalledConsumer OFF)
+    if(IIPHOTOLIBRARY_TEST_LEGACY_QML)
+        iiphoto_add_installed_consumer(iiPhotoLibrary.InstalledLegacyViewConsumer ON)
+    endif()
 endif()
 
 install(TARGETS iiPhotoLibrary EXPORT iiPhotoLibraryTargets

@@ -1,0 +1,8 @@
+if(NOT DEFINED PHOTO_OPTIONS OR NOT DEFINED EXPECTED_LEGACY)
+    message(FATAL_ERROR "The photo options file and expected legacy setting are required")
+endif()
+cmake_policy(SET CMP0077 NEW)
+include("${PHOTO_OPTIONS}")
+if(NOT "${IIPHOTOLIBRARY_TEST_LEGACY_QML}" STREQUAL "${EXPECTED_LEGACY}")
+    message(FATAL_ERROR "Legacy photo QML test setting is '${IIPHOTOLIBRARY_TEST_LEGACY_QML}', expected '${EXPECTED_LEGACY}'")
+endif()

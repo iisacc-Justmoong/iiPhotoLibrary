@@ -42,7 +42,7 @@
       "document_id": "urn:iisacc:document:a9345b98b3c5dc1a88c5e66e54aa4e9b13b386b145e65461de16c6ba16467a23",
       "source": "docs/BuildComponents.md",
       "agent_json": "docs/BuildComponents.agent.json",
-      "source_sha256": "c679045be2c5a5a9df4f53bd2ce5ca04c95f56497481ba4f30ad289c778d7cf9",
+      "source_sha256": "df8106ba1de69f949fc0ed099dd394375c84fa0d4ce8dab7f94c5603a9ac288c",
       "role": "guide"
     },
     {
@@ -70,7 +70,7 @@
       "document_id": "urn:iisacc:document:aa40ad521de99c18d293761c67dc64e8b91c9a0e1e74fd1d244f26dacd273a8f",
       "source": "docs/NativePhotoViews.md",
       "agent_json": "docs/NativePhotoViews.agent.json",
-      "source_sha256": "5d24acb067017413b3de5f35993f63b5f628a240aeb405250001313bd8bf5d1e",
+      "source_sha256": "979026164b64f3ac66b4b659c594fcb2a87155ee7dbe544fa0ac74e04b1de048",
       "role": "guide"
     },
     {

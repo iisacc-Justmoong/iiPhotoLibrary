@@ -1,29 +1,74 @@
 string(RANDOM LENGTH 16 ALPHABET 0123456789abcdef nonce)
+if(NOT INSTALL_LIBDIR OR IS_ABSOLUTE "${INSTALL_LIBDIR}" OR INSTALL_LIBDIR MATCHES "(^|/)\\.\\.(/|$)")
+    message(FATAL_ERROR "A relative photo installation library directory is required")
+endif()
+if(IS_SYMLINK "${PROJECT_BUILD}" OR IS_SYMLINK "${PROJECT_SOURCE}/build" OR IS_SYMLINK "${PROJECT_SOURCE}/resources")
+    message(FATAL_ERROR "The photo build and resource roots must be direct directories")
+endif()
+file(REAL_PATH "${PROJECT_SOURCE}/build" build_root)
+file(REAL_PATH "${PROJECT_BUILD}" build_real)
+cmake_path(IS_PREFIX build_root "${build_real}" NORMALIZE within_build)
+if(NOT within_build)
+    message(FATAL_ERROR "The photo consumer build must be inside this project's build directory")
+endif()
 set(work "${PROJECT_BUILD}/photo-consumer-${nonce}")
+set(resource_work "${PROJECT_SOURCE}/resources/.photo-consumer-${nonce}")
+if(EXISTS "${work}" OR IS_SYMLINK "${work}" OR EXISTS "${resource_work}" OR IS_SYMLINK "${resource_work}")
+    message(FATAL_ERROR "The photo consumer workspace already exists")
+endif()
 file(MAKE_DIRECTORY "${work}")
+file(MAKE_DIRECTORY "${resource_work}")
 function(run)
     execute_process(COMMAND ${ARGV} RESULT_VARIABLE result OUTPUT_VARIABLE output ERROR_VARIABLE error)
     if(NOT result EQUAL 0)
-        file(REMOVE_RECURSE "${work}")
+        file(REMOVE_RECURSE "${work}" "${resource_work}")
         message(FATAL_ERROR "Command failed (${result}): ${ARGV}\n${output}\n${error}")
     endif()
     message(STATUS "${output}${error}")
 endfunction()
-set(stage "${work}/stage")
-set(relocated "${work}/relocated")
-# Only disposable outputs created by this test are replaced.
-file(REMOVE_RECURSE "${stage}" "${relocated}")
-run("${CMAKE_COMMAND}" --install "${PROJECT_BUILD}" --prefix "${stage}")
+set(stage "${resource_work}/stage")
+set(relocated "${resource_work}/relocated")
+# Redirect the private install manifest so this test cannot overwrite the
+# project's install_manifest.txt or another install's manifest.
+file(READ "${PROJECT_BUILD}/cmake_install.cmake" install_script)
+set(local_manifest "${PROJECT_BUILD}/install_local_manifest.txt")
+set(normal_manifest "${PROJECT_BUILD}/\${CMAKE_INSTALL_MANIFEST}")
+foreach(manifest IN ITEMS "${local_manifest}" "${normal_manifest}")
+    string(FIND "${install_script}" "${manifest}" first)
+    if(first LESS 0)
+        file(REMOVE_RECURSE "${work}" "${resource_work}")
+        message(FATAL_ERROR "Cannot safely redirect the photo installation manifest")
+    endif()
+    string(LENGTH "${manifest}" manifest_length)
+    math(EXPR after_first "${first} + ${manifest_length}")
+    string(SUBSTRING "${install_script}" ${after_first} -1 remainder)
+    string(FIND "${remainder}" "${manifest}" second)
+    if(NOT second EQUAL -1)
+        file(REMOVE_RECURSE "${work}" "${resource_work}")
+        message(FATAL_ERROR "Cannot safely redirect the photo installation manifest")
+    endif()
+endforeach()
+string(REPLACE "${local_manifest}" "${resource_work}/install_local_manifest.txt" install_script "${install_script}")
+string(REPLACE "${normal_manifest}" "${resource_work}/\${CMAKE_INSTALL_MANIFEST}" install_script "${install_script}")
+file(WRITE "${resource_work}/cmake_install.cmake" "${install_script}")
+run("${CMAKE_COMMAND}" "-DCMAKE_INSTALL_PREFIX=${stage}" -P "${resource_work}/cmake_install.cmake")
 file(RENAME "${stage}" "${relocated}")
-file(WRITE "${work}/consumer-prefix.cmake" "set(CMAKE_PREFIX_PATH [==[${PREFIX_PATH}]==] CACHE STRING Dependencies FORCE)\n")
-run("${CMAKE_COMMAND}" --fresh -G "${GENERATOR}" -C "${work}/consumer-prefix.cmake" -S "${PROJECT_SOURCE}/tests/consumer" -B "${work}/build"
-    "-DiiPhotoLibrary_DIR=${relocated}/lib/cmake/iiPhotoLibrary"
+file(WRITE "${resource_work}/consumer-prefix.cmake" "set(CMAKE_PREFIX_PATH [==[${PREFIX_PATH}]==] CACHE STRING Dependencies FORCE)\n")
+set(disable_legacy)
+if(NOT LEGACY_QML)
+    list(APPEND disable_legacy "-DCMAKE_DISABLE_FIND_PACKAGE_LVRS=TRUE" "-DCMAKE_DISABLE_FIND_PACKAGE_Qt6Quick=TRUE")
+endif()
+run("${CMAKE_COMMAND}" --fresh -G "${GENERATOR}" -C "${resource_work}/consumer-prefix.cmake" -S "${PROJECT_SOURCE}/tests/consumer" -B "${work}/build"
+    "-DiiPhotoLibrary_DIR=${relocated}/${INSTALL_LIBDIR}/cmake/iiPhotoLibrary"
     "-DQt6_DIR=${Qt6_DIR}"
-    "-DiiSocietyContainer_DIR=${iiSocietyContainer_DIR}" "-DLVRS_DIR=${LVRS_DIR}"
+    "-DiiSocietyContainer_DIR=${iiSocietyContainer_DIR}" "-DiiSDKCore_DIR=${iiSDKCore_DIR}" "-DLVRS_DIR=${LVRS_DIR}"
+    "-DPHOTO_CONSUMER_LEGACY_QML=${LEGACY_QML}" ${disable_legacy}
     -DCMAKE_BUILD_TYPE=Release)
 run("${CMAKE_COMMAND}" --build "${work}/build" --parallel 4)
 file(READ "${work}/build/run-path.txt" consumer_executable)
-run("${CMAKE_COMMAND}" -E env QT_QPA_PLATFORM=offscreen QT_QUICK_BACKEND=software QML_DISABLE_DISK_CACHE=1
+run("${CMAKE_COMMAND}" -E env --unset=DYLD_LIBRARY_PATH --unset=DYLD_FALLBACK_LIBRARY_PATH
+    --unset=DYLD_FRAMEWORK_PATH --unset=DYLD_FALLBACK_FRAMEWORK_PATH --unset=LD_LIBRARY_PATH
+    QT_QPA_PLATFORM=offscreen QT_QUICK_BACKEND=software QML_DISABLE_DISK_CACHE=1
     "${consumer_executable}")
 
-file(REMOVE_RECURSE "${work}")
+file(REMOVE_RECURSE "${work}" "${resource_work}")

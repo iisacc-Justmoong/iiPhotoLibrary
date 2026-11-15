@@ -35,6 +35,7 @@ private slots:
         std::vector<std::string> invalidations;
         PhotoPresentationBridge bridge(controller.get(), model, {}, [&](auto source) { invalidations.emplace_back(source); });
         QCOMPARE(model->rows.get().size(), std::size_t(2));
+        QCOMPARE(invalidations.size(), std::size_t(1));invalidations.clear();
         auto first = model->rows.get()[0], second = model->rows.get()[1];
         gallery->replace({row("a", "Updated", "2"), row("b", "Second", "1")});
         QTRY_COMPARE(first->name.get(), std::string("Updated"));
@@ -52,6 +53,38 @@ private slots:
         QVERIFY(model->rows.get().empty());
         second->select();
         QVERIFY(model->selectedId.get().empty());
+    }
+
+    void previewBecomesVisibleOnlyWhenReady() {
+        auto model = std::make_shared<PhotoViewModel>();
+        PhotoController controller({}, nullptr, std::make_shared<CompatibilityLibrary>());
+        auto* gallery = static_cast<PhotoGalleryModel*>(controller.galleryModel());
+        gallery->replace({row("a", "First", "")});
+        std::vector<std::string> invalidations;
+        PhotoPresentationBridge bridge(&controller, model, {}, [&](auto source) { invalidations.emplace_back(source); });
+        QCOMPARE(model->rows.get().size(), std::size_t(1));
+        auto first = model->rows.get().front();
+        QVERIFY(first->preview.get().empty());
+        first->select();
+        QVERIFY(model->selectedPreview.get().empty());
+        bool readyAfterInvalidation = true;
+        auto previewObserver = first->preview.observe([&](const auto& source, std::uint64_t) {
+            if (!source.empty() && (invalidations.empty() || invalidations.back() != source))
+                readyAfterInvalidation = false;
+        });
+        gallery->replace({row("a", "First", "1")});
+        QTRY_COMPARE(first->preview.get(), std::string("file:///fixture.jpg"));
+        QCOMPARE(model->selectedPreview.get(), std::string("file:///fixture.jpg"));
+        QVERIFY(readyAfterInvalidation);
+        QCOMPARE(invalidations.size(), std::size_t(1));
+        gallery->replace({row("a", "First", "")});
+        QTRY_VERIFY(first->preview.get().empty());
+        QVERIFY(model->selectedPreview.get().empty());
+        invalidations.clear();
+        gallery->replace({row("a", "First", "2")});
+        QTRY_COMPARE(first->preview.get(), std::string("file:///fixture.jpg"));
+        QVERIFY(readyAfterInvalidation);
+        QCOMPARE(invalidations.size(), std::size_t(1));
     }
 
     void bridgeMayRetireDuringDeferredReconciliation() {

@@ -10,9 +10,9 @@
   },
   "source": {
     "path": "docs/NativePhotoViews.md",
-    "sha256": "5d24acb067017413b3de5f35993f63b5f628a240aeb405250001313bd8bf5d1e",
-    "bytes": 8704,
-    "line_count": 100,
+    "sha256": "979026164b64f3ac66b4b659c594fcb2a87155ee7dbe544fa0ac74e04b1de048",
+    "bytes": 18900,
+    "line_count": 218,
     "encoding": "utf-8",
     "language": "ko"
   },
@@ -42,134 +42,291 @@
       "id": "b000003",
       "kind": "paragraph",
       "start_line": 3,
-      "end_line": 7,
-      "raw": "사진 갤러리는 [System 갤러리 시안](https://www.figma.com/design/PFMgQb3BVbrTbzPPsoWsRp/System?node-id=34-336),\n좁은 화면은 [컴팩트 갤러리 시안](https://www.figma.com/design/PFMgQb3BVbrTbzPPsoWsRp/System?node-id=37-85),\n정보 시트는 [파일 정보 시안](https://www.figma.com/design/PFMgQb3BVbrTbzPPsoWsRp/System?node-id=34-376)을\n기준으로 LVUI로 선언한다. 컴포넌트와 표면 색상은 LVUI 시스템을 사용하며 자체 토큰은\n만들지 않는다. QML 갤러리는 실제 소비자를 이전하는 동안 레거시로 격리한다.\n"
+      "end_line": 10,
+      "raw": "사진 갤러리는 [System 갤러리 시안](https://www.figma.com/design/PFMgQb3BVbrTbzPPsoWsRp/System?node-id=34-336),\n좁은 화면은 [컴팩트 갤러리 시안](https://www.figma.com/design/PFMgQb3BVbrTbzPPsoWsRp/System?node-id=37-85),\n정보 시트는 [파일 정보 시안](https://www.figma.com/design/PFMgQb3BVbrTbzPPsoWsRp/System?node-id=34-376)을\n기준으로 LVUI로 선언한다. 컴포넌트와 표면 색상은 LVUI 시스템을 사용하며 자체 토큰은\n만들지 않는다. QML 갤러리는 실제 소비자를 이전하는 동안 레거시로 격리한다.\n정보 시트는 플랫폼별 자동 표시를 명시하여 데스크톱에서는 중앙에, 모바일에서는\n모바일 시트 위치에 배치한다.\n2026-11-15 macOS 헤드리스 소비자는 선택한 사진의 정보 시트가 중앙에 열리는지 확인했다.\n"
     },
     {
       "id": "b000004",
       "kind": "blank",
-      "start_line": 8,
-      "end_line": 8,
+      "start_line": 11,
+      "end_line": 11,
       "raw": "\n"
     },
     {
       "id": "b000005",
       "kind": "paragraph",
-      "start_line": 9,
-      "end_line": 14,
-      "raw": "Qt 없는 C++23 프레젠테이션 모델은 앱이 주입한 사진 스냅샷과 변경 이벤트를\n받아 안정적인 사진 ID별 행을 제공한다. 미리보기의 주소와 리비전, 선택 및\n정보 시트, 활성·작업 중·공유 가능 상태를 분리한다. 행의 부분 갱신은 다른\n행을 다시 만들지 않는다. 삭제된 행과 닫힌 화면은 이전 콜백을 무효화한다.\n초기 동기화와 이벤트 누락 복구는 호스트가 명시적으로 스냅샷을 요청하며,\n평상시에는 이벤트로 변경한다.\n"
+      "start_line": 12,
+      "end_line": 24,
+      "raw": "Qt 없는 C++23 프레젠테이션 모델은 앱이 주입한 사진 스냅샷과 변경 이벤트를\n받아 안정적인 사진 ID별 행을 제공한다. 미리보기의 주소와 리비전, 선택 및\n정보 시트, 활성·작업 중·공유 가능 상태를 분리한다. 행의 부분 갱신은 다른\n행을 다시 만들지 않는다. 삭제된 행과 닫힌 화면은 이전 콜백을 무효화한다.\n모델과 행의 모든 상태 변경·동작은 생성된 소유 스레드에서만 수행한다. 다른\n스레드의 직접 호출은 상태나 주입된 콜백을 읽거나 바꾸기 전에 거부하며,\n쿼리 포트는 오류를 반환한다. 호스트는 백그라운드 결과를 소유 실행기로 전달한다.\n모델 파괴 시 대기 중인 쿼리를 취소하고 포트를 상태보다 먼저 닫는다. 호스트는\n모델을 소유 스레드에서 해제하고, 그 모델의 현재 쿼리가 반환된 다음 파괴해야 한다.\nmacOS 프레젠테이션 공유 라이브러리는 최종 런타임 검색 경로로 빌드하며, 같은\n타임스탬프에서 다시 설치해도 경로가 중복 추가되지 않는지 별도로 검사한다.\n초기 동기화와 이벤트 누락 복구는 호스트가 명시적으로 스냅샷을 요청하며,\n평상시에는 이벤트로 변경한다.\n"
     },
     {
       "id": "b000006",
       "kind": "blank",
-      "start_line": 15,
-      "end_line": 15,
+      "start_line": 25,
+      "end_line": 25,
       "raw": "\n"
     },
     {
       "id": "b000007",
       "kind": "paragraph",
-      "start_line": 16,
-      "end_line": 20,
-      "raw": "라이브러리 연결, 파일 선택, 새로고침, 원본 열기, 복사, 복제, 공유, 휴지통과\n가시 영역의 미리보기 우선순위는 호스트가 주입한 명령으로 실행한다. 화면은\n파일 대화상자나 운영체제 위젯을 직접 만들지 않는다. 미리보기의 실제 읽기와\n디코딩은 앱이 주입한 이미지 서비스의 책임이다. 스크롤과 확대 상태는 iiGUI\n뷰포트 입력에 따라 업데이트하고 타이머로 계속 조회하지 않는다.\n"
+      "start_line": 26,
+      "end_line": 34,
+      "raw": "공유 프레젠테이션 패키지는 동일한 C++ 뷰모델에 접근하는 C ABI와 Python API를\n제공한다. Python 호스트는 초기 스냅샷, 항목별 변경, 순서 변경, 선택과 사진 명령을\n전달하며 관측 콜백으로 변경된 속성과 행의 안정 ID를 받는다. 알림은 모델 변경 중\n동기적으로 발생하므로 전체 스냅샷이 필요한 소비자는 현재 호출이 반환된 뒤 명시적으로\n조회한다. 구조와 모델 속성의 알림은 관측을 등록하면 전송하고, 개별 행 속성은\n`watch_rows()`에 지정된 안정 ID에 대해서만 구독한다. 등록 해제는 `observe(None)` 또는\n빈 행 목록으로 명시한다. 주기적 조회는 시작하지 않는다. Python의 모델 및 네이티브 모델 리스는\n생성한 스레드에서 명시적으로 닫아야 하고, 뷰가 모델을 사용하는 동안 리스를 유지하며\n현재 콜백과 쿼리가 끝난 뒤 해제한다. 콜백에 전달된 문자열은 콜백 동안만 유효하다.\n"
     },
     {
       "id": "b000008",
-      "kind": "blank",
-      "start_line": 21,
-      "end_line": 21,
-      "raw": "\n"
-    },
-    {
-      "id": "b000009",
-      "kind": "paragraph",
-      "start_line": 22,
-      "end_line": 34,
-      "raw": "레거시 `PhotoController`에 연결하는 선택적 `iiPhotoLibrary::PresentationBridge`는\n기존 서비스의 변경 신호만\n관찰하고 화면 명령을 기존 서비스에 전달한다. 앱은 어댑터·뷰모델·LVUI 뷰의\n수명을 함께 소유하고, 화면이 숨겨지면 가시 미리보기 우선순위를 비운다.\n항목 삽입·삭제는 기존 행 식별자를 검증한 뒤 연속 범위 하나로 적용하며,\n정렬은 기존 행의 식별자 순서만 재배치한다. 기존 행 객체와 나머지 메타데이터는\n유지한다. 행 개수나 변경 구간의 식별자가 원본과 맞지 않거나 모델이 재설정되면\n이벤트 누락 복구를 위해 전체 스냅샷을 한 번 다시 읽는다. 호스트도 `reconcile()`을\n명시적으로 호출할 수 있다. 이 검사는 모든 종류의 과거 이벤트 누락을 자동으로\n탐지한다고 보장하지 않으며 폴링을 시작하지 않는다.\n뷰 활성화가 퇴역하면 가시 키의 빈 알림도 자동으로 전달한다.\n앱 런타임 장착, 운영체제 권한 대화상자, 실제 라이브러리와 GPU 출력은 별도\n검증으로 구분한다.\n"
-    },
-    {
-      "id": "b000010",
       "kind": "blank",
       "start_line": 35,
       "end_line": 35,
       "raw": "\n"
     },
     {
-      "id": "b000011",
+      "id": "b000009",
       "kind": "paragraph",
       "start_line": 36,
-      "end_line": 42,
-      "raw": "`iiPhotoLibraryPresentation` 패키지에는 `iiPhotoLibrary::Presentation`,\n`iiPhotoLibraryPresentation_VIEWS_DIR` 및 `iiPhotoLibraryPresentation_STRINGS_DIR`가\n있다. Qt 서비스와 연결하려면 별도의 `iiPhotoLibraryPresentationBridge` 패키지를\n사용한다. 기존 `iiPhotoLibrary_QML_IMPORT_PATH`는\n`iiPhotoLibrary_LEGACY_QML_IMPORT_PATH`의 호환 별칭이며 기존 QML은\n`src/Legacy/qml` 및 설치본의 `legacy/qml`에 있다. 기존 QML 호환 검사 전용\n하네스도 `tests/Legacy/PhotosHarness.qml`에 격리되어 있다.\n"
+      "end_line": 39,
+      "raw": "공유 패키지의 `iiPhotoLibraryPresentation_PYTHON_DIR`에서\n`iiphotolibrary_presentation.PhotoModel`을 가져올 수 있다. Python과 공유 라이브러리가\n서로 다른 설치 경로에 있을 때 생성자의 `library_path`와 `core_library_dir`를 명시할 수\n있다. 예를 들어 다음 코드는 명시적인 이벤트 수신과 사용자의 선택만 처리한다.\n"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 40,
+      "end_line": 40,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "fenced_code",
+      "start_line": 41,
+      "end_line": 51,
+      "raw": "```python\nfrom iiphotolibrary_presentation import PhotoModel\n\nwith PhotoModel() as photos:\n    photos.observe(lambda property_name, row_id: print(property_name, row_id))\n    photos.watch_rows([\"asset-1\"])\n    photos.update({\"active\": True, \"access\": \"ready\"}, [\n        {\"id\": \"asset-1\", \"gallery_key\": \"gallery-1\", \"name\": \"Image\"}\n    ])\n    photos.select(\"asset-1\")\n```\n",
+      "language": "python",
+      "code": "from iiphotolibrary_presentation import PhotoModel\n\nwith PhotoModel() as photos:\n    photos.observe(lambda property_name, row_id: print(property_name, row_id))\n    photos.watch_rows([\"asset-1\"])\n    photos.update({\"active\": True, \"access\": \"ready\"}, [\n        {\"id\": \"asset-1\", \"gallery_key\": \"gallery-1\", \"name\": \"Image\"}\n    ])\n    photos.select(\"asset-1\")\n",
+      "closed": true
     },
     {
       "id": "b000012",
       "kind": "blank",
-      "start_line": 43,
-      "end_line": 43,
+      "start_line": 52,
+      "end_line": 52,
       "raw": "\n"
     },
     {
       "id": "b000013",
       "kind": "paragraph",
-      "start_line": 44,
-      "end_line": 55,
-      "raw": "기존 제품이 이전 사진 서비스 바이너리를 계속 사용해야 한다면\n`src/Presentation/QtCompatibility`를 별도로 구성해 같은 어댑터를\n`iiPhotoLibrary::QtPresentationBridge` 패키지로 제공할 수 있다. 서비스를 정적으로\n링크하는 제품은 브리지도 정적으로 링크해 `PhotoController` 복사본이 둘 생기지\n않게 한다. 공유 브리지는 명시적인 공유 사진 서비스에서만 허용한다. 같은 어댑터가\n포함된 새 `iiPhotoLibrary::PresentationBridge`와 이 호환 패키지를 함께 링크하지\n않으며, 서비스 헤더와 바이너리 및 Core ABI는 각 제품이 일치시켜야 한다.\n기존 서비스의 모델 재설정은 다음 이벤트 턴에 명시적인 스냅샷으로 복구하고,\n새 서비스의 개별 삽입·삭제 이벤트에 대한 즉시 부분 갱신 계약은 유지한다.\nSociety가 빌드에 사용하는 기존 정적 사진 서비스와 같은 Core ABI의 모델을 조합한\n브리지 및 별도 설치 스테이징 소비자 검사에서 변경, 순서, 미리보기 무효화와\n재진입·종료를 검증했다. 이 검사는 실제 사진 라이브러리나 앱 화면을 열지 않는다.\n"
+      "start_line": 53,
+      "end_line": 61,
+      "raw": "초기화와 복구용 `update`, 항목 단위 `change`·`remove`, `reorder`, 가시 ID,\n파일 드롭, 선택, 확대와 뷰 명령을 제공한다. 저장소 연결·파일 선택·원본 열기 등은\n`set_actions()`로 앱이 제공한다. 콜백 예외는 C 경계를 넘어가지 않고 보관되며 다음\nPython 호출에서 다시 보고한다. 외부 네이티브 호스트가 모델을 보유하는 동안에는\n`lease_model()`을 유지하고 뷰와 진행 중인 쿼리를 먼저 종료한다. 정적 빌드와\nWebAssembly에는 Python 모듈을 설치하지 않으며 C++·C API는 별도로 제공한다.\nID로 사진을 선택하는 `selectById()`는 모델의 기존 ID 인덱스를 사용하고 숨김·재진입\n제어는 기존 행 선택과 동일하게 적용한다. `findById()`도 같은 인덱스로 행을 찾으며,\n행 관측 갱신은 명시적으로 지정된 ID만 확인한다.\n"
     },
     {
       "id": "b000014",
       "kind": "blank",
-      "start_line": 56,
-      "end_line": 56,
+      "start_line": 62,
+      "end_line": 62,
       "raw": "\n"
     },
     {
       "id": "b000015",
       "kind": "paragraph",
-      "start_line": 57,
-      "end_line": 81,
-      "raw": "현재 갤러리의 C++ 모델과 Qt 서비스 어댑터는 항목 선택·부분 변경·수명 종료를\n헤드리스 테스트한다. 최초 데이터가 도착하면 최신 항목을 드러내고, 이후 목록\n변경은 사용자의 탐색 위치를 유지한다. 앱 호스트는 화면을 숨길 때 `hide()`,\n다시 보일 때 `show()`를 호출하여 우선순위를 비우고 최신 위치로 재진입한다.\n뷰포트 폭과 높이는 기본적으로 0으로 두어 호스트 배치에 맞추며, 호스트가 필요한\n축만 명시적인 논리 픽셀 크기로 지정할 수 있다. 갤러리 폭이 기존 화면과 같은\n600 논리 px 미만이면 가져오기·추가·새로고침을 세로로 놓는다. 배치 크기가 실제로\n바뀔 때만 이벤트를 받아 전환하며 폴링하지 않는다.\n크기 슬라이더는 기존 확대 범위인 56–400 논리 px를 관측 가능한 썸네일 크기에\n양방향 연결해 포인터·키보드·접근성 명령으로 갤러리 크기를 조절한다. 갤러리의\n터치 핀치도 iiGUI 이벤트를 받아 같은 크기 범위에 적용하며 숨긴 화면에서는 거절한다.\n핀치 중심의 사진과 행 내 상대 위치는 열 수가 달라져도 가능한 한 같은 지점에 유지한다.\n보조 클릭은 해당 행에 붙인 LVUI ContextMenu를 열며, 열기·복사·복제·공유·삭제를\n다른 선택 행과 무관하게 그 사진의 ID로 전달한다. 메뉴가 열리면 정보 시트를 열지\n않고 해당 사진을 선택한다. 숨겨지거나 제거된 행은 이후 명령을 전달하지 않는다.\n터치 길게 누르기도 iiGUI의 컨텍스트 메뉴에 연결되며, 헤드리스 검사에서 선택한\n사진의 메뉴만 열리고 일반 탭은 발생하지 않는지 확인한다. 가로 드래그는 기존과\n같이 누르기 시작 시점에서 180 논리 px 이동을 두 배 확대에 대응하고 누른 사진의\n상대 위치를 유지한다. 확대 한계에 닿은 뒤 되돌릴 때도 최초 크기와 누적 이동을\n기준으로 판정한다.\n드래그가 시작되면 사진 선택은 취소하며 일반 클릭과 세로 스크롤은 유지한다.\n앱 호스트 연결은 아직 LVUI로 검증되지 않았으며 이전 완료로 취급하지 않는다.\n핀치·드래그·길게 누르기의 실제 기기 입력은 검증하지 않았다.\n미리보기 주소의 같은 리비전이 교체되면 호스트가\n`previewChanged`를 이미지 로더의 무효화에 연결해야 한다.\n"
+      "start_line": 63,
+      "end_line": 71,
+      "raw": "2026-11-15 macOS에서 공유 프레젠테이션과 정적 프레젠테이션을 각각 빌드했고,\nPython의 부분 알림·행 구독·명령·스레드·콜백 재진입·리스 검사가 통과했다.\n별도의 임시 설치 prefix에서 C17 소비자를 빌드하고, 설치된 Python 모듈이 상대 경로로\n공유 라이브러리를 찾는 검사도 통과했다. Windows MinGW x86-64에서는 C ABI 구현을\n객체까지 교차 컴파일했으며 Windows 링크·실행은 검증하지 않았다. 시스템 설치본은\n갱신하지 않았고 실제 사진 앱도 실행하지 않았다.\n별도 AddressSanitizer·UndefinedBehaviorSanitizer 빌드에서 C ABI의 콜백 중 모델 파괴와\nC++ 모델 검사가 통과했다. 연결된 Core 라이브러리는 계측하지 않았다. 이 macOS\n환경에서는 LeakSanitizer가 지원되지 않아 누수 검사는 수행되지 않았다.\n"
     },
     {
       "id": "b000016",
       "kind": "blank",
-      "start_line": 82,
-      "end_line": 82,
+      "start_line": 72,
+      "end_line": 72,
       "raw": "\n"
     },
     {
       "id": "b000017",
       "kind": "paragraph",
-      "start_line": 83,
-      "end_line": 90,
-      "raw": "설치 스테이징의 LVUI 뷰와 프레젠테이션 라이브러리를 결합한 창 없는 검사는\n120개 사진의 최신 위치, 가시 키, 선택, 정보 시트, 보조 클릭 메뉴의 행별 명령,\n원본 열기와 화면 숨김을\n확인한다. 파일 드롭은 앱이 주입한 파일 명령에 전달하고, 주입한 이미지 공급자의\n래스터가 그리기 목록에 들어가며 같은 주소의 새 리비전이 공급자를 무효화하는지도\n확인한다. 기존\nQt 화면 검사에서 만든 캡처는 각 테스트의 임시 리소스 디렉터리에 저장하고 종료 시\n정리한다. 기존 사용자의 `resources/photos`는 덮어쓰지 않는다.\n"
+      "start_line": 73,
+      "end_line": 80,
+      "raw": "라이브러리 연결, 파일 선택, 새로고침, 원본 열기, 복사, 복제, 공유, 휴지통과\n가시 영역의 미리보기 우선순위는 호스트가 주입한 명령으로 실행한다. 화면은\n파일 대화상자나 운영체제 위젯을 직접 만들지 않는다. 미리보기의 실제 읽기와\n디코딩은 앱이 주입한 이미지 서비스의 책임이다. 스크롤과 확대 상태는 iiGUI\n뷰포트 입력에 따라 업데이트하고 타이머로 계속 조회하지 않는다.\n호스트가 파일 선택의 시작 또는 완료 실패를 표시할 때 사용할 `photo.picker_failed`\n문구는 화면과 함께 설치하는 영어·한국어 카탈로그에 포함한다. 오류를 표시하는\n시점과 선택 요청의 취소·수명은 각 호스트가 소유한다.\n"
     },
     {
       "id": "b000018",
       "kind": "blank",
-      "start_line": 91,
-      "end_line": 91,
+      "start_line": 81,
+      "end_line": 81,
       "raw": "\n"
     },
     {
       "id": "b000019",
       "kind": "paragraph",
-      "start_line": 92,
-      "end_line": 95,
-      "raw": "`tests/lvui-public-consumer`는 설치 스테이징의 LVUI·사진 프레젠테이션과 동적\niiGUI를 공개 `PaintView` API로 조합해 생성 뷰를 마운트한다. 가로 드래그 확대와\n선택 방지, 호스트 종료를 검사하며 iiGUI의 비공개 위젯 상태 헤더를 요구하지 않는다.\n검사용 그리기 장치는 모의 객체이므로 실제 GPU나 앱 창 표시를 검증하지 않는다.\n"
+      "start_line": 82,
+      "end_line": 94,
+      "raw": "레거시 `PhotoController`에 연결하는 선택적 `iiPhotoLibrary::PresentationBridge`는\n기존 서비스의 변경 신호만\n관찰하고 화면 명령을 기존 서비스에 전달한다. 앱은 어댑터·뷰모델·LVUI 뷰의\n수명을 함께 소유하고, 화면이 숨겨지면 가시 미리보기 우선순위를 비운다.\n항목 삽입·삭제는 기존 행 식별자를 검증한 뒤 연속 범위 하나로 적용하며,\n정렬은 기존 행의 식별자 순서만 재배치한다. 기존 행 객체와 나머지 메타데이터는\n유지한다. 행 개수나 변경 구간의 식별자가 원본과 맞지 않거나 모델이 재설정되면\n이벤트 누락 복구를 위해 전체 스냅샷을 한 번 다시 읽는다. 호스트도 `reconcile()`을\n명시적으로 호출할 수 있다. 이 검사는 모든 종류의 과거 이벤트 누락을 자동으로\n탐지한다고 보장하지 않으며 폴링을 시작하지 않는다.\n뷰 활성화가 퇴역하면 가시 키의 빈 알림도 자동으로 전달한다.\n앱 런타임 장착, 운영체제 권한 대화상자, 실제 라이브러리와 GPU 출력은 별도\n검증으로 구분한다.\n"
     },
     {
       "id": "b000020",
       "kind": "blank",
-      "start_line": 96,
-      "end_line": 96,
+      "start_line": 95,
+      "end_line": 95,
       "raw": "\n"
     },
     {
       "id": "b000021",
       "kind": "paragraph",
-      "start_line": 97,
-      "end_line": 100,
+      "start_line": 96,
+      "end_line": 102,
+      "raw": "`iiPhotoLibraryPresentation` 패키지에는 `iiPhotoLibrary::Presentation`,\n`iiPhotoLibraryPresentation_VIEWS_DIR` 및 `iiPhotoLibraryPresentation_STRINGS_DIR`가\n있다. Qt 서비스와 연결하려면 별도의 `iiPhotoLibraryPresentationBridge` 패키지를\n사용한다. 기존 `iiPhotoLibrary_QML_IMPORT_PATH`는\n`iiPhotoLibrary_LEGACY_QML_IMPORT_PATH`의 호환 별칭이며 기존 QML은\n`src/Legacy/qml` 및 설치본의 `legacy/qml`에 있다. 기존 QML 호환 검사 전용\n하네스도 `tests/Legacy/PhotosHarness.qml`에 격리되어 있다.\n"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 103,
+      "end_line": 103,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "paragraph",
+      "start_line": 104,
+      "end_line": 115,
+      "raw": "기존 제품이 이전 사진 서비스 바이너리를 계속 사용해야 한다면\n`src/Presentation/QtCompatibility`를 별도로 구성해 같은 어댑터를\n`iiPhotoLibrary::QtPresentationBridge` 패키지로 제공할 수 있다. 서비스를 정적으로\n링크하는 제품은 브리지도 정적으로 링크해 `PhotoController` 복사본이 둘 생기지\n않게 한다. 공유 브리지는 명시적인 공유 사진 서비스에서만 허용한다. 같은 어댑터가\n포함된 새 `iiPhotoLibrary::PresentationBridge`와 이 호환 패키지를 함께 링크하지\n않으며, 서비스 헤더와 바이너리 및 Core ABI는 각 제품이 일치시켜야 한다.\n기존 서비스의 모델 재설정은 다음 이벤트 턴에 명시적인 스냅샷으로 복구하고,\n새 서비스의 개별 삽입·삭제 이벤트에 대한 즉시 부분 갱신 계약은 유지한다.\nSociety가 빌드에 사용하는 기존 정적 사진 서비스와 같은 Core ABI의 모델을 조합한\n브리지 및 별도 설치 스테이징 소비자 검사에서 변경, 순서, 미리보기 무효화와\n재진입·종료를 검증했다. 이 검사는 실제 사진 라이브러리나 앱 화면을 열지 않는다.\n"
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 116,
+      "end_line": 116,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "paragraph",
+      "start_line": 117,
+      "end_line": 120,
+      "raw": "기본 테스트는 기존 사진 서비스와 설치 소비자 검사를 유지하면서 Qt Quick과 LVRS를\n요구하지 않는다. 레거시 QML의 두 갤러리 검사는\n`IIPHOTOLIBRARY_TEST_LEGACY_QML=ON`을 지정했을 때 별도 테스트로 추가된다.\n새 LVUI 화면의 동작은 아래의 독립 소비자 검사에서 검증한다.\n"
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 121,
+      "end_line": 121,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "paragraph",
+      "start_line": 122,
+      "end_line": 168,
+      "raw": "현재 갤러리의 C++ 모델과 Qt 서비스 어댑터는 항목 선택·부분 변경·수명 종료를\n헤드리스 테스트한다. 최초 데이터가 도착하면 최신 항목을 드러내고, 이후 목록\n변경은 사용자의 탐색 위치를 유지한다. 앱 호스트는 화면을 숨길 때 `hide()`,\n다시 보일 때 `show()`를 호출하여 우선순위를 비우고 최신 위치로 재진입한다.\n뷰포트 폭과 높이는 기본적으로 0으로 두어 호스트 배치에 맞추며, 호스트가 필요한\n축만 명시적인 논리 픽셀 크기로 지정할 수 있다. 갤러리 폭이 기존 화면과 같은\n600 논리 px 미만이면 가져오기·추가·새로고침을 세로로 놓는다. 배치 크기가 실제로\n바뀔 때만 이벤트를 받아 전환하며 폴링하지 않는다.\n크기 슬라이더는 기존 확대 범위인 56–400 논리 px를 관측 가능한 썸네일 크기에\n양방향 연결해 포인터·키보드·접근성 명령으로 갤러리 크기를 조절한다. 갤러리의\n터치 핀치도 iiGUI 이벤트를 받아 같은 크기 범위에 적용하며 숨긴 화면에서는 거절한다.\n핀치 중심의 사진과 행 내 상대 위치는 열 수가 달라져도 가능한 한 같은 지점에 유지한다.\n보조 클릭은 해당 행에 붙인 LVUI ContextMenu를 열며, 열기·복사·복제·공유·삭제를\n다른 선택 행과 무관하게 그 사진의 ID로 전달한다. 메뉴가 열리면 정보 시트를 열지\n않고 해당 사진을 선택한다. 숨겨지거나 제거된 행은 이후 명령을 전달하지 않는다.\n터치 길게 누르기도 iiGUI의 컨텍스트 메뉴에 연결되며, 헤드리스 검사에서 선택한\n사진의 메뉴만 열리고 일반 탭은 발생하지 않는지 확인한다. 가로 드래그는 기존과\n같이 누르기 시작 시점에서 180 논리 px 이동을 두 배 확대에 대응하고 누른 사진의\n상대 위치를 유지한다. 확대 한계에 닿은 뒤 되돌릴 때도 최초 크기와 누적 이동을\n기준으로 판정한다.\n드래그가 시작되면 사진 선택은 취소하며 일반 클릭과 세로 스크롤은 유지한다.\n파일 정보에는 시안과 기존 화면처럼 유형·크기·생성 시각의 이름과 값을 표시한다.\n크기는 원본 바이트 수를 유지하면서 1024 단위와 번역 가능한 단위 문자열로 표시하고,\n유효한 시간대가 포함된 ISO 시각은 사용자 기기의 현지 시각으로 변환한다. 알 수 없는\n시각 형식은 원본 문자열을 보존한다. 화면에서 쓰는 레이블·단위는 카탈로그로 공급하며,\n언어나 선택한 항목이 변경될 때 관련 텍스트만 갱신한다.\nSociety macOS 소스는 기존 사진 서비스와 이 뷰를 iiGUI 표면에 연결한다. 기존\n서비스·브리지·생성 뷰를 모의 페인트 장치로 조합한 검사는 사진 선택과 변경·삭제를\n확인한다. 실제 앱 창이나 GPU 출력, 핀치·드래그·길게 누르기의 실제 기기 입력 및\n나머지 운영체제의 앱 호스트는 검증하지 않았다.\nSociety의 Windows 데스크톱 소스 구성에도 같은 LVUI 뷰와 사진 서비스를 연결했으며,\n표면·입력의 실제 Windows 제품 링크와 실행은 아직 검증하지 않았다.\n기존 Qt 사진 서비스의 미리보기는 `previewStamp`가 준비된 경우에만 LVUI에\n주소를 공개한다. 준비가 취소되면 선택된 정보의 주소도 지우고, 새 리비전이\n준비되면 다시 공개한다. 이 규칙은 해당 서비스 어댑터의 계약이며 네이티브\n`PhotoEntry`가 리비전 없는 주소를 사용하는 것을 제한하지 않는다.\n호스트는 `previewChanged`를 이미지 로더의 무효화에 연결한다. 행의 새 주소,\n새 리비전 또는 재삽입된 주소는 화면의 관측 가능한 값이 바뀌기 전에 무효화한다.\n하나의 스냅샷이나 행 묶음에서 같은 주소는 한 번만 무효화하며 변경 없는 정보\n갱신은 무효화하지 않는다. 이 처리는 사진 서비스의 변경 통지 또는 명시적 복구\n조회에만 반응하고 별도의 주기적 검사나 이미지 읽기를 시작하지 않는다.\n2026-11-15에는 준비되지 않은 기존 서비스 미리보기의 숨김·재공개, 같은 주소의\n리비전 변경과 삭제 후 재삽입, 중복 주소 묶음 및 무효화 실패 후 재시도를 검사했다.\nQt 서비스와 설치 브리지 검사, 설치 프레젠테이션과 AOT 생성 LVUI의 헤드리스\n소비자 검사, 모델의 AddressSanitizer·UndefinedBehaviorSanitizer 검사가 통과했다.\n변경된 모델은 Windows x86-64 객체로 교차 컴파일했으며 Windows 링크·실행과\n실제 앱 창 표시, Core 자체의 sanitizer 계측은 검증하지 않았다.\n"
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 169,
+      "end_line": 169,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "paragraph",
+      "start_line": 170,
+      "end_line": 177,
+      "raw": "설치 스테이징의 LVUI 뷰와 프레젠테이션 라이브러리를 결합한 창 없는 검사는\n120개 사진의 최신 위치, 가시 키, 선택, 정보 시트, 보조 클릭 메뉴의 행별 명령,\n원본 열기와 화면 숨김을\n확인한다. 파일 드롭은 앱이 주입한 파일 명령에 전달하고, 주입한 이미지 공급자의\n래스터가 그리기 목록에 들어가며 같은 주소의 새 리비전이 공급자를 무효화하는지도\n확인한다. 기존\nQt 화면 검사에서 만든 캡처는 각 테스트의 임시 리소스 디렉터리에 저장하고 종료 시\n정리한다. 기존 사용자의 `resources/photos`는 덮어쓰지 않는다.\n"
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 178,
+      "end_line": 178,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "paragraph",
+      "start_line": 179,
+      "end_line": 182,
+      "raw": "`tests/lvui-public-consumer`는 설치 스테이징의 LVUI·사진 프레젠테이션과 동적\niiGUI를 공개 `PaintView` API로 조합해 생성 뷰를 마운트한다. 가로 드래그 확대와\n선택 방지, 호스트 종료를 검사하며 iiGUI의 비공개 위젯 상태 헤더를 요구하지 않는다.\n검사용 그리기 장치는 모의 객체이므로 실제 GPU나 앱 창 표시를 검증하지 않는다.\n"
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 183,
+      "end_line": 183,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "paragraph",
+      "start_line": 184,
+      "end_line": 192,
+      "raw": "2026-11-15에는 잘못된 스레드의 빈 변경·숨김·행 명령이 상태를 바꾸지 않는지,\n소유 스레드의 변경과 동시에 들어오는 거부 요청, 파괴 시 대기 쿼리 취소를 검사했다.\n별도의 직접 행 선택 알림에서 모델이 파괴되어도 남은 선택 갱신을 중단한다.\n프레젠테이션 코드와 검사에 ThreadSanitizer를, 별도 빌드에 AddressSanitizer와\nUndefinedBehaviorSanitizer를 적용했으며 세 검사가 통과했다. 링크된 Core 스테이징은\n이 sanitizer 빌드에 포함되지 않으므로 Core 전체의 경쟁 조건까지 검증한 결과는 아니다.\n설치 스테이징을 사용하는 LVUI 공개 소비자와 Qt 서비스 브리지 검사도 통과했다.\n변경된 C++ 모델은 MinGW x86-64 객체로 교차 컴파일했으며 Windows 링크·실행이나\n실제 앱 표시를 검증하지 않았다. 시스템 설치본은 갱신하지 않았다.\n"
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 193,
+      "end_line": 193,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "paragraph",
+      "start_line": 194,
+      "end_line": 200,
+      "raw": "2026-11-15 macOS에서 기본 구성의 전체 검사 21개와 설치된 프레젠테이션을 사용하는\nLVUI 소비자 검사가 통과했다. 소비자는 파일 유형·크기·시각이 선택 항목과 영어·한국어\n전환에 반응하는지 확인한다. 별도 레거시 구성의 갤러리·검사 목록·설치 소비자 검사도\n3개 모두 통과했다. 시간대가 다른 문자열이 같은 시각으로 변환되는지와 잘못된 입력의\n원본 보존도 검사했다. 표시 형식 구현은 Windows MinGW, Android NDK, iOS arm64,\nWebAssembly에서 문법 교차 검사했으며 해당 플랫폼에서 빌드된 앱이나 기기 실행을\n검증한 것은 아니다.\n"
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 201,
+      "end_line": 201,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "paragraph",
+      "start_line": 202,
+      "end_line": 205,
       "raw": "현재 테스트 환경에는 동일한 Core 버전 번호를 사용하면서 `TaskToken`의 크기가 다른\n설치본이 함께 존재한다. iiGUI·사진 모델·호스트는 빌드와 실행에서 같은 Core ABI를\n사용해야 한다. 검사는 각 구성요소를 동일한 Core 스테이징으로 다시 빌드해 수행했다.\n같은 버전 표기만으로 다른 Core 바이너리와의 ABI 호환을 보장하지 않는다.\n"
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 206,
+      "end_line": 206,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "paragraph",
+      "start_line": 207,
+      "end_line": 209,
+      "raw": "설치 소비자의 구형 QML 선언은 `tests/Legacy/PhotoConsumerQmlFixture.qml`에\n격리했다. 사진 서비스와 앨범 소비자 검사는 기존 테스트에서 계속 수행한다.\n2026-11-15 레거시 설치 소비자를 새 리소스 경로로 다시 빌드해 통과했다.\n"
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 210,
+      "end_line": 210,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "paragraph",
+      "start_line": 211,
+      "end_line": 214,
+      "raw": "독립 사진 프레젠테이션과 LVUI 소비자는 iPhoneOS 18 arm64 및 Android\narm64/API 24로도 빌드·링크했다. 생성된 뷰와 iiGUI 호스트 마운트 심벌이 같은\n소비 바이너리에 포함되는 것을 확인했다. 모바일 앱 패키지·기기 실행이나 사진\n서비스 연동을 검증한 것은 아니다.\n"
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 215,
+      "end_line": 215,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "paragraph",
+      "start_line": 216,
+      "end_line": 218,
+      "raw": "생성된 사진 화면을 외부 소유 `iiGUI::PaintView`와 테스트용 프레임 장치로\n구성해 사진 추가 입력, 모델 변경에 따른 갱신 필요 상태, 명시적 그리기와 종료\n수명 해제를 검사했다. 실제 GPU 출력이나 모바일 사진 서비스 연동은 포함하지 않는다.\n"
     }
   ],
   "outline": [
@@ -185,79 +342,114 @@
   "indexes": {
     "directive_candidates": [
       {
-        "block_id": "b000007",
+        "block_id": "b000005",
         "line": 20,
+        "text": "모델을 소유 스레드에서 해제하고, 그 모델의 현재 쿼리가 반환된 다음 파괴해야 한다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000007",
+        "line": 32,
+        "text": "빈 행 목록으로 명시한다. 주기적 조회는 시작하지 않는다. Python의 모델 및 네이티브 모델 리스는",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000017",
+        "line": 77,
         "text": "뷰포트 입력에 따라 업데이트하고 타이머로 계속 조회하지 않는다.",
         "basis": "lexical_match",
         "context": "paragraph"
       },
       {
-        "block_id": "b000009",
-        "line": 31,
+        "block_id": "b000019",
+        "line": 91,
         "text": "탐지한다고 보장하지 않으며 폴링을 시작하지 않는다.",
         "basis": "lexical_match",
         "context": "paragraph"
       },
       {
-        "block_id": "b000013",
-        "line": 44,
+        "block_id": "b000023",
+        "line": 104,
         "text": "기존 제품이 이전 사진 서비스 바이너리를 계속 사용해야 한다면",
         "basis": "lexical_match",
         "context": "paragraph"
       },
       {
-        "block_id": "b000015",
-        "line": 64,
+        "block_id": "b000025",
+        "line": 118,
+        "text": "요구하지 않는다. 레거시 QML의 두 갤러리 검사는",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000027",
+        "line": 129,
         "text": "바뀔 때만 이벤트를 받아 전환하며 폴링하지 않는다.",
         "basis": "lexical_match",
         "context": "paragraph"
       },
       {
-        "block_id": "b000015",
-        "line": 71,
+        "block_id": "b000027",
+        "line": 136,
         "text": "않고 해당 사진을 선택한다. 숨겨지거나 제거된 행은 이후 명령을 전달하지 않는다.",
         "basis": "lexical_match",
         "context": "paragraph"
       },
       {
-        "block_id": "b000015",
-        "line": 78,
-        "text": "앱 호스트 연결은 아직 LVUI로 검증되지 않았으며 이전 완료로 취급하지 않는다.",
+        "block_id": "b000027",
+        "line": 157,
+        "text": "`PhotoEntry`가 리비전 없는 주소를 사용하는 것을 제한하지 않는다.",
         "basis": "lexical_match",
         "context": "paragraph"
       },
       {
-        "block_id": "b000015",
-        "line": 81,
-        "text": "`previewChanged`를 이미지 로더의 무효화에 연결해야 한다.",
+        "block_id": "b000027",
+        "line": 161,
+        "text": "갱신은 무효화하지 않는다. 이 처리는 사진 서비스의 변경 통지 또는 명시적 복구",
         "basis": "lexical_match",
         "context": "paragraph"
       },
       {
-        "block_id": "b000019",
-        "line": 94,
+        "block_id": "b000027",
+        "line": 162,
+        "text": "조회에만 반응하고 별도의 주기적 검사나 이미지 읽기를 시작하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000031",
+        "line": 181,
         "text": "선택 방지, 호스트 종료를 검사하며 iiGUI의 비공개 위젯 상태 헤더를 요구하지 않는다.",
         "basis": "lexical_match",
         "context": "paragraph"
       },
       {
-        "block_id": "b000019",
-        "line": 95,
+        "block_id": "b000031",
+        "line": 182,
         "text": "검사용 그리기 장치는 모의 객체이므로 실제 GPU나 앱 창 표시를 검증하지 않는다.",
         "basis": "lexical_match",
         "context": "paragraph"
       },
       {
-        "block_id": "b000021",
-        "line": 99,
+        "block_id": "b000037",
+        "line": 204,
         "text": "사용해야 한다. 검사는 각 구성요소를 동일한 Core 스테이징으로 다시 빌드해 수행했다.",
         "basis": "lexical_match",
         "context": "paragraph"
       },
       {
-        "block_id": "b000021",
-        "line": 100,
+        "block_id": "b000037",
+        "line": 205,
         "text": "같은 버전 표기만으로 다른 Core 바이너리와의 ABI 호환을 보장하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000043",
+        "line": 218,
+        "text": "수명 해제를 검사했다. 실제 GPU 출력이나 모바일 사진 서비스 연동은 포함하지 않는다.",
         "basis": "lexical_match",
         "context": "paragraph"
       }

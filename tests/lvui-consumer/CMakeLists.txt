@@ -12,7 +12,7 @@ file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/private/iiGUI/WidgetState.h"
     CONTENT "#pragma once\n#include \"${IIGUI_WIDGET_STATE_HEADER}\"\n")
 lvui_generate(NAME PhotosView SOURCE "${iiPhotoLibraryPresentation_VIEWS_DIR}/PhotosView.lvui"
     FRAMEWORK iiGUI INCLUDES iiPhotoLibrary/PhotoViewModel.h OUTPUT_VARIABLE generated)
-add_executable(PhotoLvuiConsumer consumer.cpp "${generated}")
+add_executable(PhotoLvuiConsumer consumer.cpp mount.cpp "${generated}")
 target_compile_features(PhotoLvuiConsumer PRIVATE cxx_std_23)
 target_include_directories(PhotoLvuiConsumer PRIVATE "${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/private")
 target_link_libraries(PhotoLvuiConsumer PRIVATE iiPhotoLibrary::Presentation LVUI::Native iiGUI::iiGUI)

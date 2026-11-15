@@ -1,10 +1,12 @@
 #include "PhotosView.generated.h"
 #include <iiGUI/Image.h>
+#include <iiGUI/PaintView.h>
 #include <iiGUI/WidgetState.h>
 #include <algorithm>
 #include <chrono>
 #include <cmath>
 #include <memory>
+#include <optional>
 #include <stdexcept>
 #include <string_view>
 #include <thread>
@@ -27,6 +29,24 @@ struct Resolver final : lvui::native::ImageResolver<ii::gui::RasterImage> {
     }
     void invalidate(){revision.set(revision.get()+1);}
 };
+struct ExternalPaintDevice final : ii::gui::FramePaintDevice {
+    int frames=0;
+    std::optional<ii::gui::Rect> addButtonText;
+    ii::gui::PaintCapabilities capabilities()const noexcept override {
+        return {.api=ii::gui::GraphicsApi::vulkan,.hardware=true,.native_api=true,
+                .backdrop=true,.shadow=true,.content_transform=true,.scene_sources=true};
+    }
+    ii::core::Result<void> paint_frame(const ii::gui::CanvasFrame& frame,const ii::gui::PaintFrameInfo&,
+                                      std::stop_token)override {
+        ++frames;
+        const auto capture=[&](const auto& texts){for(const auto& text:texts)
+            if(text.text=="Add photos or videos…")addButtonText=text.bounds;};
+        capture(frame.texts);
+        for(const auto& layer:frame.overlays)capture(layer.texts);
+        for(const auto& scene:frame.scenes)for(const auto& layer:scene.layers)capture(layer.texts);
+        return {};
+    }
+};
 }
 int main(){
     using namespace iiPhotoLibrary::presentation;
@@ -41,9 +61,15 @@ int main(){
     handlers.previewChanged=[&](std::string_view){resolver->invalidate();};model->setActions(std::move(handlers));
     auto strings=std::make_shared<lvui::native::AppStrings>();
     good(strings->replace_catalog("en",{{"photo.title","Photos"},{"photo.open","Open"},
-        {"photo.import_library","Import photo library…"},{"photo.add","Add photos or videos…"},{"photo.refresh","Refresh"},{"photo.size","Size"}}));
+        {"photo.import_library","Import photo library…"},{"photo.add","Add photos or videos…"},{"photo.refresh","Refresh"},{"photo.size","Size"},
+        {"photo.field_type","Type: {value}"},{"photo.field_size","Size: {value}"},{"photo.field_created","Created: {value}"},
+        {"photo.unit_bytes","{value} bytes"},{"photo.unit_kb","{value} KB"},{"photo.unit_mb","{value} MB"},{"photo.unit_gb","{value} GB"},
+        {"photo.image","Photo"},{"photo.video","Video"}}));
     good(strings->replace_catalog("ko",{{"photo.title","사진"},{"photo.open","열기"},
-        {"photo.import_library","사진 보관함 가져오기…"},{"photo.add","사진 또는 동영상 추가…"},{"photo.refresh","새로고침"},{"photo.size","크기"}}));
+        {"photo.import_library","사진 보관함 가져오기…"},{"photo.add","사진 또는 동영상 추가…"},{"photo.refresh","새로고침"},{"photo.size","크기"},
+        {"photo.field_type","유형: {value}"},{"photo.field_size","크기: {value}"},{"photo.field_created","생성: {value}"},
+        {"photo.unit_bytes","{value}바이트"},{"photo.unit_kb","{value} KB"},{"photo.unit_mb","{value} MB"},{"photo.unit_gb","{value} GB"},
+        {"photo.image","사진"},{"photo.video","동영상"}}));
     auto factories=lvui::native::BackendFactories{}.with_app_strings(strings).with<PhotoBackend>([model]{return PhotoBackend(model);})
         .with<std::shared_ptr<lvui::native::ImageServices<ii::gui::RasterImage>>>([imageServices]{return imageServices;});
     ii::runtime::EventLoop eventLoop;ii::gui::detail::WidgetFrameHooks hooks;
@@ -54,6 +80,7 @@ int main(){
     PhotoState state{.active=true,.canShare=true,.access="authorized",.status="Ready"};
     for(int index=0;index<120;++index)state.entries.push_back({.id="id-"+std::to_string(index),.galleryKey="key-"+std::to_string(index),.name="Photo "+std::to_string(index)});
     state.entries.front().preview="file:///fixture-preview.jpg";state.entries.front().previewRevision="1";
+    state.entries.front().bytes=1536;state.entries.front().created="2026-10-02T12:34:00";
     auto published=model->update.send(state);check(published&&*published,"Photo snapshot failed");
     (void)take(tree->drawing_snapshot({900,720}));
     check(take(find(tree,"/photosTitle").snapshot()).text=="Photos","English title was not localized");
@@ -92,6 +119,16 @@ int main(){
     check(actions==std::vector<std::string>{"id-0"},"Long-touch menu lost its photo identity");actions.clear();
     const auto requests=resolver->requests;auto revised=state.entries.front();revised.previewRevision="2";
     auto changed=model->change.send({.id="id-0",.entry=revised});check(changed&&*changed&&resolver->requests>requests,"Preview revision did not invalidate the image resolver");
+    auto unavailable=revised;unavailable.preview.clear();unavailable.previewRevision.clear();
+    changed=model->change.send({.id="id-0",.entry=unavailable});check(changed&&*changed,"Unavailable preview was rejected");
+    const auto unavailableFrame=take(tree->drawing_snapshot({900,720}));
+    check(!hasRaster(unavailableFrame.images)&&!std::ranges::any_of(unavailableFrame.overlays,[&](const auto& layer){return hasRaster(layer.images);}),
+          "Unavailable preview was still painted");
+    const auto requestsBeforeRecovery=resolver->requests;const auto revisionBeforeRecovery=resolver->revision.get();
+    revised.previewRevision="3";changed=model->change.send({.id="id-0",.entry=revised});
+    (void)take(tree->drawing_snapshot({900,720}));
+    check(changed&&*changed&&resolver->revision.get()==revisionBeforeRecovery+1&&resolver->requests>requestsBeforeRecovery,
+          "Recovered preview did not invalidate and reload the image");
     if(priorities.empty()||priorities.back().empty()||priorities.back().size()>=state.entries.size()){
         const auto viewport=take(scroll.snapshot());
         throw std::runtime_error("Visible priority was not bounded: events="+std::to_string(priorities.size())+
@@ -100,7 +137,26 @@ int main(){
     }
     good(surface.activate());
     check(model->selectedId.get()=="id-0"&&model->informationOpen.get(),"Gallery selection did not open information");
+    const auto photoSheet=take(find(tree,"/photoInformation").snapshot());
+    if(!ii::gui::sheet_mobile_platform())
+        check(std::abs(photoSheet.bounds.x*2+photoSheet.bounds.width-900)<.1 &&
+              std::abs(photoSheet.bounds.y*2+photoSheet.bounds.height-720)<.1,
+              "The desktop photo information sheet was not centered");
     check(take(find(tree,"/photoName").snapshot()).text=="Photo 0","Selected photo information was not bound");
+    check(take(find(tree,"/photoTypeImage").snapshot()).text=="유형: 사진","Localized photo type was not shown");
+    check(take(find(tree,"/photoBytes").snapshot()).text=="크기: 1.5 KB","Photo size was not formatted");
+    check(take(find(tree,"/photoCreated").snapshot()).text=="생성: 2026-10-02 12:34","Photo creation time was not formatted");
+    good(strings->set_locale("en"));
+    check(take(find(tree,"/photoTypeImage").snapshot()).text=="Type: Photo","Photo type did not follow locale changes");
+    check(take(find(tree,"/photoBytes").snapshot()).text=="Size: 1.5 KB","Photo size did not follow locale changes");
+    check(take(find(tree,"/photoCreated").snapshot()).text=="Created: 2026-10-02 12:34","Photo creation label did not follow locale changes");
+    auto informationChange=revised;informationChange.video=true;informationChange.bytes=1572864;
+    informationChange.created="2026-10-03T09:15:00";
+    auto informationUpdated=model->change.send({.id="id-0",.entry=informationChange});
+    check(informationUpdated&&*informationUpdated,"Selected photo update was rejected");
+    check(take(find(tree,"/photoTypeVideo").snapshot()).text=="Type: Video","Photo type did not follow the selected item");
+    check(take(find(tree,"/photoBytes").snapshot()).text=="Size: 1.5 MB","Photo size did not follow the selected item");
+    check(take(find(tree,"/photoCreated").snapshot()).text=="Created: 2026-10-03 09:15","Photo creation time did not follow the selected item");
     good(find(tree,"/viewOriginal").activate());check(actions==std::vector<std::string>{"id-0"},"Original action used the wrong photo");
     model->closeInformation();
     auto zoom=find(tree,"/photoSizeSlider");const auto beforeSize=model->thumbnailSize.get();
@@ -169,4 +225,33 @@ int main(){
     check(model->thumbnailSize.get()==hiddenSize&&take(scroll.snapshot()).scroll_offset==hiddenScroll.scroll_offset,
           "A declined pinch changed the hidden gallery or scrolled it");
     good(root.clear_content());scope.reset();tree->close();
+
+    auto externalModel=std::make_shared<PhotoViewModel>();externalModel->motionEnabled.set(false);
+    good(strings->set_locale("en"));
+    int picks=0;PhotoActions externalActions;externalActions.pickFiles=[&]{++picks;};
+    externalModel->setActions(std::move(externalActions));
+    auto externalFactories=lvui::native::BackendFactories{}.with_app_strings(strings).with<PhotoBackend>(
+        [externalModel]{return PhotoBackend(externalModel);});
+    auto device=std::make_shared<ExternalPaintDevice>();std::shared_ptr<View::Scope> externalScope;
+    ii::runtime::EventLoop externalEvents;
+    ii::gui::PaintViewServices services;services.events=&externalEvents;
+    auto external=take(ii::gui::PaintView::create(device,[&](auto& builder){
+        return View::build(builder,{}, {},&externalScope,externalFactories);
+    },{},services));
+    check(device->frames==0&&take(external->needs_paint()),"External photo view painted before a request");
+    check(bool(externalModel->update.send({.active=true,.access="authorized",.status="Ready"})),
+          "External photo state failed");
+    good(external->paint({900,720}));
+    check(device->addButtonText.has_value(),"External photo action was not painted");
+    const auto textBounds=*device->addButtonText;
+    const auto x=textBounds.x+textBounds.width/2,y=textBounds.y+textBounds.height/2;
+    good(external->input({.kind=ii::gui::WidgetInputKind::pointer_down,.x=x,.y=y,.buttons=1}));
+    good(external->input({.kind=ii::gui::WidgetInputKind::pointer_up,.x=x,.y=y}));
+    check(picks==1&&device->frames==1,"External photo input or on-demand painting failed");
+    externalModel->status.set("Updated");
+    check(take(external->needs_paint())&&device->frames==1,"External photo status painted without a request");
+    good(external->paint({900,720}));check(device->frames==2,"External photo repaint failed");
+    std::weak_ptr<View::Scope> externalRetired=externalScope;
+    good(external->close());externalScope.reset();
+    check(externalRetired.expired(),"External photo view retained its model");
 }

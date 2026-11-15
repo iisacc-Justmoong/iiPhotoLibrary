@@ -1,10 +1,13 @@
 #include <iiPhotoLibrary/iiPhotoLibrary.h>
 #include <QGuiApplication>
+#ifdef PHOTO_CONSUMER_LEGACY_QML
 #include <QQmlEngine>
 #include <QQmlComponent>
-#include <QDebug>
 #include "backend/runtime/appbootstrap.h"
+#endif
+#include <QDebug>
 int main(int argc, char **argv) {
+#ifdef PHOTO_CONSUMER_LEGACY_QML
     lvrs::AppBootstrapOptions options;
     options.applicationName = "iiPhotoLibraryConsumer";
     options.quickStyleName = "Basic";
@@ -13,8 +16,11 @@ int main(int argc, char **argv) {
     options.logBootstrapDiagnostics = false;
     options.logGraphicsBackend = false;
     if (!lvrs::preApplicationBootstrap(options).ok) return 1;
+#endif
     QGuiApplication app(argc, argv);
+#ifdef PHOTO_CONSUMER_LEGACY_QML
     lvrs::postApplicationBootstrap(app, options);
+#endif
     // Construction does not request permission, scan, import or remove real photos.
     auto library = iiPhotoLibrary::nativePhotoLibrary();
     if (!library || library->name().isEmpty()) return 2;
@@ -45,13 +51,15 @@ int main(int argc, char **argv) {
     const QString id(64, 'a');
     if (iiPhotoLibrary::importedPhotoId(iiPhotoLibrary::importedResourceName(id, 0, "hello.jpg")) != id) return 3;
     iiPhotoLibrary::PhotoController controller({}, nullptr, library);
+#ifdef PHOTO_CONSUMER_LEGACY_QML
     QQmlEngine engine;
     engine.addImportPath(QStringLiteral(PHOTO_QML_PATH));
     engine.addImportPath(QStringLiteral(LVRS_QML_PATH));
     QQmlComponent component(&engine);
-    component.setData("import QtQuick\nimport iiPhotoLibrary 1.0\nPhotosView { width: 402; height: 700 }", QUrl());
+    component.loadUrl(QUrl::fromLocalFile(QStringLiteral(PHOTO_LEGACY_QML_FIXTURE)));
     std::unique_ptr<QObject> view(component.createWithInitialProperties({{"controller", QVariant::fromValue(&controller)}}));
     if (!view) { qCritical() << component.errors(); return 4; }
-    qInfo() << "Installed iiPhotoLibrary: album manager/All Library/eight smart albums/bridge, native backend, controller and QML import passed";
+#endif
+    qInfo() << "Installed iiPhotoLibrary: album manager/All Library/eight smart albums/bridge, native backend and controller passed";
     return 0;
 }

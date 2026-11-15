@@ -22,4 +22,27 @@ remaining Qt image-codec and event-loop adapters.
 
 Photo test containers are created beneath `resources/` and removed by the test fixture. Installed-consumer checks use unique temporary build directories and remove them after completion or a reported command failure.
 
-On native macOS, if `LVRS_DIR` is not specified, the photo tests prefer the Qt LVRS package in the SDK macOS platform directory. Set `LVRS_DIR` explicitly for a different Qt LVRS installation.
+The default test configuration keeps the photo service, album, gallery-model,
+and installed-library consumer checks, without requiring Qt Quick or LVRS.
+The two historical QML gallery checks and their relocated QML consumer are
+isolated behind `IIPHOTOLIBRARY_TEST_LEGACY_QML=ON`; enabling this adds those
+checks without removing the default service tests. Their existing time limits
+remain unchanged. On native macOS, the opt-in legacy tests prefer the Qt LVRS
+package in the SDK macOS platform directory when `LVRS_DIR` is unspecified.
+The opt-in test inventory compares both executables and confirms that the 40
+service test functions are still present and only the two legacy view functions
+are separated. The LVUI presentation's independent consumer tests remain a
+separate integration check.
+
+The installed-consumer test puts its disposable install inputs under
+`resources/` and compilation output below `build/`. It redirects the private
+installation manifest, preserving the project's existing install manifest,
+and removes its own test workspaces after success or a reported command failure.
+
+On 2026-11-15 the macOS default configuration built with LVRS and Qt Quick
+package discovery disabled and passed all 21 tests. The opt-in legacy build
+passed six focused tests, including both original gallery checks and the
+relocated QML consumer. A missing iiSharedCanvas runtime search path initially
+prevented the service test from starting; the test target now supplies the
+selected shared-library directory, and the full default suite passed on retry.
+No user application or system installation was run.

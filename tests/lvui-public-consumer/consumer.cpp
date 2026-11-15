@@ -4,6 +4,7 @@
 #include <cmath>
 #include <memory>
 #include <stdexcept>
+#include <thread>
 
 using ii::core::Result;
 namespace {
@@ -28,6 +29,13 @@ int main(){
     using namespace iiPhotoLibrary::presentation;
     using View=lvui_generated::PhotosView;
     auto model=std::make_shared<PhotoViewModel>();
+    bool foreignHideRejected=false,foreignQueryRejected=false;
+    std::thread foreign([&]{
+        try{model->hide();}catch(const std::logic_error&){foreignHideRejected=true;}
+        foreignQueryRejected=!model->change.send({.id="missing"});
+    });
+    foreign.join();
+    check(foreignHideRejected&&foreignQueryRejected,"Installed photo model accepted foreign-thread operations");
     model->thumbnailSize.set(80);model->viewportWidth.set(320);model->viewportHeight.set(170);model->motionEnabled.set(false);
     PhotoState state{.active=true,.canShare=true,.access="authorized"};
     for(int i=0;i<120;++i)state.entries.push_back({.id="id-"+std::to_string(i),.galleryKey="key-"+std::to_string(i),.name="Photo "+std::to_string(i)});
