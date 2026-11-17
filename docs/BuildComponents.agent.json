@@ -10,9 +10,9 @@
   },
   "source": {
     "path": "docs/BuildComponents.md",
-    "sha256": "df8106ba1de69f949fc0ed099dd394375c84fa0d4ce8dab7f94c5603a9ac288c",
-    "bytes": 3035,
-    "line_count": 48,
+    "sha256": "cf742c0cd10a69b2cce457ab51485b8fc976a8baed476c895424bd4ec96073df",
+    "bytes": 3501,
+    "line_count": 55,
     "encoding": "utf-8",
     "language": "en"
   },
@@ -128,6 +128,20 @@
       "start_line": 42,
       "end_line": 48,
       "raw": "On 2026-11-15 the macOS default configuration built with LVRS and Qt Quick\npackage discovery disabled and passed all 21 tests. The opt-in legacy build\npassed six focused tests, including both original gallery checks and the\nrelocated QML consumer. A missing iiSharedCanvas runtime search path initially\nprevented the service test from starting; the test target now supplies the\nselected shared-library directory, and the full default suite passed on retry.\nNo user application or system installation was run.\n"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 49,
+      "end_line": 49,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "paragraph",
+      "start_line": 50,
+      "end_line": 55,
+      "raw": "The installed photo library records the SHA-256 fingerprint of the public\n`iiFileProviderDevice.h` used to compile it, and places that provider's include\ndirectory before transitive SDK includes. A consumer selecting a different\nheader is rejected during package discovery; rebuild and reinstall the photo\nlibrary with that consumer's iiFileProvider package to restore compatibility.\nThe Albums-only component does not use this file device and remains independent.\n"
     }
   ],
   "outline": [

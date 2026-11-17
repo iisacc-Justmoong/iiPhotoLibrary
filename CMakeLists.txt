@@ -10,6 +10,9 @@ include(CMakePackageConfigHelpers)
 include(CTest)
 include(cmake/LegacyViewOptions.cmake)
 if(BUILD_TESTING)
+    add_test(NAME iiPhotoLibrary.ProviderAbiGuard
+        COMMAND "${CMAKE_COMMAND}" "-DPHOTO_SOURCE=${CMAKE_CURRENT_SOURCE_DIR}"
+            -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/provider_abi_guard.cmake")
     foreach(_legacy_case IN ITEMS default on off)
         set(_legacy_option_arg)
         set(_legacy_expected OFF)
@@ -129,6 +132,11 @@ set(IIPHOTOLIBRARY_HAS_LEGACY OFF)
 if(NOT IIPHOTOLIBRARY_ALBUMS_ONLY)
 # File creation is owned by iiFileProvider.
 find_package(iiFileProvider 0.6 CONFIG REQUIRED HINTS "$ENV{IIFILEPROVIDER_PREFIX}" "$ENV{HOME}/.local/SDK/iiFileProvider")
+include(cmake/ProviderAbi.cmake)
+iiphoto_provider_device_hash(iiFileProvider::iiFileProvider IIPHOTOLIBRARY_PROVIDER_DEVICE_SHA256 IIPHOTOLIBRARY_PROVIDER_DEVICE_INCLUDE)
+if(NOT IIPHOTOLIBRARY_PROVIDER_DEVICE_SHA256)
+    message(FATAL_ERROR "Cannot identify iiFileProviderDevice.h used to build iiPhotoLibrary")
+endif()
 set(IIPHOTOLIBRARY_HAS_LEGACY ON)
 find_package(Qt6 6.8.3 EXACT REQUIRED COMPONENTS Core Gui)
 find_package(iiSocietyContainer 0.14.0 CONFIG REQUIRED COMPONENTS Sharing
@@ -139,6 +147,9 @@ include(cmake/QtApple.cmake)
 add_library(iiPhotoLibrary
     src/Library/PhotoStore.cpp src/Library/PhotoController.cpp src/Library/PhotoLibrarySource.cpp
     src/Library/PhotoController.h src/Library/PhotoWorker_p.h)
+# Other SDK targets may expose an older provider include directory transitively.
+# The header used to build this library must be the one whose ABI is recorded.
+target_include_directories(iiPhotoLibrary BEFORE PRIVATE "${IIPHOTOLIBRARY_PROVIDER_DEVICE_INCLUDE}")
 iiphoto_configure_shared(iiPhotoLibrary)
 add_library(iiPhotoLibrary::iiPhotoLibrary ALIAS iiPhotoLibrary)
 target_compile_features(iiPhotoLibrary PUBLIC cxx_std_23)
@@ -341,4 +352,5 @@ configure_package_config_file(cmake/iiPhotoLibraryConfig.cmake.in
 write_basic_package_version_file("${CMAKE_CURRENT_BINARY_DIR}/iiPhotoLibraryConfigVersion.cmake"
     VERSION ${PROJECT_VERSION} COMPATIBILITY SameMajorVersion)
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/iiPhotoLibraryConfig.cmake"
-    "${CMAKE_CURRENT_BINARY_DIR}/iiPhotoLibraryConfigVersion.cmake" cmake/QtApple.cmake DESTINATION ${package_dir})
+    "${CMAKE_CURRENT_BINARY_DIR}/iiPhotoLibraryConfigVersion.cmake" cmake/QtApple.cmake
+    cmake/ProviderAbi.cmake DESTINATION ${package_dir})

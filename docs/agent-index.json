@@ -42,7 +42,7 @@
       "document_id": "urn:iisacc:document:a9345b98b3c5dc1a88c5e66e54aa4e9b13b386b145e65461de16c6ba16467a23",
       "source": "docs/BuildComponents.md",
       "agent_json": "docs/BuildComponents.agent.json",
-      "source_sha256": "df8106ba1de69f949fc0ed099dd394375c84fa0d4ce8dab7f94c5603a9ac288c",
+      "source_sha256": "cf742c0cd10a69b2cce457ab51485b8fc976a8baed476c895424bd4ec96073df",
       "role": "guide"
     },
     {

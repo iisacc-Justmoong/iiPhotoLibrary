@@ -46,3 +46,10 @@ relocated QML consumer. A missing iiSharedCanvas runtime search path initially
 prevented the service test from starting; the test target now supplies the
 selected shared-library directory, and the full default suite passed on retry.
 No user application or system installation was run.
+
+The installed photo library records the SHA-256 fingerprint of the public
+`iiFileProviderDevice.h` used to compile it, and places that provider's include
+directory before transitive SDK includes. A consumer selecting a different
+header is rejected during package discovery; rebuild and reinstall the photo
+library with that consumer's iiFileProvider package to restore compatibility.
+The Albums-only component does not use this file device and remains independent.
