@@ -1,4 +1,5 @@
 @PACKAGE_INIT@
+set(iiPhotoLibrary_SPDX_LICENSE "Apache-2.0")
 include(CMakeFindDependencyMacro)
 
 

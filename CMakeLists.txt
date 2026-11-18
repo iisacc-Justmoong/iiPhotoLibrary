@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.24)
 project(iiPhotoLibrary VERSION 0.1.1 LANGUAGES CXX)
+set(iiPhotoLibrary_SPDX_LICENSE "Apache-2.0")
 
 
 
@@ -31,6 +32,9 @@ if(BUILD_TESTING)
         COMMAND "${CMAKE_COMMAND}" "-DSOURCE_ROOT=${CMAKE_CURRENT_SOURCE_DIR}"
             "-DCONSUMER_SCRIPT=${CMAKE_CURRENT_SOURCE_DIR}/tests/installed_consumer.cmake"
             -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/installed_consumer_policy.cmake")
+    add_test(NAME iiPhotoLibrary.License
+        COMMAND "${CMAKE_COMMAND}" "-DSOURCE_ROOT=${CMAKE_CURRENT_SOURCE_DIR}"
+            -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/license_text.cmake")
 endif()
 option(BUILD_SHARED_LIBS "Build photo components as shared libraries" ON)
 if(EMSCRIPTEN AND BUILD_SHARED_LIBS)
@@ -183,6 +187,7 @@ if(IIPHOTOLIBRARY_BUILD_PRESENTATION)
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/iiPhotoLibrary)
     set(_photo_bridge_package "${CMAKE_INSTALL_LIBDIR}/cmake/iiPhotoLibraryPresentationBridge")
     install(EXPORT iiPhotoLibraryPresentationBridgeTargets NAMESPACE iiPhotoLibrary:: DESTINATION "${_photo_bridge_package}")
+    set(iiPhotoLibraryPresentationBridge_SPDX_LICENSE "Apache-2.0")
     configure_package_config_file(cmake/iiPhotoLibraryPresentationBridgeConfig.cmake.in
         "${CMAKE_CURRENT_BINARY_DIR}/iiPhotoLibraryPresentationBridgeConfig.cmake" INSTALL_DESTINATION "${_photo_bridge_package}")
     write_basic_package_version_file("${CMAKE_CURRENT_BINARY_DIR}/iiPhotoLibraryPresentationBridgeConfigVersion.cmake"
@@ -340,7 +345,7 @@ if(IIPHOTOLIBRARY_ALBUMS_ONLY)
 endif()
 install(FILES ThirdParty/nlohmann/LICENSE.MIT DESTINATION ${CMAKE_INSTALL_DATADIR}/iiPhotoLibrary/licenses/nlohmann-json)
 install(DIRECTORY docs/ DESTINATION ${CMAKE_INSTALL_DATADIR}/iiPhotoLibrary/docs)
-install(FILES README.md DESTINATION ${CMAKE_INSTALL_DATADIR}/iiPhotoLibrary)
+install(FILES LICENSE NOTICE README.md DESTINATION ${CMAKE_INSTALL_DATADIR}/iiPhotoLibrary)
 set(package_dir "${CMAKE_INSTALL_LIBDIR}/cmake/iiPhotoLibrary")
 install(EXPORT iiPhotoLibraryAlbumTargets NAMESPACE iiPhotoLibrary:: DESTINATION ${package_dir})
 if(IIPHOTOLIBRARY_HAS_LEGACY)

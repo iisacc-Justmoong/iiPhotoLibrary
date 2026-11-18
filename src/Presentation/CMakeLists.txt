@@ -1,3 +1,4 @@
+set(iiPhotoLibraryPresentation_SPDX_LICENSE "Apache-2.0")
 find_package(iiSDKCore 0.20 CONFIG REQUIRED COMPONENTS Runtime
     HINTS "$ENV{HOME}/.local/SDK/iiSDKCore")
 

@@ -10,9 +10,9 @@
   },
   "source": {
     "path": "README.md",
-    "sha256": "986b775f6f62c92de14c1e6e6b599e746795563c2571f67f9a14fdaa39572f87",
-    "bytes": 13494,
-    "line_count": 137,
+    "sha256": "2eb46d8e31a3bef4d347647ba065b5c41e7b847879979fe85fb5dd2378137ea1",
+    "bytes": 13855,
+    "line_count": 145,
     "encoding": "utf-8",
     "language": "ko"
   },
@@ -567,7 +567,7 @@
       "kind": "paragraph",
       "start_line": 110,
       "end_line": 110,
-      "raw": "SPDX-License-Identifier: MIT\n"
+      "raw": "SPDX-License-Identifier: Apache-2.0\n"
     },
     {
       "id": "b000068",
@@ -580,88 +580,116 @@
       "id": "b000069",
       "kind": "paragraph",
       "start_line": 112,
-      "end_line": 114,
-      "raw": "The original code and documentation in this repository are licensed under the\n[MIT License](LICENSE). Third-party code, libraries, fonts, tools, and model\nweights retain their respective licenses.\n"
+      "end_line": 116,
+      "raw": "The iiPhotoLibrary module in this repository is licensed under the\n[Apache License, Version 2.0](LICENSE) (SPDX `Apache-2.0`).\nThe copyright notice is `Copyright (c) 2026 iisacc`. Attribution for this\ndistribution is in [NOTICE](NOTICE). The Korean statement of the same policy\nis [docs/License.md](docs/License.md).\n"
     },
     {
       "id": "b000070",
-      "kind": "blank",
-      "start_line": 115,
-      "end_line": 115,
-      "raw": "\n"
-    },
-    {
-      "id": "b000071",
-      "kind": "heading",
-      "start_line": 116,
-      "end_line": 116,
-      "raw": "## Source header layout\n",
-      "level": 2,
-      "title": "Source header layout"
-    },
-    {
-      "id": "b000072",
       "kind": "blank",
       "start_line": 117,
       "end_line": 117,
       "raw": "\n"
     },
     {
-      "id": "b000073",
+      "id": "b000071",
       "kind": "paragraph",
       "start_line": 118,
-      "end_line": 124,
-      "raw": "Public headers and implementations live together under `src/Albums/`,\n`src/Library/`, and `src/Platform/` according to responsibility. Existing\n`<iiPhotoLibrary/...>` public include names remain unchanged.\nThere is no separate authored `include/` tree. Existing public `#include` names\nand exported CMake targets are unchanged; installation still places only public\nheaders in the package include directory. Generated export headers belong to\n`build/`, not to the authored source tree.\n"
+      "end_line": 119,
+      "raw": "iisacc products under Product are licensed under the GNU Affero General\nPublic License, version 3 or later (AGPL-3.0-or-later).\n"
+    },
+    {
+      "id": "b000072",
+      "kind": "blank",
+      "start_line": 120,
+      "end_line": 120,
+      "raw": "\n"
+    },
+    {
+      "id": "b000073",
+      "kind": "paragraph",
+      "start_line": 121,
+      "end_line": 122,
+      "raw": "Third-party and vendored code, libraries, fonts, tools, and model weights\nkeep their original licenses.\n"
     },
     {
       "id": "b000074",
+      "kind": "blank",
+      "start_line": 123,
+      "end_line": 123,
+      "raw": "\n"
+    },
+    {
+      "id": "b000075",
+      "kind": "heading",
+      "start_line": 124,
+      "end_line": 124,
+      "raw": "## Source header layout\n",
+      "level": 2,
+      "title": "Source header layout"
+    },
+    {
+      "id": "b000076",
       "kind": "blank",
       "start_line": 125,
       "end_line": 125,
       "raw": "\n"
     },
     {
-      "id": "b000075",
+      "id": "b000077",
       "kind": "paragraph",
       "start_line": 126,
-      "end_line": 128,
-      "raw": "Validate this layout from the SDK workspace with\n`python3 -B tests/test_source_header_layout.py`. Reconfigure, build, run CTest,\nand verify a staged installed consumer after changing source/header paths.\n"
-    },
-    {
-      "id": "b000076",
-      "kind": "blank",
-      "start_line": 129,
-      "end_line": 129,
-      "raw": "\n"
-    },
-    {
-      "id": "b000077",
-      "kind": "html",
-      "start_line": 130,
-      "end_line": 130,
-      "raw": "<!-- workspace-docs:readme:start -->\n"
+      "end_line": 132,
+      "raw": "Public headers and implementations live together under `src/Albums/`,\n`src/Library/`, and `src/Platform/` according to responsibility. Existing\n`<iiPhotoLibrary/...>` public include names remain unchanged.\nThere is no separate authored `include/` tree. Existing public `#include` names\nand exported CMake targets are unchanged; installation still places only public\nheaders in the package include directory. Generated export headers belong to\n`build/`, not to the authored source tree.\n"
     },
     {
       "id": "b000078",
+      "kind": "blank",
+      "start_line": 133,
+      "end_line": 133,
+      "raw": "\n"
+    },
+    {
+      "id": "b000079",
+      "kind": "paragraph",
+      "start_line": 134,
+      "end_line": 136,
+      "raw": "Validate this layout from the SDK workspace with\n`python3 -B tests/test_source_header_layout.py`. Reconfigure, build, run CTest,\nand verify a staged installed consumer after changing source/header paths.\n"
+    },
+    {
+      "id": "b000080",
+      "kind": "blank",
+      "start_line": 137,
+      "end_line": 137,
+      "raw": "\n"
+    },
+    {
+      "id": "b000081",
+      "kind": "html",
+      "start_line": 138,
+      "end_line": 138,
+      "raw": "<!-- workspace-docs:readme:start -->\n"
+    },
+    {
+      "id": "b000082",
       "kind": "heading",
-      "start_line": 131,
-      "end_line": 131,
+      "start_line": 139,
+      "end_line": 139,
       "raw": "## Documentation entry points\n",
       "level": 2,
       "title": "Documentation entry points"
     },
     {
-      "id": "b000079",
+      "id": "b000083",
       "kind": "blank",
-      "start_line": 132,
-      "end_line": 132,
+      "start_line": 140,
+      "end_line": 140,
       "raw": "\n"
     },
     {
-      "id": "b000080",
+      "id": "b000084",
       "kind": "list",
-      "start_line": 133,
-      "end_line": 136,
+      "start_line": 141,
+      "end_line": 144,
       "raw": "- Human overview: this English `README.md`.\n- Agent instructions: [AGENT.md](AGENT.md).\n- Human documentation: [documentation index](docs/README.md).\n- Structured agent documentation: [agent index](docs/agent-index.json).\n",
       "items": [
         {
@@ -687,10 +715,10 @@
       ]
     },
     {
-      "id": "b000081",
+      "id": "b000085",
       "kind": "html",
-      "start_line": 137,
-      "end_line": 137,
+      "start_line": 145,
+      "end_line": 145,
       "raw": "<!-- workspace-docs:readme:end -->\n"
     }
   ],
@@ -752,20 +780,20 @@
       "start_line": 108
     },
     {
-      "block_id": "b000071",
+      "block_id": "b000075",
       "parent_id": "b000001",
       "level": 2,
       "title": "Source header layout",
       "anchor": "source-header-layout",
-      "start_line": 116
+      "start_line": 124
     },
     {
-      "block_id": "b000078",
+      "block_id": "b000082",
       "parent_id": "b000001",
       "level": 2,
       "title": "Documentation entry points",
       "anchor": "documentation-entry-points",
-      "start_line": 131
+      "start_line": 139
     }
   ],
   "indexes": {
@@ -879,31 +907,45 @@
       },
       {
         "block_id": "b000069",
-        "label": "MIT License",
+        "label": "Apache License, Version 2.0",
         "target": "LICENSE",
         "kind": "relative",
         "line": 113
       },
       {
-        "block_id": "b000080",
+        "block_id": "b000069",
+        "label": "NOTICE",
+        "target": "NOTICE",
+        "kind": "relative",
+        "line": 115
+      },
+      {
+        "block_id": "b000069",
+        "label": "docs/License.md",
+        "target": "docs/License.md",
+        "kind": "relative",
+        "line": 116
+      },
+      {
+        "block_id": "b000084",
         "label": "AGENT.md",
         "target": "AGENT.md",
         "kind": "relative",
-        "line": 134
+        "line": 142
       },
       {
-        "block_id": "b000080",
+        "block_id": "b000084",
         "label": "documentation index",
         "target": "docs/README.md",
         "kind": "relative",
-        "line": 135
+        "line": 143
       },
       {
-        "block_id": "b000080",
+        "block_id": "b000084",
         "label": "agent index",
         "target": "docs/agent-index.json",
         "kind": "relative",
-        "line": 136
+        "line": 144
       }
     ],
     "tables": []
