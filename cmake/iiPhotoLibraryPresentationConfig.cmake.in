@@ -1,4 +1,5 @@
 @PACKAGE_INIT@
+set(iiPhotoLibraryPresentation_SPDX_LICENSE "Apache-2.0")
 set_and_check(iiPhotoLibraryPresentation_VIEWS_DIR "${PACKAGE_PREFIX_DIR}/@CMAKE_INSTALL_DATADIR@/iiPhotoLibraryPresentation/views")
 set_and_check(iiPhotoLibraryPresentation_STRINGS_DIR "${PACKAGE_PREFIX_DIR}/@CMAKE_INSTALL_DATADIR@/iiPhotoLibraryPresentation/strings")
 if("@BUILD_SHARED_LIBS@" AND NOT "@CMAKE_SYSTEM_NAME@" STREQUAL "Emscripten")

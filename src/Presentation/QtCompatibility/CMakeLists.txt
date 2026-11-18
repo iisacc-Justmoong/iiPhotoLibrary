@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.24)
 project(iiPhotoLibraryQtPresentationBridge VERSION 0.1.1 LANGUAGES CXX)
+set(iiPhotoLibraryQtPresentationBridge_SPDX_LICENSE "Apache-2.0")
 
 set(CMAKE_CXX_EXTENSIONS OFF)
 option(BUILD_SHARED_LIBS "Build the compatibility adapter as a shared library" OFF)
