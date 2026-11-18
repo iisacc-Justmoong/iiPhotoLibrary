@@ -10,9 +10,9 @@
   },
   "source": {
     "path": "docs/BuildComponents.md",
-    "sha256": "cf742c0cd10a69b2cce457ab51485b8fc976a8baed476c895424bd4ec96073df",
-    "bytes": 3501,
-    "line_count": 55,
+    "sha256": "1054f30c6a3bc8051472cbf036bace56e02a1693d422497e367e1a45f622644a",
+    "bytes": 5418,
+    "line_count": 83,
     "encoding": "utf-8",
     "language": "en"
   },
@@ -112,36 +112,106 @@
       "id": "b000013",
       "kind": "paragraph",
       "start_line": 37,
-      "end_line": 40,
-      "raw": "The installed-consumer test puts its disposable install inputs under\n`resources/` and compilation output below `build/`. It redirects the private\ninstallation manifest, preserving the project's existing install manifest,\nand removes its own test workspaces after success or a reported command failure.\n"
+      "end_line": 41,
+      "raw": "The presentation bridge and its installed-package consumer use a CTest-run\nC++ test executable with Qt Core event processing, without linking Qt Test.\nThe suite retains the four bridge lifetime and model-update cases; the test\nsupport and the dependency contract are checked separately. All migrated photo\ntest targets run without Qt Test.\n"
     },
     {
       "id": "b000014",
       "kind": "blank",
-      "start_line": 41,
-      "end_line": 41,
+      "start_line": 42,
+      "end_line": 42,
       "raw": "\n"
     },
     {
       "id": "b000015",
       "kind": "paragraph",
-      "start_line": 42,
-      "end_line": 48,
-      "raw": "On 2026-11-15 the macOS default configuration built with LVRS and Qt Quick\npackage discovery disabled and passed all 21 tests. The opt-in legacy build\npassed six focused tests, including both original gallery checks and the\nrelocated QML consumer. A missing iiSharedCanvas runtime search path initially\nprevented the service test from starting; the test target now supplies the\nselected shared-library directory, and the full default suite passed on retry.\nNo user application or system installation was run.\n"
+      "start_line": 43,
+      "end_line": 45,
+      "raw": "The separate Qt compatibility bridge and its installed consumer also use the\nCTest test executable without linking Qt Test. The three existing cases retain\ntheir bounded event-loop waits and preview-readiness checks.\n"
     },
     {
       "id": "b000016",
       "kind": "blank",
-      "start_line": 49,
-      "end_line": 49,
+      "start_line": 46,
+      "end_line": 46,
       "raw": "\n"
     },
     {
       "id": "b000017",
       "kind": "paragraph",
-      "start_line": 50,
-      "end_line": 55,
+      "start_line": 47,
+      "end_line": 50,
+      "raw": "The installed-consumer test puts its disposable install inputs under\n`resources/` and compilation output below `build/`. It redirects the private\ninstallation manifest, preserving the project's existing install manifest,\nand removes its own test workspaces after success or a reported command failure.\n"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 51,
+      "end_line": 51,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "paragraph",
+      "start_line": 52,
+      "end_line": 58,
+      "raw": "On 2026-11-15 the macOS default configuration built with LVRS and Qt Quick\npackage discovery disabled and passed all 21 tests. The opt-in legacy build\npassed six focused tests, including both original gallery checks and the\nrelocated QML consumer. A missing iiSharedCanvas runtime search path initially\nprevented the service test from starting; the test target now supplies the\nselected shared-library directory, and the full default suite passed on retry.\nNo user application or system installation was run.\n"
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 59,
+      "end_line": 59,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "paragraph",
+      "start_line": 60,
+      "end_line": 65,
       "raw": "The installed photo library records the SHA-256 fingerprint of the public\n`iiFileProviderDevice.h` used to compile it, and places that provider's include\ndirectory before transitive SDK includes. A consumer selecting a different\nheader is rejected during package discovery; rebuild and reinstall the photo\nlibrary with that consumer's iiFileProvider package to restore compatibility.\nThe Albums-only component does not use this file device and remains independent.\n"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 66,
+      "end_line": 66,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "paragraph",
+      "start_line": 67,
+      "end_line": 72,
+      "raw": "갤러리 모델 CTest는 단일 열·비지연 목록에 대해 인덱스, 삽입·삭제\n신호와 행 수, 정렬 전후 영속 인덱스의 정체성, 초기화와 데이터 변경\n범위를 독립적으로 확인한다. 잘못된 삽입·삭제와 영속 인덱스 갱신 누락을\n주입한 테스트도 포함한다. 이는 일반 트리 모델과 지연 로딩을 포함하는\nQt 모델 검사기 전체의 동등한 대체는 아니며, 행 이동은 미지원 오류로\n표시한다.\n"
+    },
+    {
+      "kind": "blank",
+      "raw": "\n",
+      "id": "b000024",
+      "start_line": 73,
+      "end_line": 73
+    },
+    {
+      "kind": "paragraph",
+      "raw": "사진 검사 실행기는 여러 사례 이름과 데이터 행 선택, 기존 `-functions`\n목록 조회, 신호 인자 기록 및 지연 삭제 처리를 지원한다. 이 동작은 Qt Test\n없이 실행되는 작은 지원 검사에서 확인한다.\n",
+      "id": "b000025",
+      "start_line": 74,
+      "end_line": 76
+    },
+    {
+      "kind": "blank",
+      "raw": "\n",
+      "id": "b000026",
+      "start_line": 77,
+      "end_line": 77
+    },
+    {
+      "kind": "paragraph",
+      "raw": "사진 서비스 40개 사례와 선택형 레거시 뷰 두 사례를 CTest 실행기로\n유지한다. 연대순 갤러리의 모바일·데스크톱 데이터 행과 여러 이름을 한 번에\n선택하는 기존 사용법도 보존한다. 터치 이벤트는 QtGui의 테스트 지원 경로를\n사용하며, 해당 헤더의 `QTest` 이름공간은 남지만 Qt Test 라이브러리는\n필요하지 않다. 레거시 연대순 검사는 배치가 반영된 끝 위치와 실제 스크롤\n거리를 함께 확인한다. TLS와 실제 GUI를 사용하는 통합 사례는 별도 요청 시 실행한다.\n",
+      "id": "b000027",
+      "start_line": 78,
+      "end_line": 83
     }
   ],
   "outline": [

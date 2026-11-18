@@ -1,0 +1,25 @@
+#pragma once
+
+// C++ public entry for iiPhotoLibrary; the linked components select the API.
+
+#if defined(IISDK_IMPORT_IIPHOTOLIBRARY_PRESENTATION)
+#include <iiPhotoLibrary/PhotoViewModel.h>
+#include <iiPhotoLibrary/PhotoPresentationC.h>
+#endif
+
+#if defined(IISDK_IMPORT_IIPHOTOLIBRARY_BRIDGE)
+#include <iiPhotoLibrary/PhotoPresentationBridge.h>
+#endif
+
+#if defined(IISDK_IMPORT_IIPHOTOLIBRARY_ALBUMS)
+#include <iiPhotoLibrary/Album.h>
+#include <iiPhotoLibrary/GooglePhotosAlbumSource.h>
+#endif
+
+#if defined(IISDK_IMPORT_IIPHOTOLIBRARY_QT)
+#include <iiPhotoLibrary/PhotoController.h>
+#include <iiPhotoLibrary/PhotoLibrary.h>
+#include <iiPhotoLibrary/PhotoLibraryAlbumSource.h>
+#include <iiPhotoLibrary/PhotoStore.h>
+#include <iiPhotoLibrary/iiPhotoLibrary.h>
+#endif

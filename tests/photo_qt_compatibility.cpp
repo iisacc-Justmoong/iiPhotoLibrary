@@ -1,7 +1,8 @@
 #include <iiPhotoLibrary/PhotoPresentationBridge.h>
 #include <iiPhotoLibrary/PhotoViewModel.h>
 #include <iiPhotoLibrary/PhotoController.h>
-#include <QTest>
+#include "CTestSupport.h"
+#include <QCoreApplication>
 #include <memory>
 
 using namespace iiPhotoLibrary;
@@ -19,13 +20,12 @@ public:
     bool trash(const QString&, QString*) override { return false; }
 };
 
-class PhotoQtCompatibilityTests final : public QObject {
-    Q_OBJECT
+class PhotoQtCompatibilityTests final {
     static QVariant row(const char* id, const char* name, const char* revision) {
         return QVariantMap{{"id", id}, {"galleryKey", id}, {"name", name},
                            {"preview", QUrl("file:///fixture.jpg")}, {"previewStamp", revision}, {"media", "photo"}};
     }
-private slots:
+public:
     void existingServiceChangesAndRetires() {
         auto model = std::make_shared<PhotoViewModel>();
         auto controller = std::make_unique<PhotoController>(PhotoController::Sender{}, nullptr,
@@ -34,25 +34,25 @@ private slots:
         gallery->replace({row("a", "First", "1"), row("b", "Second", "1")});
         std::vector<std::string> invalidations;
         PhotoPresentationBridge bridge(controller.get(), model, {}, [&](auto source) { invalidations.emplace_back(source); });
-        QCOMPARE(model->rows.get().size(), std::size_t(2));
-        QCOMPARE(invalidations.size(), std::size_t(1));invalidations.clear();
+        CTEST_COMPARE(model->rows.get().size(), std::size_t(2));
+        CTEST_COMPARE(invalidations.size(), std::size_t(1));invalidations.clear();
         auto first = model->rows.get()[0], second = model->rows.get()[1];
         gallery->replace({row("a", "Updated", "2"), row("b", "Second", "1")});
-        QTRY_COMPARE(first->name.get(), std::string("Updated"));
-        QTRY_COMPARE(invalidations.size(), std::size_t(1));
+        CTEST_WAIT_VERIFY(first->name.get() == std::string("Updated"), 5000);
+        CTEST_WAIT_VERIFY(invalidations.size() == std::size_t(1), 5000);
         gallery->replace({row("b", "Second", "1"), row("c", "Third", "1"), row("a", "Updated", "2")});
-        QTRY_COMPARE(model->rows.get().size(), std::size_t(3));
-        QCOMPARE(model->rows.get()[0], second);
-        QCOMPARE(model->rows.get()[2], first);
+        CTEST_WAIT_VERIFY(model->rows.get().size() == std::size_t(3), 5000);
+        CTEST_COMPARE(model->rows.get()[0], second);
+        CTEST_COMPARE(model->rows.get()[2], first);
         gallery->replace({row("b", "Second", "1")});
-        QTRY_COMPARE(model->rows.get().size(), std::size_t(1));
-        QCOMPARE(model->rows.get()[0], second);
+        CTEST_WAIT_VERIFY(model->rows.get().size() == std::size_t(1), 5000);
+        CTEST_COMPARE(model->rows.get()[0], second);
         first->select();
-        QVERIFY(model->selectedId.get().empty());
+        CTEST_CHECK(model->selectedId.get().empty());
         controller.reset();
-        QVERIFY(model->rows.get().empty());
+        CTEST_CHECK(model->rows.get().empty());
         second->select();
-        QVERIFY(model->selectedId.get().empty());
+        CTEST_CHECK(model->selectedId.get().empty());
     }
 
     void previewBecomesVisibleOnlyWhenReady() {
@@ -62,29 +62,29 @@ private slots:
         gallery->replace({row("a", "First", "")});
         std::vector<std::string> invalidations;
         PhotoPresentationBridge bridge(&controller, model, {}, [&](auto source) { invalidations.emplace_back(source); });
-        QCOMPARE(model->rows.get().size(), std::size_t(1));
+        CTEST_COMPARE(model->rows.get().size(), std::size_t(1));
         auto first = model->rows.get().front();
-        QVERIFY(first->preview.get().empty());
+        CTEST_CHECK(first->preview.get().empty());
         first->select();
-        QVERIFY(model->selectedPreview.get().empty());
+        CTEST_CHECK(model->selectedPreview.get().empty());
         bool readyAfterInvalidation = true;
         auto previewObserver = first->preview.observe([&](const auto& source, std::uint64_t) {
             if (!source.empty() && (invalidations.empty() || invalidations.back() != source))
                 readyAfterInvalidation = false;
         });
         gallery->replace({row("a", "First", "1")});
-        QTRY_COMPARE(first->preview.get(), std::string("file:///fixture.jpg"));
-        QCOMPARE(model->selectedPreview.get(), std::string("file:///fixture.jpg"));
-        QVERIFY(readyAfterInvalidation);
-        QCOMPARE(invalidations.size(), std::size_t(1));
+        CTEST_WAIT_VERIFY(first->preview.get() == std::string("file:///fixture.jpg"), 5000);
+        CTEST_COMPARE(model->selectedPreview.get(), std::string("file:///fixture.jpg"));
+        CTEST_CHECK(readyAfterInvalidation);
+        CTEST_COMPARE(invalidations.size(), std::size_t(1));
         gallery->replace({row("a", "First", "")});
-        QTRY_VERIFY(first->preview.get().empty());
-        QVERIFY(model->selectedPreview.get().empty());
+        CTEST_WAIT_VERIFY(first->preview.get().empty(), 5000);
+        CTEST_CHECK(model->selectedPreview.get().empty());
         invalidations.clear();
         gallery->replace({row("a", "First", "2")});
-        QTRY_COMPARE(first->preview.get(), std::string("file:///fixture.jpg"));
-        QVERIFY(readyAfterInvalidation);
-        QCOMPARE(invalidations.size(), std::size_t(1));
+        CTEST_WAIT_VERIFY(first->preview.get() == std::string("file:///fixture.jpg"), 5000);
+        CTEST_CHECK(readyAfterInvalidation);
+        CTEST_COMPARE(invalidations.size(), std::size_t(1));
     }
 
     void bridgeMayRetireDuringDeferredReconciliation() {
@@ -95,10 +95,18 @@ private slots:
         auto bridge = std::make_unique<PhotoPresentationBridge>(&controller, model);
         auto subscription = model->rows.observe([&](const auto&, std::uint64_t) { bridge.reset(); });
         gallery->replace({row("a", "First", "1"), row("b", "Second", "1")});
-        QTRY_VERIFY(!bridge);
-        QCOMPARE(model->rows.get().size(), std::size_t(2));
+        CTEST_WAIT_VERIFY(!bridge, 5000);
+        CTEST_COMPARE(model->rows.get().size(), std::size_t(2));
     }
 };
 
-QTEST_GUILESS_MAIN(PhotoQtCompatibilityTests)
-#include "photo_qt_compatibility.moc"
+int main(int argc, char** argv)
+{
+    QCoreApplication application(argc, argv);
+    photo_test::CTestRunner runner;
+    PhotoQtCompatibilityTests tests;
+    runner.run("existingServiceChangesAndRetires", [&] { tests.existingServiceChangesAndRetires(); });
+    runner.run("previewBecomesVisibleOnlyWhenReady", [&] { tests.previewBecomesVisibleOnlyWhenReady(); });
+    runner.run("bridgeMayRetireDuringDeferredReconciliation", [&] { tests.bridgeMayRetireDuringDeferredReconciliation(); });
+    return runner.result();
+}

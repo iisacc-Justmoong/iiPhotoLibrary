@@ -57,12 +57,17 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/iiPhotoLibraryQtPresentationBridgeCon
     "${CMAKE_CURRENT_BINARY_DIR}/iiPhotoLibraryQtPresentationBridgeConfigVersion.cmake" DESTINATION "${package_dir}")
 
 if(BUILD_TESTING)
-    set(CMAKE_AUTOMOC ON)
-    find_package(Qt6 6.8 REQUIRED COMPONENTS Test)
+    find_package(Python3 REQUIRED COMPONENTS Interpreter)
     add_executable(iiPhotoLibraryQtPresentationBridgeTests ../../../tests/photo_qt_compatibility.cpp)
-    target_link_libraries(iiPhotoLibraryQtPresentationBridgeTests PRIVATE iiPhotoLibraryQtPresentationBridge Qt6::Test)
+    target_link_libraries(iiPhotoLibraryQtPresentationBridgeTests PRIVATE iiPhotoLibraryQtPresentationBridge)
     add_test(NAME iiPhotoLibrary.QtPresentationBridge COMMAND iiPhotoLibraryQtPresentationBridgeTests)
     set_tests_properties(iiPhotoLibrary.QtPresentationBridge PROPERTIES TIMEOUT 30)
+    add_executable(iiPhotoLibraryQtCompatibilityCTestSupportTests ../../../tests/ctest_support.cpp)
+    target_compile_features(iiPhotoLibraryQtCompatibilityCTestSupportTests PRIVATE cxx_std_23)
+    target_link_libraries(iiPhotoLibraryQtCompatibilityCTestSupportTests PRIVATE Qt6::Core)
+    add_test(NAME iiPhotoLibrary.QtCompatibilityCTestSupport COMMAND iiPhotoLibraryQtCompatibilityCTestSupportTests)
+    add_test(NAME iiPhotoLibrary.QtCompatibilityCTestContract COMMAND "${Python3_EXECUTABLE}" -B
+        "${CMAKE_CURRENT_SOURCE_DIR}/../../../tests/test_ctest_qt_compatibility.py")
     if(APPLE)
         set_tests_properties(iiPhotoLibrary.QtPresentationBridge PROPERTIES ENVIRONMENT_MODIFICATION
             "DYLD_LIBRARY_PATH=unset:;DYLD_FALLBACK_LIBRARY_PATH=unset:;DYLD_FRAMEWORK_PATH=unset:;DYLD_FALLBACK_FRAMEWORK_PATH=unset:")

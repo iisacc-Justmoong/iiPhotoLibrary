@@ -8,8 +8,7 @@
 #include <QLinearGradient>
 #include <QJsonDocument>
 #include <QTemporaryDir>
-#include <QTest>
-#include <QSignalSpy>
+#include "CTestSupport.h"
 #include <QElapsedTimer>
 #include <QSemaphore>
 #include <QScopeGuard>
@@ -17,6 +16,7 @@
 #include <QCryptographicHash>
 #include <QGuiApplication>
 #ifdef IIPHOTOLIBRARY_TEST_LEGACY_QML
+#include "Legacy/TouchSequence.h"
 #include <QPointingDevice>
 #include <QJSValue>
 #include <QQmlApplicationEngine>
@@ -36,8 +36,12 @@ QQuickItem *visualItem(QQuickItem *parent, const QString &name) {
     return nullptr;
 }
 #endif
+bool tryWrite(const QString &path, const QByteArray &bytes) {
+    QFile file(path);
+    return file.open(QIODevice::WriteOnly) && file.write(bytes) == bytes.size();
+}
 void write(const QString &path, const QByteArray &bytes) {
-    QFile file(path); QVERIFY(file.open(QIODevice::WriteOnly)); QCOMPARE(file.write(bytes), bytes.size());
+    CTEST_CHECK(tryWrite(path, bytes));
 }
 class Library final : public PhotoLibrary {
 public:
@@ -124,8 +128,7 @@ struct Fixture {
 };
 }
 class PhotosTest : public QObject {
-    Q_OBJECT
-private slots:
+public:
     void finalShutdownDoesNotWaitForABlockedPhotoOperation() {
         Fixture f;
         f.library->add("slow.jpg", "fixture original");
@@ -140,86 +143,86 @@ private slots:
         f.library->beforePreview = [entered, release](const QString &) { entered->release(); release->acquire(); };
         auto controller = std::make_unique<PhotoController>(PhotoController::Sender{}, nullptr, f.library);
         controller->configure(f.temporary.path() + "/drive.societycontainer", true);
-        QTRY_VERIFY_WITH_TIMEOUT(!controller->busy(), 10000);
+        CTEST_WAIT_VERIFY(!controller->busy(), 10000);
         controller->connectLibrary();
-        QTRY_VERIFY_WITH_TIMEOUT(entered->available() > 0, 10000);
+        CTEST_WAIT_VERIFY(entered->available() > 0, 10000);
         QElapsedTimer elapsed; elapsed.start();
         controller->shutdownAsync();
         controller.reset();
-        QVERIFY2(elapsed.elapsed() < 500, "Photo shutdown waited for a blocked operation");
+        CTEST_CHECK_MESSAGE(elapsed.elapsed() < 500, "Photo shutdown waited for a blocked operation");
         release->release();
-        QTRY_COMPARE_WITH_TIMEOUT(f.library.use_count(), baselineOwners, 10000);
+        CTEST_WAIT_COMPARE_TIMEOUT(f.library.use_count(), baselineOwners, 10000);
         QCoreApplication::processEvents();
         QFile original(f.library->directory + "/slow.jpg");
-        QVERIFY(original.open(QIODevice::ReadOnly)); QCOMPARE(original.readAll(), QByteArray("fixture original"));
+        CTEST_CHECK(original.open(QIODevice::ReadOnly)); CTEST_COMPARE(original.readAll(), QByteArray("fixture original"));
     }
     void fixtureRootIsProjectResources() {
         const QFileInfo root(QStringLiteral(IIPHOTOLIBRARY_TEST_DIRECTORY));
-        QCOMPARE(root.fileName(), QStringLiteral("resources"));
-        QVERIFY(root.isDir());
+        CTEST_COMPARE(root.fileName(), QStringLiteral("resources"));
+        CTEST_CHECK(root.isDir());
         QTemporaryDir temporary(root.absoluteFilePath() + "/photos-test-XXXXXX");
-        QVERIFY(temporary.isValid());
+        CTEST_CHECK(temporary.isValid());
     }
     void defaultRefreshIgnoresUnselectedNativePhotosAndPreservesContainerFiles() {
         Fixture f; f.library->add("outside.jpg", "native library original");
         const auto root = f.temporary.path() + "/drive.societycontainer";
         for (int attempt = 0; attempt < 3; ++attempt) {
-            QVERIFY(f.store->refresh()); QVERIFY(f.store->catalog().isEmpty());
-            QVERIFY(!QFileInfo::exists(root + "/.society-photos"));
+            CTEST_CHECK(f.store->refresh()); CTEST_CHECK(f.store->catalog().isEmpty());
+            CTEST_CHECK(!QFileInfo::exists(root + "/.society-photos"));
         }
         PhotoController controller({}, nullptr, f.library);
         controller.setApplicationActive(true); controller.configure(root, true);
-        QTRY_VERIFY(!controller.busy()); QVERIFY(controller.entries().isEmpty());
-        QCOMPARE(f.library->authorizations, 0); QCOMPARE(f.library->scans.load(), 0);
-        QCOMPARE(f.library->exports.load(), 0); QCOMPARE(f.library->previews.load(), 0);
+        CTEST_WAIT_DEFAULT(!controller.busy()); CTEST_CHECK(controller.entries().isEmpty());
+        CTEST_COMPARE(f.library->authorizations, 0); CTEST_COMPARE(f.library->scans.load(), 0);
+        CTEST_COMPARE(f.library->exports.load(), 0); CTEST_COMPARE(f.library->previews.load(), 0);
         QImage image(4, 4, QImage::Format_RGB32); image.fill(Qt::green);
-        const auto supplied = f.photos() + "/user.png"; QVERIFY(image.save(supplied));
+        const auto supplied = f.photos() + "/user.png"; CTEST_CHECK(image.save(supplied));
         const auto before = PhotoStore::digestFile(supplied);
-        QVERIFY(f.store->refresh()); QCOMPARE(f.store->catalog().size(), 1);
+        CTEST_CHECK(f.store->refresh()); CTEST_COMPARE(f.store->catalog().size(), 1);
         const auto id = f.store->catalog().first().toObject().value("id").toString();
-        QVERIFY(f.store->hasOriginal(id)); QVERIFY(f.store->consume(id));
-        QCOMPARE(PhotoStore::digestFile(supplied), before);
-        QVERIFY(f.store->trash(id)); QVERIFY(f.store->refresh());
-        QCOMPARE(PhotoStore::digestFile(supplied), before);
-        QCOMPARE(f.library->scans.load(), 0); QCOMPARE(f.library->imports.load(), 0);
-        QCOMPARE(f.library->removals.load(), 0); QCOMPARE(f.library->snapshot.assets.size(), 1);
-        QFile external(f.library->directory + "/outside.jpg"); QVERIFY(external.open(QIODevice::ReadOnly));
-        QCOMPARE(external.readAll(), QByteArray("native library original"));
+        CTEST_CHECK(f.store->hasOriginal(id)); CTEST_CHECK(f.store->consume(id));
+        CTEST_COMPARE(PhotoStore::digestFile(supplied), before);
+        CTEST_CHECK(f.store->trash(id)); CTEST_CHECK(f.store->refresh());
+        CTEST_COMPARE(PhotoStore::digestFile(supplied), before);
+        CTEST_COMPARE(f.library->scans.load(), 0); CTEST_COMPARE(f.library->imports.load(), 0);
+        CTEST_COMPARE(f.library->removals.load(), 0); CTEST_COMPARE(f.library->snapshot.assets.size(), 1);
+        QFile external(f.library->directory + "/outside.jpg"); CTEST_CHECK(external.open(QIODevice::ReadOnly));
+        CTEST_COMPARE(external.readAll(), QByteArray("native library original"));
     }
     void explicitLibraryImportDoesNotAdoptLaterNativePhotosDuringRefresh() {
         Fixture f; f.library->add("selected.jpg", "selected original");
-        QVERIFY(f.store->importLibrary()); QCOMPARE(f.store->catalog().size(), 1);
+        CTEST_CHECK(f.store->importLibrary()); CTEST_COMPARE(f.store->catalog().size(), 1);
         const auto id = f.store->catalog().first().toObject().value("id").toString();
         const auto scans = f.library->scans.load(), exports = f.library->exports.load();
         f.library->add("later.jpg", "not selected later original");
-        QVERIFY(f.store->refresh()); QCOMPARE(f.store->catalog().size(), 1);
-        QCOMPARE(f.library->scans.load(), scans); QCOMPARE(f.library->exports.load(), exports);
-        QVERIFY(f.store->prepare(id));
-        QFile original(f.store->resourcePath(id, 0)); QVERIFY(original.open(QIODevice::ReadOnly));
-        QCOMPARE(original.readAll(), QByteArray("selected original"));
-        QVERIFY(f.store->trash(id)); QVERIFY(f.store->importLibrary());
-        QCOMPARE(f.library->removals.load(), 0); QCOMPARE(f.library->imports.load(), 0);
-        QCOMPARE(f.library->snapshot.assets.size(), 2);
+        CTEST_CHECK(f.store->refresh()); CTEST_COMPARE(f.store->catalog().size(), 1);
+        CTEST_COMPARE(f.library->scans.load(), scans); CTEST_COMPARE(f.library->exports.load(), exports);
+        CTEST_CHECK(f.store->prepare(id));
+        QFile original(f.store->resourcePath(id, 0)); CTEST_CHECK(original.open(QIODevice::ReadOnly));
+        CTEST_COMPARE(original.readAll(), QByteArray("selected original"));
+        CTEST_CHECK(f.store->trash(id)); CTEST_CHECK(f.store->importLibrary());
+        CTEST_COMPARE(f.library->removals.load(), 0); CTEST_COMPARE(f.library->imports.load(), 0);
+        CTEST_COMPARE(f.library->snapshot.assets.size(), 2);
         bool deleted = false;
         for (const auto &value : f.store->catalog())
             if (value.toObject().value("id") == id) deleted = value.toObject().value("deleted").toBool();
-        QVERIFY(deleted);
+        CTEST_CHECK(deleted);
     }
     void permissionGrantedForAnOldContainerDoesNotImportIntoItsReplacement() {
         Fixture first, second; first.library->permission = Access::NotDetermined;
         first.library->add("not-selected.jpg", "native source");
         PhotoController controller({}, nullptr, first.library);
         controller.configure(first.temporary.path() + "/drive.societycontainer", true);
-        QTRY_VERIFY(!controller.busy()); controller.connectLibrary();
-        QCOMPARE(first.library->authorizations, 1); QVERIFY(controller.busy());
+        CTEST_WAIT_DEFAULT(!controller.busy()); controller.connectLibrary();
+        CTEST_COMPARE(first.library->authorizations, 1); CTEST_CHECK(controller.busy());
         auto granted = std::exchange(first.library->authorizationFinished, {});
-        QVERIFY(bool(granted));
+        CTEST_CHECK(bool(granted));
         controller.configure(second.temporary.path() + "/drive.societycontainer", true);
-        QTRY_VERIFY(!controller.busy()); first.library->permission = Access::Full;
+        CTEST_WAIT_DEFAULT(!controller.busy()); first.library->permission = Access::Full;
         granted(); QCoreApplication::processEvents();
-        QTRY_VERIFY(!controller.busy()); QVERIFY(controller.entries().isEmpty());
-        QCOMPARE(first.library->scans.load(), 0); QCOMPARE(first.library->exports.load(), 0);
-        QVERIFY(!QFileInfo::exists(second.temporary.path() + "/drive.societycontainer/.society-photos"));
+        CTEST_WAIT_DEFAULT(!controller.busy()); CTEST_CHECK(controller.entries().isEmpty());
+        CTEST_COMPARE(first.library->scans.load(), 0); CTEST_COMPARE(first.library->exports.load(), 0);
+        CTEST_CHECK(!QFileInfo::exists(second.temporary.path() + "/drive.societycontainer/.society-photos"));
     }
     void openingAndReadingAnEmptyStoreCreatesNoPhotoDirectories() {
         Fixture f;
@@ -228,77 +231,77 @@ private slots:
         const auto id = QString(64, 'a');
         const auto before = QDir(root).entryList(QDir::AllEntries | QDir::Hidden | QDir::NoDotAndDotDot);
         for (int attempt = 0; attempt < 3; ++attempt) {
-            QCOMPARE(f.store->catalog(), QJsonArray{});
-            QCOMPARE(f.store->gallery(), QJsonArray{});
-            QVERIFY(!f.store->hasOriginal(id));
-            QVERIFY(f.store->resourcePath(id, 0).isEmpty());
-            QCOMPARE(f.store->previewPath(id), f.photos() + "/.previews/" + id + ".jpg");
-            QVERIFY(!f.store->command({{"id", id}, {"action", "available"}}).value("ok").toBool());
+            CTEST_COMPARE(f.store->catalog(), QJsonArray{});
+            CTEST_COMPARE(f.store->gallery(), QJsonArray{});
+            CTEST_CHECK(!f.store->hasOriginal(id));
+            CTEST_CHECK(f.store->resourcePath(id, 0).isEmpty());
+            CTEST_COMPARE(f.store->previewPath(id), f.photos() + "/.previews/" + id + ".jpg");
+            CTEST_CHECK(!f.store->command({{"id", id}, {"action", "available"}}).value("ok").toBool());
             f.store = std::make_unique<PhotoStore>(root, f.library);
-            bool published = false;
-            QVERIFY(f.store->open([&](const QJsonArray &rows, bool reset) {
-                QCOMPARE(rows, QJsonArray{}); QVERIFY(reset); published = true;
+            bool published = false, publicationValid = true;
+            CTEST_CHECK(f.store->open([&](const QJsonArray &rows, bool reset) {
+                published = true; publicationValid &= rows.isEmpty() && reset;
             }));
-            QVERIFY(published);
-            QVERIFY(!QFileInfo::exists(privateRoot));
-            QVERIFY(!QFileInfo::exists(f.photos() + "/.previews"));
-            QCOMPARE(QDir(root).entryList(QDir::AllEntries | QDir::Hidden | QDir::NoDotAndDotDot), before);
+            CTEST_CHECK(published); CTEST_CHECK(publicationValid);
+            CTEST_CHECK(!QFileInfo::exists(privateRoot));
+            CTEST_CHECK(!QFileInfo::exists(f.photos() + "/.previews"));
+            CTEST_COMPARE(QDir(root).entryList(QDir::AllEntries | QDir::Hidden | QDir::NoDotAndDotDot), before);
         }
-        QCOMPARE(f.library->exports.load(), 0); QCOMPARE(f.library->previews.load(), 0);
+        CTEST_COMPARE(f.library->exports.load(), 0); CTEST_COMPARE(f.library->previews.load(), 0);
     }
     void photoDiscoveryAndOriginalPreparationCreateOnlyRequiredParents() {
         Fixture f; const QByteArray original("original bytes");
         f.library->add("first.jpg", original);
         const auto privateRoot = f.temporary.path() + "/drive.societycontainer/.society-photos/" + f.store->containerId();
-        QVERIFY(!QFileInfo::exists(privateRoot));
-        QVERIFY2(f.store->importLibrary(), qPrintable(f.store->errorString()));
-        QCOMPARE(f.library->scans.load(), 1); // Preflight discovery is reused by the writer.
+        CTEST_CHECK(!QFileInfo::exists(privateRoot));
+        CTEST_CHECK_MESSAGE(f.store->importLibrary(), qPrintable(f.store->errorString()));
+        CTEST_COMPARE(f.library->scans.load(), 1); // Preflight discovery is reused by the writer.
         const auto record = f.store->catalog().first().toObject();
         const auto id = record.value("id").toString();
         for (const auto &path : {privateRoot + "/gallery", privateRoot + "/references", privateRoot + "/incoming", f.photos() + "/.previews"})
-            QVERIFY2(QFileInfo(path).isDir(), qPrintable(path));
-        QVERIFY(!QFileInfo::exists(privateRoot + "/originals"));
-        QVERIFY(!QFileInfo::exists(privateRoot + "/viewing"));
+            CTEST_CHECK_MESSAGE(QFileInfo(path).isDir(), qPrintable(path));
+        CTEST_CHECK(!QFileInfo::exists(privateRoot + "/originals"));
+        CTEST_CHECK(!QFileInfo::exists(privateRoot + "/viewing"));
         // Simulate external removal of a payload-empty staging directory.
         // Provider lease sentinels are persistent control files, not cached originals.
-        for (const auto &name : QDir(privateRoot + "/incoming").entryList(QDir::Files | QDir::Hidden | QDir::NoDotAndDotDot)) QCOMPARE(name, QStringLiteral(".iisacc-temporary.lock"));
-        QVERIFY(QDir(privateRoot + "/incoming").removeRecursively());
-        QVERIFY2(f.store->prepare(id), qPrintable(f.store->errorString()));
-        QFile cached(f.store->resourcePath(id, 0)); QVERIFY(cached.open(QIODevice::ReadOnly));
-        QCOMPARE(cached.readAll(), original); cached.close();
-        QVERIFY(QFileInfo(privateRoot + "/originals").isDir());
-        QVERIFY(!QFileInfo::exists(privateRoot + "/viewing"));
-        QVERIFY(cached.remove());
-        for (const auto &name : QDir(privateRoot + "/originals").entryList(QDir::Files | QDir::Hidden | QDir::NoDotAndDotDot)) QCOMPARE(name, QStringLiteral(".iisacc-temporary.lock"));
-        QVERIFY(QDir(privateRoot + "/originals").removeRecursively());
-        for (const auto &name : QDir(privateRoot + "/incoming").entryList(QDir::Files | QDir::Hidden | QDir::NoDotAndDotDot)) QCOMPARE(name, QStringLiteral(".iisacc-temporary.lock"));
-        QVERIFY(QDir(privateRoot + "/incoming").removeRecursively());
-        QVERIFY2(f.store->prepare(id), qPrintable(f.store->errorString()));
-        QCOMPARE(PhotoStore::digestFile(f.store->resourcePath(id, 0)), record.value("resources").toArray().first().toObject().value("hash").toString());
+        for (const auto &name : QDir(privateRoot + "/incoming").entryList(QDir::Files | QDir::Hidden | QDir::NoDotAndDotDot)) CTEST_COMPARE(name, QStringLiteral(".iisacc-temporary.lock"));
+        CTEST_CHECK(QDir(privateRoot + "/incoming").removeRecursively());
+        CTEST_CHECK_MESSAGE(f.store->prepare(id), qPrintable(f.store->errorString()));
+        QFile cached(f.store->resourcePath(id, 0)); CTEST_CHECK(cached.open(QIODevice::ReadOnly));
+        CTEST_COMPARE(cached.readAll(), original); cached.close();
+        CTEST_CHECK(QFileInfo(privateRoot + "/originals").isDir());
+        CTEST_CHECK(!QFileInfo::exists(privateRoot + "/viewing"));
+        CTEST_CHECK(cached.remove());
+        for (const auto &name : QDir(privateRoot + "/originals").entryList(QDir::Files | QDir::Hidden | QDir::NoDotAndDotDot)) CTEST_COMPARE(name, QStringLiteral(".iisacc-temporary.lock"));
+        CTEST_CHECK(QDir(privateRoot + "/originals").removeRecursively());
+        for (const auto &name : QDir(privateRoot + "/incoming").entryList(QDir::Files | QDir::Hidden | QDir::NoDotAndDotDot)) CTEST_COMPARE(name, QStringLiteral(".iisacc-temporary.lock"));
+        CTEST_CHECK(QDir(privateRoot + "/incoming").removeRecursively());
+        CTEST_CHECK_MESSAGE(f.store->prepare(id), qPrintable(f.store->errorString()));
+        CTEST_COMPARE(PhotoStore::digestFile(f.store->resourcePath(id, 0)), record.value("resources").toArray().first().toObject().value("hash").toString());
     }
     void emptyRefreshAndAutomaticConnectionDoNotPersistPhotoState() {
         for (const auto permission : {Access::NotDetermined, Access::Denied, Access::Unsupported, Access::Full, Access::Limited}) {
             Fixture f; f.library->permission = permission;
             const auto root = f.temporary.path() + "/drive.societycontainer";
             for (int attempt = 0; attempt < 3; ++attempt) {
-                bool published = false;
-                QVERIFY2(f.store->refresh({}, [&](const QJsonArray &rows, bool reset) {
-                    QCOMPARE(rows, QJsonArray{}); QVERIFY(reset); published = true;
+                bool published = false, publicationValid = true;
+                CTEST_CHECK_MESSAGE(f.store->refresh({}, [&](const QJsonArray &rows, bool reset) {
+                    published = true; publicationValid &= rows.isEmpty() && reset;
                 }), qPrintable(f.store->errorString()));
-                QVERIFY(published);
-                QVERIFY(!QFileInfo::exists(root + "/.society-photos"));
-                QVERIFY(QDir(f.photos()).entryList(QDir::AllEntries | QDir::Hidden | QDir::System | QDir::NoDotAndDotDot).isEmpty());
+                CTEST_CHECK(published); CTEST_CHECK(publicationValid);
+                CTEST_CHECK(!QFileInfo::exists(root + "/.society-photos"));
+                CTEST_CHECK(QDir(f.photos()).entryList(QDir::AllEntries | QDir::Hidden | QDir::System | QDir::NoDotAndDotDot).isEmpty());
             }
-            QCOMPARE(f.library->scans.load(), 0);
+            CTEST_COMPARE(f.library->scans.load(), 0);
             PhotoController controller({}, nullptr, f.library);
             controller.setApplicationActive(false);
             controller.configure(root, true);
-            QTRY_VERIFY(!controller.busy());
-            QVERIFY(controller.entries().isEmpty());
-            QVERIFY(!QFileInfo::exists(root + "/.society-photos"));
-            QVERIFY(!QFileInfo::exists(f.photos() + "/.previews"));
-            QCOMPARE(f.library->authorizations, 0);
-            QCOMPARE(f.library->exports.load(), 0); QCOMPARE(f.library->previews.load(), 0);
+            CTEST_WAIT_DEFAULT(!controller.busy());
+            CTEST_CHECK(controller.entries().isEmpty());
+            CTEST_CHECK(!QFileInfo::exists(root + "/.society-photos"));
+            CTEST_CHECK(!QFileInfo::exists(f.photos() + "/.previews"));
+            CTEST_COMPARE(f.library->authorizations, 0);
+            CTEST_COMPARE(f.library->exports.load(), 0); CTEST_COMPARE(f.library->previews.load(), 0);
         }
     }
     void emptyScaffoldingFromAnOlderSessionDoesNotBecomePersistentPhotoState() {
@@ -306,41 +309,41 @@ private slots:
             Fixture f; f.library->permission = permission;
             const auto privateRoot = f.temporary.path() + "/drive.societycontainer/.society-photos/" + f.store->containerId();
             for (const auto &path : {privateRoot + "/gallery", privateRoot + "/references", privateRoot + "/originals", privateRoot + "/incoming", f.photos() + "/.previews"})
-                QVERIFY(QDir().mkpath(path));
+                CTEST_CHECK(QDir().mkpath(path));
             for (int attempt = 0; attempt < 3; ++attempt) {
-                QVERIFY2(f.store->refresh(), qPrintable(f.store->errorString()));
+                CTEST_CHECK_MESSAGE(f.store->refresh(), qPrintable(f.store->errorString()));
                 QDirIterator files(privateRoot, QDir::Files | QDir::Hidden | QDir::System | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
-                QVERIFY(!files.hasNext());
-                QVERIFY(QDir(f.photos() + "/.previews").isEmpty());
+                CTEST_CHECK(!files.hasNext());
+                CTEST_CHECK(QDir(f.photos() + "/.previews").isEmpty());
             }
             // Unknown data prevents the empty fast path and is never overwritten.
             const auto unknown = privateRoot + "/user-note.txt"; write(unknown, "keep this data");
-            QVERIFY2(f.store->refresh(), qPrintable(f.store->errorString()));
-            QFile preserved(unknown); QVERIFY(preserved.open(QIODevice::ReadOnly)); QCOMPARE(preserved.readAll(), QByteArray("keep this data"));
-            QVERIFY(!QFileInfo::exists(privateRoot + "/index.json"));
+            CTEST_CHECK_MESSAGE(f.store->refresh(), qPrintable(f.store->errorString()));
+            QFile preserved(unknown); CTEST_CHECK(preserved.open(QIODevice::ReadOnly)); CTEST_COMPARE(preserved.readAll(), QByteArray("keep this data"));
+            CTEST_CHECK(!QFileInfo::exists(privateRoot + "/index.json"));
         }
     }
     void transferCreatesStagingAndCommitParentsWithoutAnInitialRefresh() {
         Fixture source, target; const QByteArray original("received original");
-        source.library->add("clip.mov", original, "video"); QVERIFY(source.store->importLibrary());
+        source.library->add("clip.mov", original, "video"); CTEST_CHECK(source.store->importLibrary());
         const auto record = source.store->catalog().first().toObject(); const auto id = record.value("id").toString();
         write(target.photos() + '/' + id + ".societyphoto", QJsonDocument(record).toJson());
         const auto privateRoot = target.temporary.path() + "/drive.societycontainer/.society-photos/" + target.store->containerId();
         QJsonObject request{{"id", id}, {"resource", 0}, {"action", "available"}};
-        QVERIFY(target.store->command(request).value("ok").toBool());
-        QVERIFY(!QFileInfo::exists(privateRoot));
+        CTEST_CHECK(target.store->command(request).value("ok").toBool());
+        CTEST_CHECK(!QFileInfo::exists(privateRoot));
         request["action"] = "begin";
-        QVERIFY2(target.store->command(request).value("ok").toBool(), qPrintable(target.store->errorString()));
-        QVERIFY(QFileInfo(privateRoot + "/incoming").isDir());
-        for (const auto &name : {"originals", "gallery", "references"}) QVERIFY(!QFileInfo::exists(privateRoot + '/' + name));
-        QVERIFY(!QFileInfo::exists(target.photos() + "/.previews"));
+        CTEST_CHECK_MESSAGE(target.store->command(request).value("ok").toBool(), qPrintable(target.store->errorString()));
+        CTEST_CHECK(QFileInfo(privateRoot + "/incoming").isDir());
+        for (const auto &name : {"originals", "gallery", "references"}) CTEST_CHECK(!QFileInfo::exists(privateRoot + '/' + name));
+        CTEST_CHECK(!QFileInfo::exists(target.photos() + "/.previews"));
         request["action"] = "chunk"; request["offset"] = "0"; request["data"] = QString::fromLatin1(original.toBase64());
-        QVERIFY(target.store->command(request).value("ok").toBool());
-        request["action"] = "commit"; QVERIFY(target.store->command(request).value("ok").toBool());
-        QFile cached(target.store->resourcePath(id, 0)); QVERIFY(cached.open(QIODevice::ReadOnly)); QCOMPARE(cached.readAll(), original);
-        QVERIFY(QFileInfo(privateRoot + "/originals").isDir());
-        QVERIFY(!QFileInfo::exists(privateRoot + "/incoming/" + record.value("resources").toArray().first().toObject().value("hash").toString()));
-        QCOMPARE(target.library->imports.load(), 0);
+        CTEST_CHECK(target.store->command(request).value("ok").toBool());
+        request["action"] = "commit"; CTEST_CHECK(target.store->command(request).value("ok").toBool());
+        QFile cached(target.store->resourcePath(id, 0)); CTEST_CHECK(cached.open(QIODevice::ReadOnly)); CTEST_COMPARE(cached.readAll(), original);
+        CTEST_CHECK(QFileInfo(privateRoot + "/originals").isDir());
+        CTEST_CHECK(!QFileInfo::exists(privateRoot + "/incoming/" + record.value("resources").toArray().first().toObject().value("hash").toString()));
+        CTEST_COMPARE(target.library->imports.load(), 0);
     }
     void galleryIndexesOutwardAndReprioritizesWithoutExportingOriginals() {
         Fixture f;
@@ -351,106 +354,107 @@ private slots:
         }
         const auto key = [](int i) { return QString::fromLatin1(QCryptographicHash::hash((QString::number(i) + ".jpg").toUtf8(), QCryptographicHash::Sha256).toHex()); };
         f.store->prioritize({key(4)});
-        int published = 0;
-        QVERIFY(f.store->importLibrary({}, [&](const QJsonArray &rows, bool reset) {
-            if (reset) { QCOMPARE(rows.size(), 8); return; }
+        int published = 0; bool resetValid = true, previewsValid = true;
+        CTEST_CHECK(f.store->importLibrary({}, [&](const QJsonArray &rows, bool reset) {
+            if (reset) { resetValid &= rows.size() == 8; return; }
             if (f.library->exports.load() != 0) return;
-            QVERIFY(!rows[0].toObject().value("previewStamp").toString().isEmpty());
+            previewsValid &= !rows.isEmpty() && !rows[0].toObject().value("previewStamp").toString().isEmpty();
             if (++published == 1) f.store->prioritize({key(7)});
         }));
-        QCOMPARE(f.library->previewOrder, QStringList({"4.jpg", "7.jpg", "6.jpg", "5.jpg", "3.jpg", "2.jpg", "1.jpg", "0.jpg"}));
-        QCOMPARE(published, 8); QCOMPARE(f.library->previews.load(), 8);
-        QCOMPARE(f.store->catalog().size(), 8);
+        CTEST_CHECK(resetValid); CTEST_CHECK(previewsValid);
+        CTEST_COMPARE(f.library->previewOrder, QStringList({"4.jpg", "7.jpg", "6.jpg", "5.jpg", "3.jpg", "2.jpg", "1.jpg", "0.jpg"}));
+        CTEST_COMPARE(published, 8); CTEST_COMPARE(f.library->previews.load(), 8);
+        CTEST_COMPARE(f.store->catalog().size(), 8);
     }
     void galleryIndexSurvivesCancellationReopenAndRepairsEditedOrMissingPreviews() {
         Fixture f;
         for (int i = 0; i < 6; ++i) f.library->add(QString::number(i) + ".jpg", QByteArray("original-") + QByteArray::number(i));
         int ready = 0;
-        QVERIFY(!f.store->importLibrary({}, [&](const QJsonArray &, bool reset) {
+        CTEST_CHECK(!f.store->importLibrary({}, [&](const QJsonArray &, bool reset) {
             if (!reset && ++ready == 2) f.store->cancel();
         }));
-        QCOMPARE(f.library->exports.load(), 0); QCOMPARE(f.library->previews.load(), 2);
+        CTEST_COMPARE(f.library->exports.load(), 0); CTEST_COMPARE(f.library->previews.load(), 2);
         f.store = std::make_unique<PhotoStore>(f.temporary.path() + "/drive.societycontainer", f.library);
-        QVERIFY(f.store->open());
-        const auto restored = f.store->gallery(); QCOMPARE(restored.size(), 6);
+        CTEST_CHECK(f.store->open());
+        const auto restored = f.store->gallery(); CTEST_COMPARE(restored.size(), 6);
         int saved = 0;
         for (const auto &row : restored) if (!row.toObject().value("previewStamp").toString().isEmpty()) ++saved;
-        QCOMPARE(saved, 2);
-        QVERIFY(f.store->importLibrary()); QCOMPARE(f.library->previews.load(), 6);
+        CTEST_COMPARE(saved, 2);
+        CTEST_CHECK(f.store->importLibrary()); CTEST_COMPARE(f.library->previews.load(), 6);
         const auto exports = f.library->exports.load();
         f.store = std::make_unique<PhotoStore>(f.temporary.path() + "/drive.societycontainer", f.library);
-        QVERIFY(f.store->open()); QVERIFY(f.store->importLibrary());
-        QCOMPARE(f.library->previews.load(), 6); QCOMPARE(f.library->exports.load(), exports);
+        CTEST_CHECK(f.store->open()); CTEST_CHECK(f.store->importLibrary());
+        CTEST_COMPARE(f.library->previews.load(), 6); CTEST_COMPARE(f.library->exports.load(), exports);
         const auto row = f.store->gallery().first().toObject();
         const auto cached = QUrl(row.value("preview").toString()).toLocalFile();
         write(cached, "broken jpeg");
         // The canonical alias preview repairs a corrupt gallery preview without native I/O.
         const auto scans = f.library->scans.load();
-        QVERIFY(f.store->refresh()); QVERIFY(QImage(cached).isNull() == false);
-        QCOMPARE(f.library->scans.load(), scans);
-        QCOMPARE(f.library->previews.load(), 6);
+        CTEST_CHECK(f.store->refresh()); CTEST_CHECK(QImage(cached).isNull() == false);
+        CTEST_COMPARE(f.library->scans.load(), scans);
+        CTEST_COMPARE(f.library->previews.load(), 6);
         f.library->snapshot.assets.first().stamp = "edited";
-        QVERIFY(f.store->importLibrary()); QCOMPARE(f.library->previews.load(), 7);
+        CTEST_CHECK(f.store->importLibrary()); CTEST_COMPARE(f.library->previews.load(), 7);
     }
     void compactGalleryIsPublishedBeforeReadingIndividualReferences() {
         Fixture f; f.library->add("a.jpg", "first"); f.library->add("b.jpg", "second");
-        QVERIFY(f.store->importLibrary());
+        CTEST_CHECK(f.store->importLibrary());
         const auto id = f.store->catalog().first().toObject().value("id").toString();
         const auto privateRoot = f.temporary.path() + "/drive.societycontainer/.society-photos/" + f.store->containerId();
-        QFile compact(privateRoot + "/gallery-catalog.json"); QVERIFY(compact.open(QIODevice::ReadOnly));
+        QFile compact(privateRoot + "/gallery-catalog.json"); CTEST_CHECK(compact.open(QIODevice::ReadOnly));
         const auto bytes = compact.readAll();
-        QVERIFY(!bytes.contains(f.temporary.path().toUtf8())); // Relocatable relative preview filenames.
-        QVERIFY(!bytes.contains("identifier"));
+        CTEST_CHECK(!bytes.contains(f.temporary.path().toUtf8())); // Relocatable relative preview filenames.
+        CTEST_CHECK(!bytes.contains("identifier"));
         PhotoStore reopened(f.temporary.path() + "/drive.societycontainer", f.library);
-        bool published = false;
+        bool published = false, publicationValid = true, referenceWritten = false;
         const bool opened = reopened.open([&](const QJsonArray &rows, bool reset) {
-            QVERIFY(reset); QCOMPARE(rows.size(), 2); published = true;
+            published = true; publicationValid &= reset && rows.size() == 2;
             for (const auto &value : rows) {
                 const auto row = value.toObject();
-                QVERIFY(!row.value("previewStamp").toString().isEmpty());
-                QVERIFY(QFile::exists(QUrl(row.value("preview").toString()).toLocalFile()));
+                publicationValid &= !row.value("previewStamp").toString().isEmpty();
+                publicationValid &= QFile::exists(QUrl(row.value("preview").toString()).toLocalFile());
             }
             // If the callback runs first, a subsequent reference error does not
             // prevent the cached gallery from being published.
-            write(privateRoot + "/references/" + id + ".json", "invalid reference");
+            referenceWritten = tryWrite(privateRoot + "/references/" + id + ".json", "invalid reference");
         });
-        QVERIFY(published); QVERIFY(!opened);
+        CTEST_CHECK(published); CTEST_CHECK(publicationValid); CTEST_CHECK(referenceWritten); CTEST_CHECK(!opened);
     }
     void explicitConnectionRequestsPhotoAccessAndPublishesAfterGrant() {
         Fixture f; f.library->permission = Access::NotDetermined; f.library->add("first.jpg", "first photo");
         PhotoController controller({}, nullptr, f.library);
         controller.setApplicationActive(false);
         controller.configure(f.temporary.path() + "/drive.societycontainer", true);
-        QTRY_VERIFY(!controller.busy()); QCOMPARE(f.library->authorizations, 0);
+        CTEST_WAIT_DEFAULT(!controller.busy()); CTEST_COMPARE(f.library->authorizations, 0);
         controller.setApplicationActive(true);
-        QTRY_VERIFY(!controller.busy()); QCOMPARE(f.library->authorizations, 0);
-        QCOMPARE(f.library->scans.load(), 0); QVERIFY(controller.entries().isEmpty());
+        CTEST_WAIT_DEFAULT(!controller.busy()); CTEST_COMPARE(f.library->authorizations, 0);
+        CTEST_COMPARE(f.library->scans.load(), 0); CTEST_CHECK(controller.entries().isEmpty());
         controller.connectLibrary();
-        QTRY_COMPARE(f.library->authorizations, 1); QVERIFY(controller.busy());
+        CTEST_WAIT_COMPARE(f.library->authorizations, 1); CTEST_CHECK(controller.busy());
         controller.refresh(); controller.connectLibrary(); controller.setApplicationActive(true);
-        QCOMPARE(f.library->authorizations, 1);
+        CTEST_COMPARE(f.library->authorizations, 1);
         f.library->permission = Access::Full;
         std::exchange(f.library->authorizationFinished, {})();
-        QTRY_COMPARE(controller.entries().size(), 1); QTRY_VERIFY(!controller.busy());
-        QVERIFY(QFile::exists(f.photos() + '/' + controller.entries()[0].toMap()["id"].toString() + ".societyphoto"));
+        CTEST_WAIT_COMPARE(controller.entries().size(), 1); CTEST_WAIT_DEFAULT(!controller.busy());
+        CTEST_CHECK(QFile::exists(f.photos() + '/' + controller.entries()[0].toMap()["id"].toString() + ".societyphoto"));
         controller.setApplicationActive(false); controller.setApplicationActive(true);
-        QTRY_VERIFY(!controller.busy()); QCOMPARE(f.library->authorizations, 1);
+        CTEST_WAIT_DEFAULT(!controller.busy()); CTEST_COMPARE(f.library->authorizations, 1);
     }
     void automaticPhotoAccessWaitsForAContainerAndNeverOpensSettings() {
         Fixture f; f.library->permission = Access::NotDetermined;
         PhotoController controller({}, nullptr, f.library);
-        controller.setApplicationActive(true); controller.refresh(); QCOMPARE(f.library->authorizations, 0);
+        controller.setApplicationActive(true); controller.refresh(); CTEST_COMPARE(f.library->authorizations, 0);
         f.library->permission = Access::Denied;
         controller.configure(f.temporary.path() + "/drive.societycontainer", true);
-        QTRY_VERIFY(!controller.busy()); QCOMPARE(f.library->authorizations, 0);
+        CTEST_WAIT_DEFAULT(!controller.busy()); CTEST_COMPARE(f.library->authorizations, 0);
         f.library->permission = Access::Limited; f.library->add("allowed.jpg", "selected photo");
         controller.setApplicationActive(false); controller.setApplicationActive(true);
-        QTRY_VERIFY(!controller.busy()); QVERIFY(controller.entries().isEmpty());
-        QCOMPARE(f.library->authorizations, 0); QCOMPARE(f.library->scans.load(), 0);
+        CTEST_WAIT_DEFAULT(!controller.busy()); CTEST_CHECK(controller.entries().isEmpty());
+        CTEST_COMPARE(f.library->authorizations, 0); CTEST_COMPARE(f.library->scans.load(), 0);
         controller.connectLibrary();
-        QTRY_COMPARE(controller.entries().size(), 1); QCOMPARE(f.library->authorizations, 0);
+        CTEST_WAIT_COMPARE(controller.entries().size(), 1); CTEST_COMPARE(f.library->authorizations, 0);
         controller.setApplicationActive(false); controller.setApplicationActive(true);
-        QTRY_VERIFY(!controller.busy()); QCOMPARE(f.library->authorizations, 0);
+        CTEST_WAIT_DEFAULT(!controller.busy()); CTEST_COMPARE(f.library->authorizations, 0);
     }
     void indexedPhotosAppearBeforeASlowOriginalFinishesAndReportRealProgress() {
         Fixture f; f.library->add("first.jpg", "first photo"); f.library->add("slow.mov", "second video", "video");
@@ -459,16 +463,16 @@ private slots:
         PhotoController controller({}, nullptr, f.library);
         // Release before the controller destructor joins its worker, even on a failed assertion.
         const auto release = qScopeGuard([&] { gate.release(); });
-        QSignalSpy progress(&controller, &PhotoController::progress);
+        photo_test::SignalRecorder progress(&controller, &PhotoController::progress);
         controller.configure(f.temporary.path() + "/drive.societycontainer", true);
-        QTRY_VERIFY(!controller.busy()); controller.connectLibrary();
-        QTRY_COMPARE(controller.entries().size(), 2); QVERIFY(controller.busy());
-        QTRY_VERIFY(!controller.entries()[0].toMap().value("previewStamp").toString().isEmpty());
-        QTRY_VERIFY(!controller.entries()[1].toMap().value("previewStamp").toString().isEmpty());
-        QTRY_COMPARE(progress.size(), 1); QCOMPARE(progress[0][1].toLongLong(), qint64(11));
-        QCOMPARE(progress[0][2].toLongLong(), qint64(11));
-        gate.release(); QTRY_COMPARE(controller.entries().size(), 2); QTRY_VERIFY(!controller.busy());
-        QCOMPARE(progress.size(), 2); QCOMPARE(progress[1][1].toLongLong(), qint64(12));
+        CTEST_WAIT_DEFAULT(!controller.busy()); controller.connectLibrary();
+        CTEST_WAIT_COMPARE(controller.entries().size(), 2); CTEST_CHECK(controller.busy());
+        CTEST_WAIT_DEFAULT(!controller.entries()[0].toMap().value("previewStamp").toString().isEmpty());
+        CTEST_WAIT_DEFAULT(!controller.entries()[1].toMap().value("previewStamp").toString().isEmpty());
+        CTEST_WAIT_COMPARE(progress.size(), 1); CTEST_COMPARE(progress[0][1].toLongLong(), qint64(11));
+        CTEST_COMPARE(progress[0][2].toLongLong(), qint64(11));
+        gate.release(); CTEST_WAIT_COMPARE(controller.entries().size(), 2); CTEST_WAIT_DEFAULT(!controller.busy());
+        CTEST_COMPARE(progress.size(), 2); CTEST_COMPARE(progress[1][1].toLongLong(), qint64(12));
     }
     void cancelledPhotoWorkReleasesItsFileLockBeforeBackgroundDrainReturns() {
         Fixture f; f.library->add("slow.mov", "video", "video"); QSemaphore entered;
@@ -480,24 +484,24 @@ private slots:
         };
         PhotoController controller({}, nullptr, f.library);
         controller.configure(f.temporary.path() + "/drive.societycontainer", true);
-        QTRY_VERIFY(!controller.busy()); controller.connectLibrary();
-        QTRY_VERIFY(entered.available());
+        CTEST_WAIT_DEFAULT(!controller.busy()); controller.connectLibrary();
+        CTEST_WAIT_DEFAULT(entered.available());
         controller.configure(f.temporary.path() + "/drive.societycontainer", false);
-        controller.waitForDone(); QVERIFY(exited.load());
+        controller.waitForDone(); CTEST_CHECK(exited.load());
         QLockFile lock(f.temporary.path() + "/drive.societycontainer/.society-photos/" + f.store->containerId() + "/operation.lock");
-        QVERIFY(lock.tryLock());
-        QCoreApplication::processEvents(); QVERIFY(!controller.active()); QVERIFY(controller.entries().isEmpty());
+        CTEST_CHECK(lock.tryLock());
+        QCoreApplication::processEvents(); CTEST_CHECK(!controller.active()); CTEST_CHECK(controller.entries().isEmpty());
     }
     void hashingCancellationStopsBeforePublishingAPartialDigest() {
         Fixture f; const QByteArray bytes(4 * 1024 * 1024, 'x');
         const auto path = f.temporary.path() + "/large.mov"; write(path, bytes);
         int chunks = 0; QString error;
-        QVERIFY(PhotoStore::digestFile(path, &error, [&] { return ++chunks == 3; }).isEmpty());
-        QCOMPARE(chunks, 3); QVERIFY(!error.isEmpty());
-        QCOMPARE(PhotoStore::digestFile(path), QString::fromLatin1(QCryptographicHash::hash(bytes, QCryptographicHash::Sha256).toHex()));
+        CTEST_CHECK(PhotoStore::digestFile(path, &error, [&] { return ++chunks == 3; }).isEmpty());
+        CTEST_COMPARE(chunks, 3); CTEST_CHECK(!error.isEmpty());
+        CTEST_COMPARE(PhotoStore::digestFile(path), QString::fromLatin1(QCryptographicHash::hash(bytes, QCryptographicHash::Sha256).toHex()));
     }
     void incrementalPhotoBatchesKeepEveryPreviouslyPublishedRecord() {
-        Fixture f; f.library->add("existing.jpg", "existing"); QVERIFY(f.store->importLibrary());
+        Fixture f; f.library->add("existing.jpg", "existing"); CTEST_CHECK(f.store->importLibrary());
         for (int i = 0; i < 8; ++i) f.library->add(QString::number(i) + ".jpg", QByteArray::number(i));
         f.library->add("last.mov", "last", "video"); QSemaphore gate;
         f.library->beforeExport = [&](const QString &token) {
@@ -507,259 +511,259 @@ private slots:
         PhotoController controller({}, nullptr, f.library);
         const auto release = qScopeGuard([&] { gate.release(); });
         controller.configure(f.temporary.path() + "/drive.societycontainer", true);
-        QTRY_VERIFY(!controller.busy()); controller.connectLibrary();
-        QTRY_VERIFY(controller.entries().size() >= 6); QVERIFY(controller.busy());
+        CTEST_WAIT_DEFAULT(!controller.busy()); controller.connectLibrary();
+        CTEST_WAIT_DEFAULT(controller.entries().size() >= 6); CTEST_CHECK(controller.busy());
         QSet<QString> names; for (const auto &row : controller.entries()) names.insert(row.toMap().value("name").toString());
-        QVERIFY(names.contains("existing.jpg")); QVERIFY(names.contains("0.jpg")); QVERIFY(names.contains("4.jpg"));
-        gate.release(); QTRY_VERIFY(!controller.busy()); QCOMPARE(controller.entries().size(), 10);
+        CTEST_CHECK(names.contains("existing.jpg")); CTEST_CHECK(names.contains("0.jpg")); CTEST_CHECK(names.contains("4.jpg"));
+        gate.release(); CTEST_WAIT_DEFAULT(!controller.busy()); CTEST_COMPARE(controller.entries().size(), 10);
     }
     void portableNamesKeepTheirExtensionAndPlatformLimits() {
         const auto id = QString(64, 'a');
         const auto name = importedResourceName(id, 0, QString(100, QChar(0xac00)) + ":test?.png");
-        QCOMPARE(importedPhotoId(name), id); QVERIFY(name.endsWith(".png")); QVERIFY(name.toUtf8().size() < 255);
-        QVERIFY(!name.contains(':')); QVERIFY(!name.contains('?'));
-        QVERIFY(importedPhotoId("Society-" + id + "-x-original.png").isEmpty());
+        CTEST_COMPARE(importedPhotoId(name), id); CTEST_CHECK(name.endsWith(".png")); CTEST_CHECK(name.toUtf8().size() < 255);
+        CTEST_CHECK(!name.contains(':')); CTEST_CHECK(!name.contains('?'));
+        CTEST_CHECK(importedPhotoId("Society-" + id + "-x-original.png").isEmpty());
     }
     void nativeOriginalsRemainAliasesAndPreviewsPersist() {
         Fixture f; f.library->add("still.jpg", "original-photo"); f.library->add("movie.mp4", "original-video", "video");
-        QVERIFY2(f.store->importLibrary(), qPrintable(f.store->errorString()));
-        const auto records = f.store->catalog(); QCOMPARE(records.size(), 2);
-        QCOMPARE(f.library->imports, 0);
+        CTEST_CHECK_MESSAGE(f.store->importLibrary(), qPrintable(f.store->errorString()));
+        const auto records = f.store->catalog(); CTEST_COMPARE(records.size(), 2);
+        CTEST_COMPARE(f.library->imports, 0);
         for (const auto &value : records) {
             const auto record = value.toObject(); const auto id = record.value("id").toString();
-            QVERIFY(QFile::exists(f.photos() + '/' + id + ".societyphoto"));
-            QVERIFY(QFile::exists(f.store->previewPath(id)));
-            QVERIFY(!QFile::exists(f.photos() + '/' + record.value("name").toString()));
-            QVERIFY(!QJsonDocument(record).toJson().contains(f.library->directory.toUtf8()));
+            CTEST_CHECK(QFile::exists(f.photos() + '/' + id + ".societyphoto"));
+            CTEST_CHECK(QFile::exists(f.store->previewPath(id)));
+            CTEST_CHECK(!QFile::exists(f.photos() + '/' + record.value("name").toString()));
+            CTEST_CHECK(!QJsonDocument(record).toJson().contains(f.library->directory.toUtf8()));
         }
-        QFile original(f.library->directory + "/still.jpg"); QVERIFY(original.open(QIODevice::ReadOnly)); QCOMPARE(original.readAll(), QByteArray("original-photo"));
+        QFile original(f.library->directory + "/still.jpg"); CTEST_CHECK(original.open(QIODevice::ReadOnly)); CTEST_COMPARE(original.readAll(), QByteArray("original-photo"));
         const int exported = f.library->exports.load();
-        QVERIFY(f.store->importLibrary()); QCOMPARE(f.library->exports, exported); QCOMPARE(f.store->catalog(), records);
+        CTEST_CHECK(f.store->importLibrary()); CTEST_COMPARE(f.library->exports, exported); CTEST_COMPARE(f.store->catalog(), records);
         f.store->releaseExports();
-        for (const auto &value : records) QVERIFY(!QFile::exists(f.store->resourcePath(value.toObject().value("id").toString(), 0)));
+        for (const auto &value : records) CTEST_CHECK(!QFile::exists(f.store->resourcePath(value.toObject().value("id").toString(), 0)));
     }
     void duplicatesPreserveAllNativeResourcesAndShareOriginalBytes() {
         Fixture f; f.library->add("live.jpg", "photo-bytes");
         write(f.library->directory + "/live.mov", "motion-bytes");
         f.library->snapshot.assets.first().resources.append({"live.mov", "live.mov", "pairedVideo"});
-        QVERIFY(f.store->importLibrary()); const auto original = f.store->catalog().first().toObject();
+        CTEST_CHECK(f.store->importLibrary()); const auto original = f.store->catalog().first().toObject();
         const auto id = original.value("id").toString();
-        const auto exported = f.store->originalsForSharing(id); QCOMPARE(exported.size(), 2);
-        QFile still(exported[0]); QVERIFY(still.open(QIODevice::ReadOnly)); QCOMPARE(still.readAll(), QByteArray("photo-bytes"));
-        QFile motion(exported[1]); QVERIFY(motion.open(QIODevice::ReadOnly)); QCOMPARE(motion.readAll(), QByteArray("motion-bytes"));
-        QVERIFY2(f.store->duplicate(id), qPrintable(f.store->errorString()));
-        QCOMPARE(f.library->imports.load(), 0); QCOMPARE(f.library->snapshot.assets.size(), 1);
-        QVERIFY(f.store->importLibrary()); QCOMPARE(f.store->catalog().size(), 2);
+        const auto exported = f.store->originalsForSharing(id); CTEST_COMPARE(exported.size(), 2);
+        QFile still(exported[0]); CTEST_CHECK(still.open(QIODevice::ReadOnly)); CTEST_COMPARE(still.readAll(), QByteArray("photo-bytes"));
+        QFile motion(exported[1]); CTEST_CHECK(motion.open(QIODevice::ReadOnly)); CTEST_COMPARE(motion.readAll(), QByteArray("motion-bytes"));
+        CTEST_CHECK_MESSAGE(f.store->duplicate(id), qPrintable(f.store->errorString()));
+        CTEST_COMPARE(f.library->imports.load(), 0); CTEST_COMPARE(f.library->snapshot.assets.size(), 1);
+        CTEST_CHECK(f.store->importLibrary()); CTEST_COMPARE(f.store->catalog().size(), 2);
         QString duplicate;
         for (const auto &value : f.store->catalog()) if (value.toObject().value("id") != id) {
             duplicate = value.toObject().value("id").toString();
-            QCOMPARE(value.toObject().value("resources").toArray().size(), 2);
+            CTEST_COMPARE(value.toObject().value("resources").toArray().size(), 2);
         }
-        QVERIFY(!duplicate.isEmpty()); QVERIFY(f.store->trash(duplicate));
-        QCOMPARE(f.library->removals.load(), 0); QVERIFY(QFileInfo::exists(f.library->directory + "/live.jpg"));
+        CTEST_CHECK(!duplicate.isEmpty()); CTEST_CHECK(f.store->trash(duplicate));
+        CTEST_COMPARE(f.library->removals.load(), 0); CTEST_CHECK(QFileInfo::exists(f.library->directory + "/live.jpg"));
     }
     void containerOwnedCopiesAndReceivedRevisionsKeepTheirOriginals() {
         Fixture f; f.library->add("native.jpg", "native original");
-        QVERIFY(f.store->importLibrary());
+        CTEST_CHECK(f.store->importLibrary());
         auto record = f.store->catalog().first().toObject();
         const auto id = record.value("id").toString();
-        QVERIFY(f.store->duplicate(id));
+        CTEST_CHECK(f.store->duplicate(id));
         QString duplicate;
         for (const auto &value : f.store->catalog())
             if (value.toObject().value("id") != id) duplicate = value.toObject().value("id").toString();
-        QVERIFY(!duplicate.isEmpty());
-        f.store->releaseExports(); QVERIFY(f.store->hasOriginal(duplicate));
+        CTEST_CHECK(!duplicate.isEmpty());
+        f.store->releaseExports(); CTEST_CHECK(f.store->hasOriginal(duplicate));
         const QByteArray replacement("received replacement original");
         auto resource = record.value("resources").toArray().first().toObject();
         resource["hash"] = QString::fromLatin1(QCryptographicHash::hash(replacement, QCryptographicHash::Sha256).toHex());
         resource["size"] = QString::number(replacement.size()); record["resources"] = QJsonArray{resource};
         write(f.photos() + '/' + id + ".societyphoto", QJsonDocument(record).toJson());
         QJsonObject packet{{"id", id}, {"resource", 0}, {"action", "begin"}};
-        QVERIFY(f.store->command(packet).value("ok").toBool());
+        CTEST_CHECK(f.store->command(packet).value("ok").toBool());
         packet["action"] = "chunk"; packet["offset"] = "0"; packet["data"] = QString::fromLatin1(replacement.toBase64());
-        QVERIFY(f.store->command(packet).value("ok").toBool());
-        packet["action"] = "commit"; QVERIFY(f.store->command(packet).value("ok").toBool());
-        QVERIFY(f.store->consume(id));
-        QFile received(f.store->resourcePath(id, 0)); QVERIFY(received.open(QIODevice::ReadWrite));
-        QVERIFY(received.setFileTime(QDateTime::currentDateTimeUtc().addSecs(-3600), QFileDevice::FileModificationTime));
-        received.close(); f.store->releaseExports(); QVERIFY(f.store->refresh());
-        QVERIFY(f.store->hasOriginal(id)); QVERIFY(f.store->hasOriginal(duplicate));
-        QVERIFY(received.open(QIODevice::ReadOnly)); QCOMPARE(received.readAll(), replacement);
-        QFile native(f.library->directory + "/native.jpg"); QVERIFY(native.open(QIODevice::ReadOnly));
-        QCOMPARE(native.readAll(), QByteArray("native original"));
-        QCOMPARE(f.library->imports.load(), 0); QCOMPARE(f.library->removals.load(), 0);
+        CTEST_CHECK(f.store->command(packet).value("ok").toBool());
+        packet["action"] = "commit"; CTEST_CHECK(f.store->command(packet).value("ok").toBool());
+        CTEST_CHECK(f.store->consume(id));
+        QFile received(f.store->resourcePath(id, 0)); CTEST_CHECK(received.open(QIODevice::ReadWrite));
+        CTEST_CHECK(received.setFileTime(QDateTime::currentDateTimeUtc().addSecs(-3600), QFileDevice::FileModificationTime));
+        received.close(); f.store->releaseExports(); CTEST_CHECK(f.store->refresh());
+        CTEST_CHECK(f.store->hasOriginal(id)); CTEST_CHECK(f.store->hasOriginal(duplicate));
+        CTEST_CHECK(received.open(QIODevice::ReadOnly)); CTEST_COMPARE(received.readAll(), replacement);
+        QFile native(f.library->directory + "/native.jpg"); CTEST_CHECK(native.open(QIODevice::ReadOnly));
+        CTEST_COMPARE(native.readAll(), QByteArray("native original"));
+        CTEST_COMPARE(f.library->imports.load(), 0); CTEST_COMPARE(f.library->removals.load(), 0);
     }
     void localAdditionStaysInTheContainerAndPreservesTheUsersFile() {
         Fixture f; QImage image(4, 4, QImage::Format_RGB32); image.fill(Qt::red);
-        QVERIFY(image.save(f.photos() + "/new.png"));
-        QVERIFY2(f.store->refresh(), qPrintable(f.store->errorString()));
-        QCOMPARE(f.library->imports, 0); QCOMPARE(f.store->catalog().size(), 1);
-        QVERIFY(QFile::exists(f.photos() + "/new.png"));
-        QVERIFY(f.store->refresh()); QCOMPARE(f.library->imports, 0); QCOMPARE(f.store->catalog().size(), 1);
+        CTEST_CHECK(image.save(f.photos() + "/new.png"));
+        CTEST_CHECK_MESSAGE(f.store->refresh(), qPrintable(f.store->errorString()));
+        CTEST_COMPARE(f.library->imports, 0); CTEST_COMPARE(f.store->catalog().size(), 1);
+        CTEST_CHECK(QFile::exists(f.photos() + "/new.png"));
+        CTEST_CHECK(f.store->refresh()); CTEST_COMPARE(f.library->imports, 0); CTEST_COMPARE(f.store->catalog().size(), 1);
     }
     void transferChecksHashesAndKeepsCommittedOriginalsInsideTheContainer() {
         Fixture source, target;
-        source.library->add("clip.mp4", QByteArray(700000, 'v'), "video"); QVERIFY(source.store->importLibrary());
+        source.library->add("clip.mp4", QByteArray(700000, 'v'), "video"); CTEST_CHECK(source.store->importLibrary());
         const auto record = source.store->catalog().first().toObject(); const auto id = record.value("id").toString();
         write(target.photos() + '/' + id + ".societyphoto", QJsonDocument(record).toJson());
-        QVERIFY(target.store->importLibrary()); QVERIFY(!target.store->hasOriginal(id)); QVERIFY(source.store->prepare(id));
+        CTEST_CHECK(target.store->importLibrary()); CTEST_CHECK(!target.store->hasOriginal(id)); CTEST_CHECK(source.store->prepare(id));
         QJsonObject base{{"id", id}, {"resource", 0}};
         auto request = base; request["action"] = "begin";
-        QVERIFY(target.store->command(request).value("ok").toBool());
+        CTEST_CHECK(target.store->command(request).value("ok").toBool());
         for (qint64 offset = 0; offset < 700000; offset += PhotoStore::ChunkBytes) {
             request = base; request["action"] = "read"; request["offset"] = QString::number(offset);
-            const auto chunk = source.store->command(request); QVERIFY(chunk.value("ok").toBool());
+            const auto chunk = source.store->command(request); CTEST_CHECK(chunk.value("ok").toBool());
             request["action"] = "chunk"; request["data"] = chunk.value("data");
-            QVERIFY(target.store->command(request).value("ok").toBool());
-            QVERIFY(target.store->command(request).value("ok").toBool()); // Replayed acknowledgement.
+            CTEST_CHECK(target.store->command(request).value("ok").toBool());
+            CTEST_CHECK(target.store->command(request).value("ok").toBool()); // Replayed acknowledgement.
         }
-        request = base; request["action"] = "commit"; QVERIFY(target.store->command(request).value("ok").toBool());
-        QVERIFY(target.store->consume(id)); QCOMPARE(target.library->imports, 0);
-        QVERIFY(target.store->consume(id)); QVERIFY(target.store->refresh()); QCOMPARE(target.library->imports, 0);
-        QCOMPARE(target.store->catalog().size(), 1);
-        request["id"] = "../../outside"; QVERIFY(!target.store->command(request).value("ok").toBool());
+        request = base; request["action"] = "commit"; CTEST_CHECK(target.store->command(request).value("ok").toBool());
+        CTEST_CHECK(target.store->consume(id)); CTEST_COMPARE(target.library->imports, 0);
+        CTEST_CHECK(target.store->consume(id)); CTEST_CHECK(target.store->refresh()); CTEST_COMPARE(target.library->imports, 0);
+        CTEST_COMPARE(target.store->catalog().size(), 1);
+        request["id"] = "../../outside"; CTEST_CHECK(!target.store->command(request).value("ok").toBool());
     }
     void legacyLayoutKeepsNativeReferencesAndOriginals()
     {
-        Fixture f; f.library->add("original.jpg", "unchanged original"); QVERIFY(f.store->importLibrary());
+        Fixture f; f.library->add("original.jpg", "unchanged original"); CTEST_CHECK(f.store->importLibrary());
         const auto before = f.store->catalog(); const auto id = before.first().toObject().value("id").toString();
         const auto identity = f.store->containerId();
         const auto root = f.temporary.path() + "/drive.societycontainer";
-        QFile manifest(root + "/.society-drive.json"); QVERIFY(manifest.open(QIODevice::ReadOnly));
+        QFile manifest(root + "/.society-drive.json"); CTEST_CHECK(manifest.open(QIODevice::ReadOnly));
         auto data = QJsonDocument::fromJson(manifest.readAll()).object(); manifest.close();
         QJsonArray legacy;
         for (const auto &entry : data.value("sections").toArray())
             if (entry.toObject().value("id") != "photos") legacy.append(entry);
         data["sections"] = legacy;
-        QVERIFY(QDir().rename(root + "/Photos", root + "/Files/Photos"));
+        CTEST_CHECK(QDir().rename(root + "/Photos", root + "/Files/Photos"));
         write(manifest.fileName(), QJsonDocument(data).toJson());
         f.store = std::make_unique<PhotoStore>(root, f.library);
-        QVERIFY2(f.store->open(), qPrintable(f.store->errorString()));
-        QCOMPARE(f.store->containerId(), identity); QCOMPARE(f.store->catalog(), before);
-        QVERIFY(f.store->hasOriginal(id)); QVERIFY(QFileInfo::exists(f.store->previewPath(id)));
-        QCOMPARE(f.store->previewPath(id), root + "/Photos/.previews/" + id + ".jpg");
+        CTEST_CHECK_MESSAGE(f.store->open(), qPrintable(f.store->errorString()));
+        CTEST_COMPARE(f.store->containerId(), identity); CTEST_COMPARE(f.store->catalog(), before);
+        CTEST_CHECK(f.store->hasOriginal(id)); CTEST_CHECK(QFileInfo::exists(f.store->previewPath(id)));
+        CTEST_COMPARE(f.store->previewPath(id), root + "/Photos/.previews/" + id + ".jpg");
         const auto exports = f.library->exports.load();
-        QVERIFY(f.store->importLibrary()); QCOMPARE(f.library->exports.load(), exports);
-        QCOMPARE(f.library->imports.load(), 0);
-        QVERIFY(!QFileInfo::exists(root + "/Files/Photos"));
+        CTEST_CHECK(f.store->importLibrary()); CTEST_COMPARE(f.library->exports.load(), exports);
+        CTEST_COMPARE(f.library->imports.load(), 0);
+        CTEST_CHECK(!QFileInfo::exists(root + "/Files/Photos"));
     }
 
     void deniedAndLimitedAccessNeverErasePhotos() {
-        Fixture f; f.library->add("a.jpg", "original"); QVERIFY(f.store->importLibrary());
+        Fixture f; f.library->add("a.jpg", "original"); CTEST_CHECK(f.store->importLibrary());
         const auto records = f.store->catalog(); f.library->snapshot.assets.clear(); f.library->permission = Access::Limited;
-        QVERIFY(f.store->importLibrary()); QCOMPARE(f.store->catalog(), records); QCOMPARE(f.library->removals, 0);
-        f.library->permission = Access::Denied; QVERIFY(f.store->importLibrary()); QCOMPARE(f.store->catalog(), records);
+        CTEST_CHECK(f.store->importLibrary()); CTEST_COMPARE(f.store->catalog(), records); CTEST_COMPARE(f.library->removals, 0);
+        f.library->permission = Access::Denied; CTEST_CHECK(f.store->importLibrary()); CTEST_COMPARE(f.store->catalog(), records);
     }
     void corruptTransferAndRedirectedCacheAreRejected() {
-        Fixture source, target; source.library->add("a.jpg", "original"); QVERIFY(source.store->importLibrary());
+        Fixture source, target; source.library->add("a.jpg", "original"); CTEST_CHECK(source.store->importLibrary());
         const auto record = source.store->catalog().first().toObject(); const auto id = record.value("id").toString();
-        write(target.photos() + '/' + id + ".societyphoto", QJsonDocument(record).toJson()); QVERIFY(target.store->importLibrary());
+        write(target.photos() + '/' + id + ".societyphoto", QJsonDocument(record).toJson()); CTEST_CHECK(target.store->importLibrary());
         QJsonObject request{{"id", id}, {"resource", 0}, {"action", "begin"}};
-        QVERIFY(target.store->command(request).value("ok").toBool());
+        CTEST_CHECK(target.store->command(request).value("ok").toBool());
         request["action"] = "chunk"; request["offset"] = "0"; request["data"] = QString::fromLatin1(QByteArray("tampered").toBase64());
-        QVERIFY(target.store->command(request).value("ok").toBool());
-        request["action"] = "commit"; QVERIFY(!target.store->command(request).value("ok").toBool());
-        QCOMPARE(target.library->imports, 0);
+        CTEST_CHECK(target.store->command(request).value("ok").toBool());
+        request["action"] = "commit"; CTEST_CHECK(!target.store->command(request).value("ok").toBool());
+        CTEST_COMPARE(target.library->imports, 0);
         const auto outside = target.temporary.path() + "/untouched"; write(outside, "private");
         const auto cache = target.store->resourcePath(id, 0);
-        QVERIFY(QDir().mkpath(QFileInfo(cache).absolutePath())); // The fixture deliberately installs a redirected cache.
-        QVERIFY(QFile::link(outside, cache));
-        request["action"] = "read"; QVERIFY(!target.store->command(request).value("ok").toBool());
-        QFile untouched(outside); QVERIFY(untouched.open(QIODevice::ReadOnly)); QCOMPARE(untouched.readAll(), QByteArray("private"));
+        CTEST_CHECK(QDir().mkpath(QFileInfo(cache).absolutePath())); // The fixture deliberately installs a redirected cache.
+        CTEST_CHECK(QFile::link(outside, cache));
+        request["action"] = "read"; CTEST_CHECK(!target.store->command(request).value("ok").toBool());
+        QFile untouched(outside); CTEST_CHECK(untouched.open(QIODevice::ReadOnly)); CTEST_COMPARE(untouched.readAll(), QByteArray("private"));
     }
     void originalEditUpdatesOneObjectAndTrashIsExplicit() {
-        Fixture f; f.library->add("a.jpg", "first"); QVERIFY(f.store->importLibrary());
+        Fixture f; f.library->add("a.jpg", "first"); CTEST_CHECK(f.store->importLibrary());
         const auto id = f.store->catalog().first().toObject().value("id").toString();
         write(f.library->directory + "/a.jpg", "second"); f.library->snapshot.assets[0].stamp = "2";
-        QVERIFY(f.store->importLibrary()); QCOMPARE(f.store->catalog().size(), 1);
-        QCOMPARE(f.store->catalog().first().toObject().value("id").toString(), id);
-        QVERIFY(f.store->trash(id)); QCOMPARE(f.library->removals, 0);
-        QVERIFY(f.store->importLibrary()); QVERIFY(f.store->catalog().first().toObject().value("deleted").toBool());
-        QVERIFY(!f.store->hasOriginal(id));
+        CTEST_CHECK(f.store->importLibrary()); CTEST_COMPARE(f.store->catalog().size(), 1);
+        CTEST_COMPARE(f.store->catalog().first().toObject().value("id").toString(), id);
+        CTEST_CHECK(f.store->trash(id)); CTEST_COMPARE(f.library->removals, 0);
+        CTEST_CHECK(f.store->importLibrary()); CTEST_CHECK(f.store->catalog().first().toObject().value("deleted").toBool());
+        CTEST_CHECK(!f.store->hasOriginal(id));
     }
     void unavailableAssetDoesNotBlockOtherPhotos() {
         Fixture f; f.library->add("offline.jpg", "offline"); f.library->add("ready.jpg", "ready");
-        QVERIFY(QFile::remove(f.library->directory + "/offline.jpg"));
-        QVERIFY(!f.store->importLibrary()); QCOMPARE(f.store->catalog().size(), 1);
-        QCOMPARE(f.store->catalog().first().toObject().value("name").toString(), QString("ready.jpg"));
+        CTEST_CHECK(QFile::remove(f.library->directory + "/offline.jpg"));
+        CTEST_CHECK(!f.store->importLibrary()); CTEST_COMPARE(f.store->catalog().size(), 1);
+        CTEST_COMPARE(f.store->catalog().first().toObject().value("name").toString(), QString("ready.jpg"));
     }
     void mediaDatabaseReplacementDoesNotBecomeGlobalDeletion() {
         Fixture f; f.library->snapshot.revision = "first-volume";
-        f.library->add("a.jpg", "original"); QVERIFY(f.store->importLibrary());
+        f.library->add("a.jpg", "original"); CTEST_CHECK(f.store->importLibrary());
         const auto records = f.store->catalog(); f.library->snapshot.assets.clear();
         f.library->snapshot.revision = "replacement-volume";
-        QVERIFY(f.store->importLibrary()); QVERIFY(f.store->importLibrary());
-        QCOMPARE(f.store->catalog(), records); QCOMPARE(f.library->removals, 0);
+        CTEST_CHECK(f.store->importLibrary()); CTEST_CHECK(f.store->importLibrary());
+        CTEST_COMPARE(f.store->catalog(), records); CTEST_COMPARE(f.library->removals, 0);
     }
     void anotherTransferKeepsItsOriginalLease() {
-        Fixture f; f.library->add("a.jpg", "original"); QVERIFY(f.store->importLibrary());
+        Fixture f; f.library->add("a.jpg", "original"); CTEST_CHECK(f.store->importLibrary());
         const auto id = f.store->catalog().first().toObject().value("id").toString();
         const auto a = QUuid::createUuid().toString(), b = QUuid::createUuid().toString();
         auto request = QJsonObject{{"id", id}, {"action", "prepare"}, {"lease", a}};
-        QVERIFY(f.store->command(request).value("ok").toBool());
-        request["lease"] = b; QVERIFY(f.store->command(request).value("ok").toBool());
+        CTEST_CHECK(f.store->command(request).value("ok").toBool());
+        request["lease"] = b; CTEST_CHECK(f.store->command(request).value("ok").toBool());
         request["action"] = "release"; request["lease"] = a;
-        QVERIFY(f.store->command(request).value("ok").toBool());
-        QVERIFY(QFile::exists(f.store->resourcePath(id, 0)));
+        CTEST_CHECK(f.store->command(request).value("ok").toBool());
+        CTEST_CHECK(QFile::exists(f.store->resourcePath(id, 0)));
         request["action"] = "read"; request["lease"] = b; request["resource"] = 0; request["offset"] = "0";
-        QVERIFY(f.store->command(request).value("ok").toBool());
-        request["action"] = "release"; QVERIFY(f.store->command(request).value("ok").toBool());
-        QVERIFY(!QFile::exists(f.store->resourcePath(id, 0)));
+        CTEST_CHECK(f.store->command(request).value("ok").toBool());
+        request["action"] = "release"; CTEST_CHECK(f.store->command(request).value("ok").toBool());
+        CTEST_CHECK(!QFile::exists(f.store->resourcePath(id, 0)));
     }
     void expiredViewingCopiesAreRemovedWithoutTouchingNativeOriginals() {
-        Fixture f; f.library->add("a.jpg", "original"); QVERIFY(f.store->importLibrary());
+        Fixture f; f.library->add("a.jpg", "original"); CTEST_CHECK(f.store->importLibrary());
         const auto id = f.store->catalog().first().toObject().value("id").toString();
-        const auto path = f.store->originalForViewing(id); QVERIFY(!path.isEmpty());
-        QFile copy(path); QVERIFY(copy.open(QIODevice::ReadWrite));
-        QVERIFY(copy.setFileTime(QDateTime::currentDateTimeUtc().addDays(-2), QFileDevice::FileModificationTime)); copy.close();
-        QVERIFY(f.store->importLibrary()); QVERIFY(!QFile::exists(path));
-        QFile original(f.library->directory + "/a.jpg"); QVERIFY(original.open(QIODevice::ReadOnly)); QCOMPARE(original.readAll(), QByteArray("original"));
+        const auto path = f.store->originalForViewing(id); CTEST_CHECK(!path.isEmpty());
+        QFile copy(path); CTEST_CHECK(copy.open(QIODevice::ReadWrite));
+        CTEST_CHECK(copy.setFileTime(QDateTime::currentDateTimeUtc().addDays(-2), QFileDevice::FileModificationTime)); copy.close();
+        CTEST_CHECK(f.store->importLibrary()); CTEST_CHECK(!QFile::exists(path));
+        QFile original(f.library->directory + "/a.jpg"); CTEST_CHECK(original.open(QIODevice::ReadOnly)); CTEST_COMPARE(original.readAll(), QByteArray("original"));
     }
     void unchangedRefreshDoesNotStartAnotherFileSync() {
         Fixture f; f.library->add("a.jpg", "original");
         PhotoController controller({}, nullptr, f.library);
-        QSignalSpy contents(&controller, &PhotoController::contentsChanged);
-        QSignalSpy entries(&controller, &PhotoController::entriesChanged);
+        photo_test::SignalCounter contents(&controller, &PhotoController::contentsChanged);
+        photo_test::SignalCounter entries(&controller, &PhotoController::entriesChanged);
         controller.configure(f.temporary.path() + "/drive.societycontainer", true);
-        QTRY_VERIFY_WITH_TIMEOUT(!controller.busy(), 5000);
-        QCOMPARE(contents.count(), 0); QVERIFY(controller.entries().isEmpty());
-        controller.connectLibrary(); QTRY_VERIFY_WITH_TIMEOUT(!controller.busy(), 5000);
-        QCOMPARE(contents.count(), 1); QVERIFY(entries.count() >= 1);
+        CTEST_WAIT_VERIFY(!controller.busy(), 5000);
+        CTEST_COMPARE(contents.count(), 0); CTEST_CHECK(controller.entries().isEmpty());
+        controller.connectLibrary(); CTEST_WAIT_VERIFY(!controller.busy(), 5000);
+        CTEST_COMPARE(contents.count(), 1); CTEST_CHECK(entries.count() >= 1);
         const auto initialUpdates = entries.count();
-        controller.refresh(); QTRY_VERIFY_WITH_TIMEOUT(!controller.busy(), 5000);
-        QCOMPARE(contents.count(), 1); QCOMPARE(entries.count(), initialUpdates);
+        controller.refresh(); CTEST_WAIT_VERIFY(!controller.busy(), 5000);
+        CTEST_COMPARE(contents.count(), 1); CTEST_COMPARE(entries.count(), initialUpdates);
     }
     void partialNativeImportCannotReplaceACompleteAlias() {
         Fixture f; f.library->add("still.jpg", "still"); f.library->add("motion.mov", "motion", "video");
         f.library->snapshot.assets[0].resources.append({"motion.mov", "motion.mov", "pairedVideo"});
-        f.library->snapshot.assets.removeLast(); QVERIFY(f.store->importLibrary());
+        f.library->snapshot.assets.removeLast(); CTEST_CHECK(f.store->importLibrary());
         const auto record = f.store->catalog().first().toObject(); const auto id = record.value("id").toString();
         auto &asset = f.library->snapshot.assets[0]; asset.resources.removeLast(); asset.stamp = "partial";
         asset.resources[0].name = importedResourceName(id, 0, "still.jpg");
-        QVERIFY(!f.store->importLibrary()); QCOMPARE(f.store->catalog().first().toObject(), record);
-        QVERIFY(!f.store->hasOriginal(id));
+        CTEST_CHECK(!f.store->importLibrary()); CTEST_COMPARE(f.store->catalog().first().toObject(), record);
+        CTEST_CHECK(!f.store->hasOriginal(id));
     }
     void remoteResourceVersionIsNotOverwrittenByAnUnchangedNativeCopy() {
-        Fixture f; f.library->add("a.jpg", "first"); QVERIFY(f.store->importLibrary());
+        Fixture f; f.library->add("a.jpg", "first"); CTEST_CHECK(f.store->importLibrary());
         auto record = f.store->catalog().first().toObject(); const auto id = record.value("id").toString();
         auto resource = record.value("resources").toArray().first().toObject();
         resource["hash"] = QString(64, 'a'); record["resources"] = QJsonArray{resource};
         write(f.photos() + '/' + id + ".societyphoto", QJsonDocument(record).toJson());
-        QVERIFY(f.store->importLibrary()); QCOMPARE(f.store->catalog().first().toObject(), record);
-        QVERIFY(!f.store->hasOriginal(id));
+        CTEST_CHECK(f.store->importLibrary()); CTEST_COMPARE(f.store->catalog().first().toObject(), record);
+        CTEST_CHECK(!f.store->hasOriginal(id));
     }
     void completedRequestCacheDoesNotStopLongTransfers() {
-        Fixture f; f.library->add("a.jpg", "original"); QVERIFY(f.store->importLibrary());
+        Fixture f; f.library->add("a.jpg", "original"); CTEST_CHECK(f.store->importLibrary());
         const auto record = f.store->catalog().first().toObject();
         PhotoController controller({}, nullptr, f.library);
         controller.configure(f.temporary.path() + "/drive.societycontainer", true, {"peer"});
-        QTRY_VERIFY_WITH_TIMEOUT(!controller.busy(), 5000);
+        CTEST_WAIT_VERIFY(!controller.busy(), 5000);
         for (int i = 0; i < 80; ++i) {
             const QJsonObject request{{"op", "society.photos"}, {"container", f.store->containerId()},
                 {"ticket", QUuid::createUuid().toString()}, {"action", "available"}, {"id", record.value("id")}};
             QJsonObject reply;
-            QTRY_VERIFY_WITH_TIMEOUT(!(reply = controller.handle("peer", request)).value("pending").toBool(), 5000);
-            QVERIFY2(reply.value("ok").toBool(), qPrintable(reply.value("error").toString()));
+            CTEST_WAIT_VERIFY(!(reply = controller.handle("peer", request)).value("pending").toBool(), 5000);
+            CTEST_CHECK_MESSAGE(reply.value("ok").toBool(), qPrintable(reply.value("error").toString()));
         }
     }
     void galleryOrdersPhotosAndVideosFromOldestToNewest() {
@@ -775,23 +779,17 @@ private slots:
         f.library->snapshot.assets.last().created = epoch.addDays(1);
         PhotoController controller({}, nullptr, f.library);
         controller.configure(f.temporary.path() + "/drive.societycontainer", true);
-        QTRY_VERIFY(!controller.busy()); controller.connectLibrary();
-        QTRY_VERIFY(!controller.busy());
-        const auto entries = controller.entries(); QCOMPARE(entries.size(), 4);
-        QCOMPARE(entries.first().toMap().value("name").toString(), QString("Z-oldest.jpg"));
-        QCOMPARE(entries.last().toMap().value("name").toString(), QString("A-newest.mov"));
-        QCOMPARE(entries.last().toMap().value("media").toString(), QString("video"));
-        QCOMPARE(entries[1].toMap().value("created"), entries[2].toMap().value("created"));
-        QVERIFY(entries[1].toMap().value("galleryKey").toString() < entries[2].toMap().value("galleryKey").toString());
+        CTEST_WAIT_DEFAULT(!controller.busy()); controller.connectLibrary();
+        CTEST_WAIT_DEFAULT(!controller.busy());
+        const auto entries = controller.entries(); CTEST_COMPARE(entries.size(), 4);
+        CTEST_COMPARE(entries.first().toMap().value("name").toString(), QString("Z-oldest.jpg"));
+        CTEST_COMPARE(entries.last().toMap().value("name").toString(), QString("A-newest.mov"));
+        CTEST_COMPARE(entries.last().toMap().value("media").toString(), QString("video"));
+        CTEST_COMPARE(entries[1].toMap().value("created"), entries[2].toMap().value("created"));
+        CTEST_CHECK(entries[1].toMap().value("galleryKey").toString() < entries[2].toMap().value("galleryKey").toString());
     }
 #ifdef IIPHOTOLIBRARY_TEST_LEGACY_QML
-    void chronologicalGalleryOpensAtNewestAndPreservesBrowsing_data() {
-        QTest::addColumn<QSize>("viewport");
-        QTest::newRow("mobile") << QSize(390, 844);
-        QTest::newRow("desktop") << QSize(960, 720);
-    }
-    void chronologicalGalleryOpensAtNewestAndPreservesBrowsing() {
-        QFETCH(QSize, viewport);
+    void chronologicalGalleryOpensAtNewestAndPreservesBrowsing(const QSize &viewport, const char* dataTag) {
         Fixture f;
         const auto epoch = QDateTime::fromString("2026-01-01T00:00:00Z", Qt::ISODate);
         const auto add = [&](int index) {
@@ -800,7 +798,7 @@ private slots:
             f.library->snapshot.assets.last().created = epoch.addDays(index);
         };
         for (int i = 0; i < 40; ++i) add(i);
-        QVERIFY(f.store->importLibrary());
+        CTEST_CHECK(f.store->importLibrary());
         PhotoController controller({}, nullptr, f.library);
         QQmlApplicationEngine engine; engine.addImportPath(QStringLiteral(IIPHOTOLIBRARY_QML_IMPORT_PATH)); engine.addImportPath(QStringLiteral(IIPHOTOLIBRARY_LVRS_QML_IMPORT_PATH));
         QStringList warnings;
@@ -810,21 +808,22 @@ private slots:
         engine.setInitialProperties({{"controller", QVariant::fromValue(&controller)},
             {"width", viewport.width()}, {"height", viewport.height()}});
         engine.load(QUrl::fromLocalFile(QStringLiteral(IIPHOTOLIBRARY_QML_FILE)));
-        QVERIFY2(!engine.rootObjects().isEmpty(), qPrintable(warnings.join('\n')));
-        auto *window = qobject_cast<QQuickWindow *>(engine.rootObjects().first()); QVERIFY(window);
-        auto *view = visualItem(window->contentItem(), "photosView"); QVERIFY(view);
-        auto *grid = visualItem(view, "photoGrid"); QVERIFY(grid);
+        CTEST_CHECK_MESSAGE(!engine.rootObjects().isEmpty(), qPrintable(warnings.join('\n')));
+        auto *window = qobject_cast<QQuickWindow *>(engine.rootObjects().first()); CTEST_CHECK(window);
+        auto *view = visualItem(window->contentItem(), "photosView"); CTEST_CHECK(view);
+        auto *grid = visualItem(view, "photoGrid"); CTEST_CHECK(grid);
         view->setProperty("touchNavigation", viewport.width() < 600);
-        QCOMPARE(grid->property("count").toInt(), 0);
+        CTEST_COMPARE(grid->property("count").toInt(), 0);
 
         // Data arrives after the empty view is already laid out.
         controller.configure(f.temporary.path() + "/drive.societycontainer", true);
-        QTRY_COMPARE(grid->property("count").toInt(), 40);
-        auto *importLibrary = visualItem(view, "connectPhotoLibrary"); QVERIFY(importLibrary);
-        QVERIFY(importLibrary->isVisible());
-        QVERIFY(grid->property("cacheBuffer").toReal() >= grid->height() * 2);
-        QTRY_VERIFY(grid->property("atYEnd").toBool());
-        QVERIFY(grid->property("contentY").toReal() > grid->property("originY").toReal());
+        CTEST_WAIT_COMPARE(grid->property("count").toInt(), 40);
+        auto *importLibrary = visualItem(view, "connectPhotoLibrary"); CTEST_CHECK(importLibrary);
+        CTEST_CHECK(importLibrary->isVisible());
+        CTEST_CHECK(grid->property("cacheBuffer").toReal() >= grid->height() * 2);
+        // atYEnd can still describe the empty layout immediately after count changes.
+        CTEST_WAIT_DEFAULT(grid->property("atYEnd").toBool()
+            && grid->property("contentY").toReal() > grid->property("originY").toReal());
         const auto settled = [&] {
             const auto pending = view->property("pendingViewState");
             return !controller.busy() && !view->property("initialPositionPending").toBool()
@@ -832,66 +831,66 @@ private slots:
         };
         // This is a state assertion, not a five-second storage benchmark.
         // External-volume fixture I/O exceeded 5 s while the UI was already ready.
-        QTRY_VERIFY_WITH_TIMEOUT(settled(), 15000);
-        QTest::qWait(100);
-        QVERIFY(window->grabWindow().save(f.temporary.filePath(QStringLiteral("chronological-%1.png")
-            .arg(QString::fromLatin1(QTest::currentDataTag())))));
+        CTEST_WAIT_VERIFY(settled(), 15000);
+        photo_test::processFor(100);
+        CTEST_CHECK(window->grabWindow().save(f.temporary.filePath(QStringLiteral("chronological-%1.png")
+            .arg(QString::fromLatin1(dataTag)))));
 
         // Checking unchanged content does not replace rows or move the camera.
         const auto endScroll = grid->property("contentY").toReal();
-        QSignalSpy entriesChanged(&controller, &PhotoController::entriesChanged);
-        controller.refresh(); QTRY_VERIFY_WITH_TIMEOUT(settled(), 15000);
-        QCOMPARE(entriesChanged.size(), 0);
-        QCOMPARE(grid->property("contentY").toReal(), endScroll);
+        photo_test::SignalCounter entriesChanged(&controller, &PhotoController::entriesChanged);
+        controller.refresh(); CTEST_WAIT_VERIFY(settled(), 15000);
+        CTEST_COMPARE(entriesChanged.size(), 0);
+        CTEST_COMPARE(grid->property("contentY").toReal(), endScroll);
         // New arrivals preserve the camera even when it was at the end.
         for (int i = 40; i < 43; ++i) add(i);
-        controller.connectLibrary(); QTRY_COMPARE(grid->property("count").toInt(), 43); QTRY_VERIFY_WITH_TIMEOUT(settled(), 15000);
-        QTRY_COMPARE(grid->property("contentY").toReal(), endScroll);
+        controller.connectLibrary(); CTEST_WAIT_COMPARE(grid->property("count").toInt(), 43); CTEST_WAIT_VERIFY(settled(), 15000);
+        CTEST_WAIT_COMPARE(grid->property("contentY").toReal(), endScroll);
         grid->setProperty("contentY", grid->property("originY").toReal() + grid->property("cellHeight").toReal());
-        QTest::qWait(100);
+        photo_test::processFor(100);
         const auto scroll = grid->property("contentY").toReal();
-        QVERIFY(scroll > grid->property("originY").toReal() && !grid->property("atYEnd").toBool());
+        CTEST_CHECK(scroll > grid->property("originY").toReal() && !grid->property("atYEnd").toBool());
         const auto selected = controller.entries()[8].toMap().value("id").toString();
         view->setProperty("selectedId", selected);
         for (int i = 43; i < 50; ++i) add(i);
-        controller.connectLibrary(); QTRY_COMPARE(grid->property("count").toInt(), 50); QTRY_VERIFY_WITH_TIMEOUT(settled(), 15000);
-        QCOMPARE(grid->property("contentY").toReal(), scroll);
-        QCOMPARE(view->property("selectedId").toString(), selected);
+        controller.connectLibrary(); CTEST_WAIT_COMPARE(grid->property("count").toInt(), 50); CTEST_WAIT_VERIFY(settled(), 15000);
+        CTEST_COMPARE(grid->property("contentY").toReal(), scroll);
+        CTEST_COMPARE(view->property("selectedId").toString(), selected);
 
         // A changed capture date can reorder the same number of entries.
         const auto movedId = controller.entries().first().toMap().value("id").toString();
-        QFile alias(f.photos() + '/' + movedId + ".societyphoto"); QVERIFY(alias.open(QIODevice::ReadOnly));
+        QFile alias(f.photos() + '/' + movedId + ".societyphoto"); CTEST_CHECK(alias.open(QIODevice::ReadOnly));
         auto record = QJsonDocument::fromJson(alias.readAll()).object(); alias.close();
         record["created"] = epoch.addDays(100).toString(Qt::ISODateWithMs);
         write(alias.fileName(), QJsonDocument(record).toJson());
-        controller.refresh(); QTRY_VERIFY_WITH_TIMEOUT(settled(), 15000);
-        QCOMPARE(controller.entries().last().toMap().value("id").toString(), movedId);
-        QCOMPARE(grid->property("contentY").toReal(), scroll);
-        QCOMPARE(view->property("selectedId").toString(), selected);
+        controller.refresh(); CTEST_WAIT_VERIFY(settled(), 15000);
+        CTEST_COMPARE(controller.entries().last().toMap().value("id").toString(), movedId);
+        CTEST_COMPARE(grid->property("contentY").toReal(), scroll);
+        CTEST_COMPARE(view->property("selectedId").toString(), selected);
 
         // Storage keeps the view alive: re-entry still starts at the newest.
         view->setVisible(false); view->setVisible(true);
-        QTRY_VERIFY_WITH_TIMEOUT(settled(), 15000); QTRY_VERIFY(grid->property("atYEnd").toBool());
+        CTEST_WAIT_VERIFY(settled(), 15000); CTEST_WAIT_DEFAULT(grid->property("atYEnd").toBool());
         view->setVisible(false);
-        controller.configure({}, false); QTRY_COMPARE(grid->property("count").toInt(), 0);
+        controller.configure({}, false); CTEST_WAIT_COMPARE(grid->property("count").toInt(), 0);
         controller.configure(f.temporary.path() + "/drive.societycontainer", true);
-        QTRY_COMPARE(grid->property("count").toInt(), 50); QTRY_VERIFY(!controller.busy());
+        CTEST_WAIT_COMPARE(grid->property("count").toInt(), 50); CTEST_WAIT_DEFAULT(!controller.busy());
         view->setVisible(true);
-        QTRY_VERIFY_WITH_TIMEOUT(settled(), 15000); QTRY_VERIFY(grid->property("atYEnd").toBool());
-        QCOMPARE(view->property("selectedId").toString(), QString());
-        QVERIFY2(warnings.isEmpty(), qPrintable(warnings.join('\n')));
+        CTEST_WAIT_VERIFY(settled(), 15000); CTEST_WAIT_DEFAULT(grid->property("atYEnd").toBool());
+        CTEST_COMPARE(view->property("selectedId").toString(), QString());
+        CTEST_CHECK_MESSAGE(warnings.isEmpty(), qPrintable(warnings.join('\n')));
         window->close();
     }
     void galleryRendersAndLatePreviewKeepsBrowsingPosition() {
         Fixture f;
         for (int i = 0; i < 40; ++i) f.library->add(QString("Photo %1.jpg").arg(i), QByteArray("original-") + QByteArray::number(i));
-        QVERIFY(f.store->importLibrary()); const auto records = f.store->catalog();
+        CTEST_CHECK(f.store->importLibrary()); const auto records = f.store->catalog();
         const auto id = records.first().toObject().value("id").toString();
-        QFile image(f.store->previewPath(id)); QVERIFY(image.open(QIODevice::ReadOnly)); const auto preview = image.readAll(); image.close();
-        QVERIFY(image.remove()); f.library->permission = Access::Denied;
+        QFile image(f.store->previewPath(id)); CTEST_CHECK(image.open(QIODevice::ReadOnly)); const auto preview = image.readAll(); image.close();
+        CTEST_CHECK(image.remove()); f.library->permission = Access::Denied;
         PhotoController controller({}, nullptr, f.library);
         controller.configure(f.temporary.path() + "/drive.societycontainer", true);
-        QTRY_VERIFY_WITH_TIMEOUT(!controller.busy(), 5000);
+        CTEST_WAIT_VERIFY(!controller.busy(), 5000);
         QQmlApplicationEngine engine; engine.addImportPath(QStringLiteral(IIPHOTOLIBRARY_QML_IMPORT_PATH)); engine.addImportPath(QStringLiteral(IIPHOTOLIBRARY_LVRS_QML_IMPORT_PATH));
         QStringList warnings;
         connect(&engine, &QQmlEngine::warnings, this, [&warnings](const QList<QQmlError> &errors) {
@@ -899,79 +898,79 @@ private slots:
         });
         engine.setInitialProperties({{"controller", QVariant::fromValue(&controller)}});
         engine.load(QUrl::fromLocalFile(QStringLiteral(IIPHOTOLIBRARY_QML_FILE)));
-        QVERIFY2(!engine.rootObjects().isEmpty(), qPrintable(warnings.join('\n')));
-        auto *window = qobject_cast<QQuickWindow *>(engine.rootObjects().first()); QVERIFY(window);
-        auto *view = visualItem(window->contentItem(), "photosView"); QVERIFY(view);
-        auto *grid = visualItem(view, "photoGrid"); QVERIFY(grid);
-        QTRY_COMPARE(grid->property("count").toInt(), 40);
-        QVERIFY(grid->property("cacheBuffer").toReal() >= grid->height() * 2);
-        QTRY_VERIFY(!view->property("initialPositionPending").toBool());
-        QVERIFY(QMetaObject::invokeMethod(grid, "positionViewAtBeginning")); QTest::qWait(100);
+        CTEST_CHECK_MESSAGE(!engine.rootObjects().isEmpty(), qPrintable(warnings.join('\n')));
+        auto *window = qobject_cast<QQuickWindow *>(engine.rootObjects().first()); CTEST_CHECK(window);
+        auto *view = visualItem(window->contentItem(), "photosView"); CTEST_CHECK(view);
+        auto *grid = visualItem(view, "photoGrid"); CTEST_CHECK(grid);
+        CTEST_WAIT_COMPARE(grid->property("count").toInt(), 40);
+        CTEST_CHECK(grid->property("cacheBuffer").toReal() >= grid->height() * 2);
+        CTEST_WAIT_DEFAULT(!view->property("initialPositionPending").toBool());
+        CTEST_CHECK(QMetaObject::invokeMethod(grid, "positionViewAtBeginning")); photo_test::processFor(100);
         view->setProperty("selectedId", id);
-        QSignalSpy contentChanges(&controller, &PhotoController::contentsChanged);
-        QSignalSpy resets(controller.galleryModel(), &QAbstractItemModel::modelReset);
-        QSignalSpy updates(controller.galleryModel(), &QAbstractItemModel::dataChanged);
+        photo_test::SignalCounter contentChanges(&controller, &PhotoController::contentsChanged);
+        photo_test::SignalCounter resets(controller.galleryModel(), &QAbstractItemModel::modelReset);
+        photo_test::SignalCounter updates(controller.galleryModel(), &QAbstractItemModel::dataChanged);
         write(f.store->previewPath(id), preview);
-        controller.refresh(); QTRY_VERIFY_WITH_TIMEOUT(!controller.busy(), 5000);
+        controller.refresh(); CTEST_WAIT_VERIFY(!controller.busy(), 5000);
         QQuickItem *loaded = nullptr;
-        QTRY_VERIFY((loaded = visualItem(grid, "photoPreview-" + id)) != nullptr);
-        QTRY_COMPARE(loaded->property("status").toInt(), 1); // Image.Ready
-        QVERIFY(loaded->property("cache").toBool());
-        QCOMPARE(contentChanges.count(), 0);
-        QCOMPARE(resets.count(), 0); QVERIFY(updates.count() > 0);
-        grid->setProperty("contentY", 250.0); QTest::qWait(100);
+        CTEST_WAIT_DEFAULT((loaded = visualItem(grid, "photoPreview-" + id)) != nullptr);
+        CTEST_WAIT_COMPARE(loaded->property("status").toInt(), 1); // Image.Ready
+        CTEST_CHECK(loaded->property("cache").toBool());
+        CTEST_COMPARE(contentChanges.count(), 0);
+        CTEST_COMPARE(resets.count(), 0); CTEST_CHECK(updates.count() > 0);
+        grid->setProperty("contentY", 250.0); photo_test::processFor(100);
         const auto scroll = grid->property("contentY").toReal();
-        controller.refresh(); QTRY_VERIFY_WITH_TIMEOUT(!controller.busy(), 5000);
-        QCOMPARE(view->property("selectedId").toString(), id);
-        QCOMPARE(grid->property("contentY").toReal(), scroll);
-        auto *info = view->findChild<QObject *>("galleryInfo"); QVERIFY(info);
-        QVERIFY(!info->property("visible").toBool());
-        grid->setProperty("contentY", grid->property("originY")); QTest::qWait(100);
-        auto *tile = visualItem(grid, "galleryTile"); QVERIFY(tile);
-        QCOMPARE(tile->width(), tile->height());
-        QCOMPARE(grid->property("cellWidth").toReal() - tile->width(), 2.0);
-        QCOMPARE(tile->property("text").toString(), QString());
-        auto *touchDevice = QTest::createTouchDevice(QInputDevice::DeviceType::TouchScreen);
+        controller.refresh(); CTEST_WAIT_VERIFY(!controller.busy(), 5000);
+        CTEST_COMPARE(view->property("selectedId").toString(), id);
+        CTEST_COMPARE(grid->property("contentY").toReal(), scroll);
+        auto *info = view->findChild<QObject *>("galleryInfo"); CTEST_CHECK(info);
+        CTEST_CHECK(!info->property("visible").toBool());
+        grid->setProperty("contentY", grid->property("originY")); photo_test::processFor(100);
+        auto *tile = visualItem(grid, "galleryTile"); CTEST_CHECK(tile);
+        CTEST_COMPARE(tile->width(), tile->height());
+        CTEST_COMPARE(grid->property("cellWidth").toReal() - tile->width(), 2.0);
+        CTEST_COMPARE(tile->property("text").toString(), QString());
+        auto *touchDevice = photo_test::createTouchDevice(QInputDevice::DeviceType::TouchScreen);
         const auto center = tile->mapToScene(QPointF(tile->width()/2, tile->height()/2)).toPoint();
-        QTest::touchEvent(window, touchDevice).press(0, center).commit();
-        QTest::touchEvent(window, touchDevice).release(0, center).commit();
-        QTRY_VERIFY(info->property("visible").toBool());
-        QCOMPARE(info->property("fileName").toString(), tile->property("name").toString());
-        QTest::qWait(250);
-        QVERIFY(window->grabWindow().save(f.temporary.filePath(QStringLiteral("information-desktop.png"))));
-        QVERIFY(QMetaObject::invokeMethod(info, "close")); QTRY_VERIFY(!info->property("visible").toBool()); QTest::qWait(250);
+        photo_test::TouchSequence(window, touchDevice).press(0, center).commit();
+        photo_test::TouchSequence(window, touchDevice).release(0, center).commit();
+        CTEST_WAIT_DEFAULT(info->property("visible").toBool());
+        CTEST_COMPARE(info->property("fileName").toString(), tile->property("name").toString());
+        photo_test::processFor(250);
+        CTEST_CHECK(window->grabWindow().save(f.temporary.filePath(QStringLiteral("information-desktop.png"))));
+        CTEST_CHECK(QMetaObject::invokeMethod(info, "close")); CTEST_WAIT_DEFAULT(!info->property("visible").toBool()); photo_test::processFor(250);
         const auto beforePinch = grid->property("cellWidth").toReal();
         const auto middle = grid->mapToScene(QPointF(grid->width()/2, grid->height()/2)).toPoint();
-        QTest::touchEvent(window, touchDevice).press(0, middle-QPoint(40,0)).press(1, middle+QPoint(40,0)).commit();
+        photo_test::TouchSequence(window, touchDevice).press(0, middle-QPoint(40,0)).press(1, middle+QPoint(40,0)).commit();
         for (int distance = 50; distance <= 120; distance += 10) {
-            QTest::touchEvent(window, touchDevice).move(0, middle-QPoint(distance,0)).move(1, middle+QPoint(distance,0)).commit(); QTest::qWait(20);
+            photo_test::TouchSequence(window, touchDevice).move(0, middle-QPoint(distance,0)).move(1, middle+QPoint(distance,0)).commit(); photo_test::processFor(20);
         }
-        QTest::touchEvent(window, touchDevice).release(0, middle-QPoint(120,0)).release(1, middle+QPoint(120,0)).commit();
-        QCOMPARE(grid->property("cellWidth").toReal(), beforePinch);
-        QCOMPARE(grid->property("cellWidth"), grid->property("cellHeight"));
-        QVERIFY(!info->property("visible").toBool());
+        photo_test::TouchSequence(window, touchDevice).release(0, middle-QPoint(120,0)).release(1, middle+QPoint(120,0)).commit();
+        CTEST_COMPARE(grid->property("cellWidth").toReal(), beforePinch);
+        CTEST_COMPARE(grid->property("cellWidth"), grid->property("cellHeight"));
+        CTEST_CHECK(!info->property("visible").toBool());
         const auto enlarged = grid->property("cellWidth").toReal();
-        QTest::touchEvent(window, touchDevice).press(0, middle-QPoint(120,0)).press(1, middle+QPoint(120,0)).commit();
+        photo_test::TouchSequence(window, touchDevice).press(0, middle-QPoint(120,0)).press(1, middle+QPoint(120,0)).commit();
         for (int distance = 110; distance >= 40; distance -= 10) {
-            QTest::touchEvent(window, touchDevice).move(0, middle-QPoint(distance,0)).move(1, middle+QPoint(distance,0)).commit(); QTest::qWait(20);
+            photo_test::TouchSequence(window, touchDevice).move(0, middle-QPoint(distance,0)).move(1, middle+QPoint(distance,0)).commit(); photo_test::processFor(20);
         }
-        QTest::touchEvent(window, touchDevice).release(0, middle-QPoint(40,0)).release(1, middle+QPoint(40,0)).commit();
-        QCOMPARE(grid->property("cellWidth").toReal(), enlarged);
-        QVERIFY(!info->property("visible").toBool());
-        auto *zoom = view->findChild<QObject *>("galleryZoom"); QVERIFY(zoom);
+        photo_test::TouchSequence(window, touchDevice).release(0, middle-QPoint(40,0)).release(1, middle+QPoint(40,0)).commit();
+        CTEST_COMPARE(grid->property("cellWidth").toReal(), enlarged);
+        CTEST_CHECK(!info->property("visible").toBool());
+        auto *zoom = view->findChild<QObject *>("galleryZoom"); CTEST_CHECK(zoom);
         zoom->setProperty("thumbnailSize", 128.0);
         view->setProperty("selectedId", id);
-        QTest::qWait(100); QVERIFY(window->grabWindow().save(f.temporary.filePath(QStringLiteral("gallery-desktop.png"))));
-        window->resize(390, 844); QTest::qWait(100);
-        const auto *add = visualItem(view, "addPhotos"); QVERIFY(add);
-        QVERIFY(add->mapToItem(view, QPointF(add->width(), 0)).x() <= view->width());
-        QVERIFY(window->grabWindow().save(f.temporary.filePath(QStringLiteral("gallery-mobile.png"))));
+        photo_test::processFor(100); CTEST_CHECK(window->grabWindow().save(f.temporary.filePath(QStringLiteral("gallery-desktop.png"))));
+        window->resize(390, 844); photo_test::processFor(100);
+        const auto *add = visualItem(view, "addPhotos"); CTEST_CHECK(add);
+        CTEST_CHECK(add->mapToItem(view, QPointF(add->width(), 0)).x() <= view->width());
+        CTEST_CHECK(window->grabWindow().save(f.temporary.filePath(QStringLiteral("gallery-mobile.png"))));
         auto deleted = records.first().toObject(); deleted["deleted"] = true;
         write(f.photos() + '/' + id + ".societyphoto", QJsonDocument(deleted).toJson());
-        controller.refresh(); QTRY_VERIFY_WITH_TIMEOUT(!controller.busy(), 5000);
-        QTRY_COMPARE(grid->property("count").toInt(), 39);
-        QCOMPARE(view->property("selectedId").toString(), QString());
-        QVERIFY2(warnings.isEmpty(), qPrintable(warnings.join('\n')));
+        controller.refresh(); CTEST_WAIT_VERIFY(!controller.busy(), 5000);
+        CTEST_WAIT_COMPARE(grid->property("count").toInt(), 39);
+        CTEST_COMPARE(view->property("selectedId").toString(), QString());
+        CTEST_CHECK_MESSAGE(warnings.isEmpty(), qPrintable(warnings.join('\n')));
         window->close();
     }
 #endif
@@ -979,11 +978,11 @@ private slots:
         Fixture host, client;
         const auto hostDrive = iiSocietyContainer::SocietyDrive::open(host.temporary.path() + "/drive.societycontainer");
         const auto clientDrive = iiSocietyContainer::SocietyDrive::open(client.temporary.path() + "/drive.societycontainer");
-        QVERIFY(iiSocietyContainer::SocietyDrive::adoptReplicaIdentity(clientDrive->rootPath(), clientDrive->identifier(), hostDrive->identifier()));
-        QVERIFY(iiSocietyContainer::SocietyDrive::completeReplica(clientDrive->rootPath(), hostDrive->identifier()));
-        client.store = std::make_unique<PhotoStore>(clientDrive->rootPath(), client.library); QVERIFY(client.store->open());
+        CTEST_CHECK(iiSocietyContainer::SocietyDrive::adoptReplicaIdentity(clientDrive->rootPath(), clientDrive->identifier(), hostDrive->identifier()));
+        CTEST_CHECK(iiSocietyContainer::SocietyDrive::completeReplica(clientDrive->rootPath(), hostDrive->identifier()));
+        client.store = std::make_unique<PhotoStore>(clientDrive->rootPath(), client.library); CTEST_CHECK(client.store->open());
         host.library->add("host.jpg", QByteArray(530000, 'h')); client.library->add("phone.mp4", QByteArray(720000, 'p'), "video");
-        QVERIFY(host.store->importLibrary()); QVERIFY(client.store->importLibrary());
+        CTEST_CHECK(host.store->importLibrary()); CTEST_CHECK(client.store->importLibrary());
         const auto hostRecord = host.store->catalog().first().toObject(), clientRecord = client.store->catalog().first().toObject();
         // Portable aliases use the ordinary container sync path. Originals use
         // the authenticated, resumable photo channel tested below.
@@ -1001,95 +1000,97 @@ private slots:
         }, nullptr, client.library);
         clientController = &sender;
         receiver.configure(hostDrive->rootPath(), true, {"client"});
-        QTRY_VERIFY_WITH_TIMEOUT(!receiver.busy(), 10000);
+        CTEST_WAIT_VERIFY(!receiver.busy(), 10000);
         const QJsonObject packet{{"op", "society.photos"}, {"container", hostDrive->identifier()},
             {"ticket", QUuid::createUuid().toString()}, {"action", "available"}, {"id", hostRecord.value("id")}};
-        QVERIFY(!receiver.handle("stranger", packet).value("ok").toBool());
+        CTEST_CHECK(!receiver.handle("stranger", packet).value("ok").toBool());
         int idleTransitions = 0;
         connect(&sender, &PhotoController::changed, this, [&] {
             if (!sender.busy()) ++idleTransitions;
         });
         sender.configure(clientDrive->rootPath(), true, {"host"}, {"host"});
-        QTRY_VERIFY_WITH_TIMEOUT(QFileInfo::exists(host.store->resourcePath(clientRecord.value("id").toString(), 0)), 20000);
-        QCOMPARE(host.library->imports.load(), 0);
-        QTRY_VERIFY_WITH_TIMEOUT(!sender.busy(), 10000);
+        CTEST_WAIT_VERIFY(QFileInfo::exists(host.store->resourcePath(clientRecord.value("id").toString(), 0)), 20000);
+        CTEST_COMPARE(host.library->imports.load(), 0);
+        CTEST_WAIT_VERIFY(!sender.busy(), 10000);
         // The local catalog refresh and post-import refresh are part of the
         // same transfer. A background owner must see only the final idle edge.
-        QCOMPARE(idleTransitions, 1);
-        QCOMPARE(client.library->imports.load(), 0);
-        QVERIFY(client.store->originalForViewing(hostRecord.value("id").toString()).isEmpty());
+        CTEST_COMPARE(idleTransitions, 1);
+        CTEST_COMPARE(client.library->imports.load(), 0);
+        CTEST_CHECK(client.store->originalForViewing(hostRecord.value("id").toString()).isEmpty());
         sender.downloadPhoto(hostRecord.value("id").toString());
-        QTRY_VERIFY_WITH_TIMEOUT(!sender.busy(), 10000);
-        QVERIFY(!client.store->originalForViewing(hostRecord.value("id").toString()).isEmpty());
-        QCOMPARE(client.library->imports.load(), 0);
-        QVERIFY(client.store->importLibrary());
-        QCOMPARE(client.library->imports.load(), 0);
-        QVERIFY(requests > 10);
+        CTEST_WAIT_VERIFY(!sender.busy(), 10000);
+        CTEST_CHECK(!client.store->originalForViewing(hostRecord.value("id").toString()).isEmpty());
+        CTEST_COMPARE(client.library->imports.load(), 0);
+        CTEST_CHECK(client.store->importLibrary());
+        CTEST_COMPARE(client.library->imports.load(), 0);
+        CTEST_CHECK(requests > 10);
         receiver.configure({}, false); sender.configure({}, false);
     }
     void nativeLibrariesExchangeAliasesPreviewsAndOriginalsOverTls() {
         Fixture desktop, phone;
         desktop.library->add("desktop.jpg", QByteArray(600000, 'd'));
         phone.library->add("phone.mp4", QByteArray(800000, 'p'), "video");
-        QVERIFY(desktop.store->importLibrary());
+        CTEST_CHECK(desktop.store->importLibrary());
         const auto desktopRecord = desktop.store->catalog().first().toObject();
         iiWebServer::LanPeer host, client;
         iiSocietyHelper::Sync::Controller hosting({}), syncing([&](const auto &peer, const auto &packet) { return client.request(peer, packet); });
         PhotoController hostPhotos({}, nullptr, desktop.library);
         PhotoController phonePhotos([&](const auto &peer, const auto &packet) { return client.request(peer, packet); }, nullptr, phone.library);
         const auto files = iiSocietyHelper::Sync::filesHandler(desktop.temporary.path() + "/drive.societycontainer");
+        bool transportValid = true;
         connect(&client, &iiWebServer::LanPeer::completed, this, [&](const auto &id, const auto &result, const auto &transport) {
-            QCOMPARE(transport, QString("local")); syncing.receive(id, result); phonePhotos.receive(id, result);
+            transportValid &= transport == QString("local"); syncing.receive(id, result); phonePhotos.receive(id, result);
         });
-        QVERIFY(host.startHost("desktop", "Desktop", [&](const auto &peer, const auto &packet) {
+        CTEST_CHECK(host.startHost("desktop", "Desktop", [&](const auto &peer, const auto &packet) {
             if (packet.value("op") == "society.photos") return hostPhotos.handle(peer, packet);
             return packet.value("op") == "society.sync" ? hosting.handle(peer, packet) : files(peer, packet);
         }, {"127.0.0.1"}, iiWebServer::Address::loopback()));
-        QVERIFY(client.join(host.createOffer(), "phone", "Phone")); QTRY_VERIFY2(client.connected(), qPrintable(client.errorString()));
+        CTEST_CHECK(client.join(host.createOffer(), "phone", "Phone")); CTEST_WAIT_MESSAGE_DEFAULT(client.connected(), qPrintable(client.errorString()));
         hosting.open(desktop.temporary.path() + "/drive.societycontainer", QString(64, 'a'));
         syncing.open(phone.temporary.path() + "/drive.societycontainer", QString(64, 'a'));
-        QTRY_VERIFY(hosting.available() && syncing.available());
+        CTEST_WAIT_DEFAULT(hosting.available() && syncing.available());
         hosting.setPeers({"phone"}, {});
-        QSignalSpy mirrored(&syncing, &iiSocietyHelper::Sync::Controller::synchronized);
+        photo_test::SignalCounter mirrored(&syncing, &iiSocietyHelper::Sync::Controller::synchronized);
         syncing.setPeers({"desktop"}, {"desktop"});
-        QTRY_VERIFY2_WITH_TIMEOUT(!mirrored.isEmpty(), qPrintable(syncing.errorString()), 15000);
+        CTEST_WAIT_MESSAGE_TIMEOUT(!mirrored.isEmpty(), qPrintable(syncing.errorString()), 15000);
         const auto desktopId = desktopRecord.value("id").toString();
         // The host index publishes metadata in batches. The first successful
         // cycle can contain only its directories, before the alias is indexed.
-        QTRY_VERIFY_WITH_TIMEOUT(QFile::exists(phone.photos() + '/' + desktopId + ".societyphoto"), 15000);
-        phone.store = std::make_unique<PhotoStore>(phone.temporary.path() + "/drive.societycontainer", phone.library); QVERIFY(phone.store->open());
-        QVERIFY(phone.store->importLibrary());
+        CTEST_WAIT_VERIFY(QFile::exists(phone.photos() + '/' + desktopId + ".societyphoto"), 15000);
+        phone.store = std::make_unique<PhotoStore>(phone.temporary.path() + "/drive.societycontainer", phone.library); CTEST_CHECK(phone.store->open());
+        CTEST_CHECK(phone.store->importLibrary());
         QJsonObject phoneRecord;
         for (const auto &value : phone.store->catalog())
             if (value.toObject().value("id") != desktopId) phoneRecord = value.toObject();
-        QVERIFY(!phoneRecord.isEmpty());
-        QTRY_COMPARE_WITH_TIMEOUT(PhotoStore::digestFile(phone.store->previewPath(desktopId)), PhotoStore::digestFile(desktop.store->previewPath(desktopId)), 15000);
+        CTEST_CHECK(!phoneRecord.isEmpty());
+        CTEST_WAIT_COMPARE_TIMEOUT(PhotoStore::digestFile(phone.store->previewPath(desktopId)), PhotoStore::digestFile(desktop.store->previewPath(desktopId)), 15000);
         connect(&hostPhotos, &PhotoController::contentsChanged, &hosting, &iiSocietyHelper::Sync::Controller::synchronizeNow);
         connect(&phonePhotos, &PhotoController::contentsChanged, &syncing, &iiSocietyHelper::Sync::Controller::synchronizeNow);
         connect(&syncing, &iiSocietyHelper::Sync::Controller::synchronized, &phonePhotos, &PhotoController::refresh);
         hostPhotos.configure(desktop.temporary.path() + "/drive.societycontainer", true, {"phone"});
-        QTRY_VERIFY_WITH_TIMEOUT(!hostPhotos.busy(), 5000);
+        CTEST_WAIT_VERIFY(!hostPhotos.busy(), 5000);
         phonePhotos.configure(phone.temporary.path() + "/drive.societycontainer", true, {"desktop"}, {"desktop"});
-        QTRY_VERIFY_WITH_TIMEOUT(QFileInfo::exists(desktop.store->resourcePath(phoneRecord.value("id").toString(), 0)), 20000);
-        QCOMPARE(desktop.library->imports.load(), 0);
-        QCOMPARE(phone.library->imports.load(), 0);
-        QTRY_VERIFY_WITH_TIMEOUT(!phonePhotos.busy(), 10000);
+        CTEST_WAIT_VERIFY(QFileInfo::exists(desktop.store->resourcePath(phoneRecord.value("id").toString(), 0)), 20000);
+        CTEST_COMPARE(desktop.library->imports.load(), 0);
+        CTEST_COMPARE(phone.library->imports.load(), 0);
+        CTEST_WAIT_VERIFY(!phonePhotos.busy(), 10000);
         phonePhotos.downloadPhoto(desktopId);
-        QTRY_VERIFY_WITH_TIMEOUT(QFileInfo::exists(phone.temporary.path() + "/drive.societycontainer/.society-photos/"
+        CTEST_WAIT_VERIFY(QFileInfo::exists(phone.temporary.path() + "/drive.societycontainer/.society-photos/"
             + iiSocietyContainer::SocietyDrive::open(phone.temporary.path() + "/drive.societycontainer")->identifier()
             + "/originals/" + desktopRecord.value("resources").toArray().first().toObject().value("hash").toString()), 20000);
-        QTRY_VERIFY_WITH_TIMEOUT(!phonePhotos.busy(), 10000);
-        QCOMPARE(desktop.library->exports.load() > 0, true);
-        QCOMPARE(phone.library->exports.load() > 0, true);
+        CTEST_WAIT_VERIFY(!phonePhotos.busy(), 10000);
+        CTEST_COMPARE(desktop.library->exports.load() > 0, true);
+        CTEST_COMPARE(phone.library->exports.load() > 0, true);
         phonePhotos.trashPhoto(desktopId);
-        QCOMPARE(phone.library->removals.load(), 0);
+        CTEST_COMPARE(phone.library->removals.load(), 0);
         const auto remotelyDeleted = [&] {
             QFile file(desktop.photos() + '/' + desktopId + ".societyphoto");
             return file.open(QIODevice::ReadOnly) && QJsonDocument::fromJson(file.readAll()).object().value("deleted").toBool();
         };
-        QTRY_VERIFY_WITH_TIMEOUT(remotelyDeleted(), 10000);
-        hostPhotos.refresh(); QTRY_VERIFY_WITH_TIMEOUT(!hostPhotos.busy(), 5000);
-        QCOMPARE(desktop.library->removals.load(), 0);
+        CTEST_WAIT_VERIFY(remotelyDeleted(), 10000);
+        hostPhotos.refresh(); CTEST_WAIT_VERIFY(!hostPhotos.busy(), 5000);
+        CTEST_COMPARE(desktop.library->removals.load(), 0);
+        CTEST_CHECK(transportValid);
         phonePhotos.configure({}, false); hostPhotos.configure({}, false);
         syncing.closeAndWait(); hosting.closeAndWait(); client.stop(); host.stop();
     }
@@ -1106,6 +1107,52 @@ int main(int argc, char **argv) {
 #ifdef IIPHOTOLIBRARY_TEST_LEGACY_QML
     lvrs::postApplicationBootstrap(app, options);
 #endif
-    PhotosTest test; return QTest::qExec(&test, argc, argv);
+    PhotosTest test;
+    photo_test::CTestRunner runner(argc, argv);
+    runner.run("finalShutdownDoesNotWaitForABlockedPhotoOperation", [&] { photo_test::ScopedDeferredDeletes cleanup; test.finalShutdownDoesNotWaitForABlockedPhotoOperation(); });
+    runner.run("fixtureRootIsProjectResources", [&] { photo_test::ScopedDeferredDeletes cleanup; test.fixtureRootIsProjectResources(); });
+    runner.run("defaultRefreshIgnoresUnselectedNativePhotosAndPreservesContainerFiles", [&] { photo_test::ScopedDeferredDeletes cleanup; test.defaultRefreshIgnoresUnselectedNativePhotosAndPreservesContainerFiles(); });
+    runner.run("explicitLibraryImportDoesNotAdoptLaterNativePhotosDuringRefresh", [&] { photo_test::ScopedDeferredDeletes cleanup; test.explicitLibraryImportDoesNotAdoptLaterNativePhotosDuringRefresh(); });
+    runner.run("permissionGrantedForAnOldContainerDoesNotImportIntoItsReplacement", [&] { photo_test::ScopedDeferredDeletes cleanup; test.permissionGrantedForAnOldContainerDoesNotImportIntoItsReplacement(); });
+    runner.run("openingAndReadingAnEmptyStoreCreatesNoPhotoDirectories", [&] { photo_test::ScopedDeferredDeletes cleanup; test.openingAndReadingAnEmptyStoreCreatesNoPhotoDirectories(); });
+    runner.run("photoDiscoveryAndOriginalPreparationCreateOnlyRequiredParents", [&] { photo_test::ScopedDeferredDeletes cleanup; test.photoDiscoveryAndOriginalPreparationCreateOnlyRequiredParents(); });
+    runner.run("emptyRefreshAndAutomaticConnectionDoNotPersistPhotoState", [&] { photo_test::ScopedDeferredDeletes cleanup; test.emptyRefreshAndAutomaticConnectionDoNotPersistPhotoState(); });
+    runner.run("emptyScaffoldingFromAnOlderSessionDoesNotBecomePersistentPhotoState", [&] { photo_test::ScopedDeferredDeletes cleanup; test.emptyScaffoldingFromAnOlderSessionDoesNotBecomePersistentPhotoState(); });
+    runner.run("transferCreatesStagingAndCommitParentsWithoutAnInitialRefresh", [&] { photo_test::ScopedDeferredDeletes cleanup; test.transferCreatesStagingAndCommitParentsWithoutAnInitialRefresh(); });
+    runner.run("galleryIndexesOutwardAndReprioritizesWithoutExportingOriginals", [&] { photo_test::ScopedDeferredDeletes cleanup; test.galleryIndexesOutwardAndReprioritizesWithoutExportingOriginals(); });
+    runner.run("galleryIndexSurvivesCancellationReopenAndRepairsEditedOrMissingPreviews", [&] { photo_test::ScopedDeferredDeletes cleanup; test.galleryIndexSurvivesCancellationReopenAndRepairsEditedOrMissingPreviews(); });
+    runner.run("compactGalleryIsPublishedBeforeReadingIndividualReferences", [&] { photo_test::ScopedDeferredDeletes cleanup; test.compactGalleryIsPublishedBeforeReadingIndividualReferences(); });
+    runner.run("explicitConnectionRequestsPhotoAccessAndPublishesAfterGrant", [&] { photo_test::ScopedDeferredDeletes cleanup; test.explicitConnectionRequestsPhotoAccessAndPublishesAfterGrant(); });
+    runner.run("automaticPhotoAccessWaitsForAContainerAndNeverOpensSettings", [&] { photo_test::ScopedDeferredDeletes cleanup; test.automaticPhotoAccessWaitsForAContainerAndNeverOpensSettings(); });
+    runner.run("indexedPhotosAppearBeforeASlowOriginalFinishesAndReportRealProgress", [&] { photo_test::ScopedDeferredDeletes cleanup; test.indexedPhotosAppearBeforeASlowOriginalFinishesAndReportRealProgress(); });
+    runner.run("cancelledPhotoWorkReleasesItsFileLockBeforeBackgroundDrainReturns", [&] { photo_test::ScopedDeferredDeletes cleanup; test.cancelledPhotoWorkReleasesItsFileLockBeforeBackgroundDrainReturns(); });
+    runner.run("hashingCancellationStopsBeforePublishingAPartialDigest", [&] { photo_test::ScopedDeferredDeletes cleanup; test.hashingCancellationStopsBeforePublishingAPartialDigest(); });
+    runner.run("incrementalPhotoBatchesKeepEveryPreviouslyPublishedRecord", [&] { photo_test::ScopedDeferredDeletes cleanup; test.incrementalPhotoBatchesKeepEveryPreviouslyPublishedRecord(); });
+    runner.run("portableNamesKeepTheirExtensionAndPlatformLimits", [&] { photo_test::ScopedDeferredDeletes cleanup; test.portableNamesKeepTheirExtensionAndPlatformLimits(); });
+    runner.run("nativeOriginalsRemainAliasesAndPreviewsPersist", [&] { photo_test::ScopedDeferredDeletes cleanup; test.nativeOriginalsRemainAliasesAndPreviewsPersist(); });
+    runner.run("duplicatesPreserveAllNativeResourcesAndShareOriginalBytes", [&] { photo_test::ScopedDeferredDeletes cleanup; test.duplicatesPreserveAllNativeResourcesAndShareOriginalBytes(); });
+    runner.run("containerOwnedCopiesAndReceivedRevisionsKeepTheirOriginals", [&] { photo_test::ScopedDeferredDeletes cleanup; test.containerOwnedCopiesAndReceivedRevisionsKeepTheirOriginals(); });
+    runner.run("localAdditionStaysInTheContainerAndPreservesTheUsersFile", [&] { photo_test::ScopedDeferredDeletes cleanup; test.localAdditionStaysInTheContainerAndPreservesTheUsersFile(); });
+    runner.run("transferChecksHashesAndKeepsCommittedOriginalsInsideTheContainer", [&] { photo_test::ScopedDeferredDeletes cleanup; test.transferChecksHashesAndKeepsCommittedOriginalsInsideTheContainer(); });
+    runner.run("legacyLayoutKeepsNativeReferencesAndOriginals", [&] { photo_test::ScopedDeferredDeletes cleanup; test.legacyLayoutKeepsNativeReferencesAndOriginals(); });
+    runner.run("deniedAndLimitedAccessNeverErasePhotos", [&] { photo_test::ScopedDeferredDeletes cleanup; test.deniedAndLimitedAccessNeverErasePhotos(); });
+    runner.run("corruptTransferAndRedirectedCacheAreRejected", [&] { photo_test::ScopedDeferredDeletes cleanup; test.corruptTransferAndRedirectedCacheAreRejected(); });
+    runner.run("originalEditUpdatesOneObjectAndTrashIsExplicit", [&] { photo_test::ScopedDeferredDeletes cleanup; test.originalEditUpdatesOneObjectAndTrashIsExplicit(); });
+    runner.run("unavailableAssetDoesNotBlockOtherPhotos", [&] { photo_test::ScopedDeferredDeletes cleanup; test.unavailableAssetDoesNotBlockOtherPhotos(); });
+    runner.run("mediaDatabaseReplacementDoesNotBecomeGlobalDeletion", [&] { photo_test::ScopedDeferredDeletes cleanup; test.mediaDatabaseReplacementDoesNotBecomeGlobalDeletion(); });
+    runner.run("anotherTransferKeepsItsOriginalLease", [&] { photo_test::ScopedDeferredDeletes cleanup; test.anotherTransferKeepsItsOriginalLease(); });
+    runner.run("expiredViewingCopiesAreRemovedWithoutTouchingNativeOriginals", [&] { photo_test::ScopedDeferredDeletes cleanup; test.expiredViewingCopiesAreRemovedWithoutTouchingNativeOriginals(); });
+    runner.run("unchangedRefreshDoesNotStartAnotherFileSync", [&] { photo_test::ScopedDeferredDeletes cleanup; test.unchangedRefreshDoesNotStartAnotherFileSync(); });
+    runner.run("partialNativeImportCannotReplaceACompleteAlias", [&] { photo_test::ScopedDeferredDeletes cleanup; test.partialNativeImportCannotReplaceACompleteAlias(); });
+    runner.run("remoteResourceVersionIsNotOverwrittenByAnUnchangedNativeCopy", [&] { photo_test::ScopedDeferredDeletes cleanup; test.remoteResourceVersionIsNotOverwrittenByAnUnchangedNativeCopy(); });
+    runner.run("completedRequestCacheDoesNotStopLongTransfers", [&] { photo_test::ScopedDeferredDeletes cleanup; test.completedRequestCacheDoesNotStopLongTransfers(); });
+    runner.run("galleryOrdersPhotosAndVideosFromOldestToNewest", [&] { photo_test::ScopedDeferredDeletes cleanup; test.galleryOrdersPhotosAndVideosFromOldestToNewest(); });
+#ifdef IIPHOTOLIBRARY_TEST_LEGACY_QML
+    runner.run("chronologicalGalleryOpensAtNewestAndPreservesBrowsing:mobile", [&] { photo_test::ScopedDeferredDeletes cleanup; test.chronologicalGalleryOpensAtNewestAndPreservesBrowsing(QSize(390, 844), "mobile"); });
+    runner.run("chronologicalGalleryOpensAtNewestAndPreservesBrowsing:desktop", [&] { photo_test::ScopedDeferredDeletes cleanup; test.chronologicalGalleryOpensAtNewestAndPreservesBrowsing(QSize(960, 720), "desktop"); });
+    runner.run("galleryRendersAndLatePreviewKeepsBrowsingPosition", [&] { photo_test::ScopedDeferredDeletes cleanup; test.galleryRendersAndLatePreviewKeepsBrowsingPosition(); });
+#endif
+    runner.run("authenticatedExchangeUploadsLocalAndDownloadsOnlySelectedOriginal", [&] { photo_test::ScopedDeferredDeletes cleanup; test.authenticatedExchangeUploadsLocalAndDownloadsOnlySelectedOriginal(); });
+    runner.run("nativeLibrariesExchangeAliasesPreviewsAndOriginalsOverTls", [&] { photo_test::ScopedDeferredDeletes cleanup; test.nativeLibrariesExchangeAliasesPreviewsAndOriginalsOverTls(); });
+    return runner.result();
 }
-#include "tst_photos.moc"
