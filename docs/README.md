@@ -5,20 +5,18 @@
 
 Markdown is the maintained human source. Agent JSON is a structured, source-traceable projection.
 
-| Document | Agent JSON |
-| --- | --- |
-| [`AGENT.md`](../AGENT.md) | [JSON](entrypoints/AGENT.agent.json) |
-| [`README.md`](../README.md) | [JSON](entrypoints/README.agent.json) |
-| [`docs/Albums.md`](Albums.md) | [JSON](Albums.agent.json) |
-| [`docs/AlbumsValidation.md`](AlbumsValidation.md) | [JSON](AlbumsValidation.agent.json) |
-| [`docs/BuildComponents.md`](BuildComponents.md) | [JSON](BuildComponents.agent.json) |
-| [`docs/DynamicLinking.md`](DynamicLinking.md) | [JSON](DynamicLinking.agent.json) |
-| [`docs/Extraction.md`](Extraction.md) | [JSON](Extraction.agent.json) |
-| [`docs/FILE_PROVIDER.md`](FILE_PROVIDER.md) | [JSON](FILE_PROVIDER.agent.json) |
-| [`docs/NativePhotoViews.md`](NativePhotoViews.md) | [JSON](NativePhotoViews.agent.json) |
-| [`docs/Platforms.md`](Platforms.md) | [JSON](Platforms.agent.json) |
-| [`docs/SocietyReference.md`](SocietyReference.md) | [JSON](SocietyReference.agent.json) |
-| [`docs/WindowsBuildAndRun.md`](WindowsBuildAndRun.md) | [JSON](WindowsBuildAndRun.agent.json) |
-| [`docs/WindowsValidation.md`](WindowsValidation.md) | [JSON](WindowsValidation.agent.json) |
-| [`docs/documentation-structure.md`](documentation-structure.md) | [JSON](documentation-structure.agent.json) |
+- Document: [`AGENT.md`](../AGENT.md); Agent JSON: [JSON](Entrypoints/AGENT.agent.json)
+- Document: [`README.md`](../README.md); Agent JSON: [JSON](Entrypoints/README.agent.json)
+- Document: [`docs/Albums.md`](Albums.md); Agent JSON: [JSON](Albums.agent.json)
+- Document: [`docs/AlbumsValidation.md`](AlbumsValidation.md); Agent JSON: [JSON](AlbumsValidation.agent.json)
+- Document: [`docs/BuildComponents.md`](BuildComponents.md); Agent JSON: [JSON](BuildComponents.agent.json)
+- Document: [`docs/DynamicLinking.md`](DynamicLinking.md); Agent JSON: [JSON](DynamicLinking.agent.json)
+- Document: [`docs/Extraction.md`](Extraction.md); Agent JSON: [JSON](Extraction.agent.json)
+- Document: [`docs/FILE_PROVIDER.md`](FILE_PROVIDER.md); Agent JSON: [JSON](FILE_PROVIDER.agent.json)
+- Document: [`docs/NativePhotoViews.md`](NativePhotoViews.md); Agent JSON: [JSON](NativePhotoViews.agent.json)
+- Document: [`docs/Platforms.md`](Platforms.md); Agent JSON: [JSON](Platforms.agent.json)
+- Document: [`docs/SocietyReference.md`](SocietyReference.md); Agent JSON: [JSON](SocietyReference.agent.json)
+- Document: [`docs/WindowsBuildAndRun.md`](WindowsBuildAndRun.md); Agent JSON: [JSON](WindowsBuildAndRun.agent.json)
+- Document: [`docs/WindowsValidation.md`](WindowsValidation.md); Agent JSON: [JSON](WindowsValidation.agent.json)
+- Document: [`docs/documentation-structure.md`](documentation-structure.md); Agent JSON: [JSON](documentation-structure.agent.json)
 <!-- workspace-docs:document-map:end -->

@@ -10,16 +10,14 @@ Existing record/reference formats are unchanged; explicit native reading is prov
 
 ## 저장 계약
 
-| 위치 | 내용 | 전파 |
-| --- | --- | --- |
-| `Photos/<id>.societyphoto` | 사진 객체, 이름, 종류, 시각, 원본 리소스 해시·크기, 삭제 표식 | 컨테이너 동기화 |
-| `Photos/.previews/<id>.jpg` | 직접 저장한 사진·비디오 프리뷰 | 컨테이너 동기화 |
-| `.society-photos/<container-id>/gallery-catalog.json` | 개별 참조 읽기 전 갤러리를 복원하는 통합 시작 카탈로그 | 전파하지 않음 |
-| `.society-photos/<container-id>/gallery/<native-key>.json` | 네이티브 메타데이터·변경 시점·프리뷰 완료 상태의 영구 인덱스 | 전파하지 않음 |
-| `Photos/.previews/gallery-<native-key>.jpg` | 원본 해시 완료 전부터 사용하는 영구 갤러리 프리뷰 | 컨테이너 내부 저장 |
-| `.society-photos/<container-id>/references/<id>.json` | 기기별 PhotoKit ID, MediaStore URI 또는 Windows 경로·변경 시점 | 전파하지 않음 |
-| `.society-photos/<container-id>/originals/<hash>` | 검증된 컨테이너 원본 또는 명시적 열람·전송을 위한 네이티브 읽기 캐시 | 인증된 사진 채널 |
-| `.society-photos/<container-id>/incoming` | 검증 전 부분 전송과 임시 출력 | 전파하지 않음 |
+- 위치: `Photos/<id>.societyphoto`; 내용: 사진 객체, 이름, 종류, 시각, 원본 리소스 해시·크기, 삭제 표식; 전파: 컨테이너 동기화
+- 위치: `Photos/.previews/<id>.jpg`; 내용: 직접 저장한 사진·비디오 프리뷰; 전파: 컨테이너 동기화
+- 위치: `.society-photos/<container-id>/gallery-catalog.json`; 내용: 개별 참조 읽기 전 갤러리를 복원하는 통합 시작 카탈로그; 전파: 전파하지 않음
+- 위치: `.society-photos/<container-id>/gallery/<native-key>.json`; 내용: 네이티브 메타데이터·변경 시점·프리뷰 완료 상태의 영구 인덱스; 전파: 전파하지 않음
+- 위치: `Photos/.previews/gallery-<native-key>.jpg`; 내용: 원본 해시 완료 전부터 사용하는 영구 갤러리 프리뷰; 전파: 컨테이너 내부 저장
+- 위치: `.society-photos/<container-id>/references/<id>.json`; 내용: 기기별 PhotoKit ID, MediaStore URI 또는 Windows 경로·변경 시점; 전파: 전파하지 않음
+- 위치: `.society-photos/<container-id>/originals/<hash>`; 내용: 검증된 컨테이너 원본 또는 명시적 열람·전송을 위한 네이티브 읽기 캐시; 전파: 인증된 사진 채널
+- 위치: `.society-photos/<container-id>/incoming`; 내용: 검증 전 부분 전송과 임시 출력; 전파: 전파하지 않음
 
 `.societyphoto`는 Society가 해석하는 논리적 alias이다. OS 심볼릭 링크나 다른 기기의 절대 경로를 복제하지 않는다. 로컬 원본은 시스템 사진 보관함에 남고, Society는 네이티브 API로 접근한다. 공통 식별자는 원본 리소스 해시를 바탕으로 생성하며, 이후에는 로컬 참조로 식별자를 유지한다. Apple cloud identifier와 Society가 가져온 리소스의 고정 이름도 사용하여 재등록을 방지한다.
 

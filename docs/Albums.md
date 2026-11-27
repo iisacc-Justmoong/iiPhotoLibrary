@@ -6,19 +6,17 @@
 
 ## 객체와 수명
 
-| 객체 | 역할 |
-| --- | --- |
-| `AlbumManager` | 생성·연결·조회·갱신·외부 수신·연결 해제 |
-| `Album` | 연결별 수명, `snapshot()`으로 동기화된 데이터 복사본 제공 |
-| `AlbumManager::allLibrary()` | 전체 앨범의 현재 사진을 모아 반환하는 읽기 전용 `All Library` 앨범 |
-| `AlbumManager::smartAlbum()` | 스크린샷·가져온 사진·중복·숨김·이미지·비디오·Favorite·Deleted의 읽기 전용 앨범 |
-| `AlbumPhotoTraits` / `AlbumPhotoTraitsUpdate` | 사진의 분류 정보 및 변경할 필드만 담은 갱신 값 |
-| `DuplicatePhotoGroup` | 동일 콘텐츠 해시를 가진 서로 다른 사진들의 묶음 |
-| `AlbumConnection` | 제공자·계정·원격 앨범 ID·표시 이름·종류 |
-| `AlbumSnapshot` | 사진 메타데이터·완전성·리비전 |
-| `AlbumSource` | 인증된 사진 연결을 읽는 교체 가능한 인터페이스 |
-| `GooglePhotosAlbumSource` | 현재 Google Photos Picker 또는 앱 생성 항목 REST 조회 |
-| `photoLibraryAlbumSource()` | 기존 네이티브 `PhotoLibrary`를 앨범 소스로 연결 |
+- 객체: `AlbumManager`; 역할: 생성·연결·조회·갱신·외부 수신·연결 해제
+- 객체: `Album`; 역할: 연결별 수명, `snapshot()`으로 동기화된 데이터 복사본 제공
+- 객체: `AlbumManager::allLibrary()`; 역할: 전체 앨범의 현재 사진을 모아 반환하는 읽기 전용 `All Library` 앨범
+- 객체: `AlbumManager::smartAlbum()`; 역할: 스크린샷·가져온 사진·중복·숨김·이미지·비디오·Favorite·Deleted의 읽기 전용 앨범
+- 객체: `AlbumPhotoTraits` / `AlbumPhotoTraitsUpdate`; 역할: 사진의 분류 정보 및 변경할 필드만 담은 갱신 값
+- 객체: `DuplicatePhotoGroup`; 역할: 동일 콘텐츠 해시를 가진 서로 다른 사진들의 묶음
+- 객체: `AlbumConnection`; 역할: 제공자·계정·원격 앨범 ID·표시 이름·종류
+- 객체: `AlbumSnapshot`; 역할: 사진 메타데이터·완전성·리비전
+- 객체: `AlbumSource`; 역할: 인증된 사진 연결을 읽는 교체 가능한 인터페이스
+- 객체: `GooglePhotosAlbumSource`; 역할: 현재 Google Photos Picker 또는 앱 생성 항목 REST 조회
+- 객체: `photoLibraryAlbumSource()`; 역할: 기존 네이티브 `PhotoLibrary`를 앨범 소스로 연결
 
 앨범 식별자는 `providerId`, `accountId`, `remoteAlbumId`의 길이를 포함하여 구성한다.
 표시 이름이 같아도 연결이 다르면 식별자와 객체가 다르다. 계정 ID에는 인증 계층에서 확인한
@@ -79,12 +77,10 @@ auto remaining = all->snapshot(); // Work에 남은 사진은 계속 반환한�
 결과 사진의 `properties`에는 원래 항목을 다시 조회할 수 있도록 예약된 네 키를 기록한다.
 원본 메타데이터에 같은 키가 있어도 관리자가 확인한 참조로 덮어쓴다.
 
-| 키 | 값 |
-| --- | --- |
-| `allLibrary.providerId` | 원래 제공자 ID |
-| `allLibrary.accountId` | 원래 계정 ID |
-| `allLibrary.albumId` | 메타데이터를 제공한 일반 앨범의 ID |
-| `allLibrary.photoId` | 그 일반 앨범에서 부여한 사진 ID |
+- 키: `allLibrary.providerId`; 값: 원래 제공자 ID
+- 키: `allLibrary.accountId`; 값: 원래 계정 ID
+- 키: `allLibrary.albumId`; 값: 메타데이터를 제공한 일반 앨범의 ID
+- 키: `allLibrary.photoId`; 값: 그 일반 앨범에서 부여한 사진 ID
 
 `All Library`의 `Ready` 상태는 현재 모은 목록을 읽을 수 있다는 뜻이다.
 `contents.complete`는 모든 일반 앨범이 `Ready`이며 각 목록도 완전할 때만 `true`이다.
@@ -106,16 +102,14 @@ auto remaining = all->snapshot(); // Work에 남은 사진은 계속 반환한�
 일반 `albums()` 목록 및 앨범 개수 한도에는 포함하지 않는다.
 `AlbumData::smartKind`, `AlbumOrigin::Smart`, `AlbumCoverage::SmartLibrary`로 구분한다.
 
-| 종류 | 표시 이름 | 포함 조건 | 분류 API |
-| --- | --- | --- | --- |
-| `SmartAlbumKind::Screenshots` | Screenshots | `traits.screenshot=true`인 사진 | `setScreenshot(photoId, bool)` |
-| `SmartAlbumKind::Imported` | Imported Photos | `traits.imported=true`인 사진·영상 | `setImported(photoId, bool)` |
-| `SmartAlbumKind::Duplicates` | Duplicates | 같은 콘텐츠 SHA-256을 가진 서로 다른 사진·영상이 두 개 이상 | `setContentHash(photoId, sha256)`, `duplicateGroups()` |
-| `SmartAlbumKind::Hidden` | Hidden | `traits.hidden=true`인 사진·영상 | `setHidden(photoId, bool)` |
-| `SmartAlbumKind::Images` | Images | `mediaType="photo"`인 항목 | `setLocalPhotos()` / `publish()` / `refresh()`의 미디어 메타데이터 |
-| `SmartAlbumKind::Videos` | Videos | `mediaType="video"`인 항목 | `setLocalPhotos()` / `publish()` / `refresh()`의 미디어 메타데이터 |
-| `SmartAlbumKind::Favorite` | Favorite | 기존 `favorite=true`인 사진·영상 | `setFavorite(photoId, bool)`, `isFavorite(photoId)` |
-| `SmartAlbumKind::Deleted` | Deleted | `traits.deleted=true`인 사진·영상 | `setDeleted(photoId, bool)`, `photoTraits(photoId).deleted` |
+- 종류: `SmartAlbumKind::Screenshots`; 표시 이름: Screenshots; 포함 조건: `traits.screenshot=true`인 사진; 분류 API: `setScreenshot(photoId, bool)`
+- 종류: `SmartAlbumKind::Imported`; 표시 이름: Imported Photos; 포함 조건: `traits.imported=true`인 사진·영상; 분류 API: `setImported(photoId, bool)`
+- 종류: `SmartAlbumKind::Duplicates`; 표시 이름: Duplicates; 포함 조건: 같은 콘텐츠 SHA-256을 가진 서로 다른 사진·영상이 두 개 이상; 분류 API: `setContentHash(photoId, sha256)`, `duplicateGroups()`
+- 종류: `SmartAlbumKind::Hidden`; 표시 이름: Hidden; 포함 조건: `traits.hidden=true`인 사진·영상; 분류 API: `setHidden(photoId, bool)`
+- 종류: `SmartAlbumKind::Images`; 표시 이름: Images; 포함 조건: `mediaType="photo"`인 항목; 분류 API: `setLocalPhotos()` / `publish()` / `refresh()`의 미디어 메타데이터
+- 종류: `SmartAlbumKind::Videos`; 표시 이름: Videos; 포함 조건: `mediaType="video"`인 항목; 분류 API: `setLocalPhotos()` / `publish()` / `refresh()`의 미디어 메타데이터
+- 종류: `SmartAlbumKind::Favorite`; 표시 이름: Favorite; 포함 조건: 기존 `favorite=true`인 사진·영상; 분류 API: `setFavorite(photoId, bool)`, `isFavorite(photoId)`
+- 종류: `SmartAlbumKind::Deleted`; 표시 이름: Deleted; 포함 조건: `traits.deleted=true`인 사진·영상; 분류 API: `setDeleted(photoId, bool)`, `photoTraits(photoId).deleted`
 
 삭제 표시된 항목은 `Deleted`에만 포함하며, 숨김 표시도 있으면 삭제 보기를 우선한다.
 그 밖의 숨김 항목은 `Hidden`에만 포함한다. 두 상태는 `All Library` 및 나머지 스마트 앨범과
@@ -244,10 +238,8 @@ albums.setLocalPhotos(local, {photo});
 Google Photos는 2025-03-31부터 Library API의 전체 개인 보관함 조회 범위를 제거했다.
 공식 [API 변경 사항](https://developers.google.com/photos/support/updates)에 따라 두 모드를 지원한다.
 
-| 모드 | 조회 범위 | OAuth scope |
-| --- | --- | --- |
-| `PickerSelection` (기본) | 사용자가 Picker에서 선택한 사진·영상 | `https://www.googleapis.com/auth/photospicker.mediaitems.readonly` |
-| `AppCreatedItems` | 해당 앱이 Google Photos에 생성한 항목 | `https://www.googleapis.com/auth/photoslibrary.readonly.appcreateddata` |
+- 모드: `PickerSelection` (기본); 조회 범위: 사용자가 Picker에서 선택한 사진·영상; OAuth scope: `https://www.googleapis.com/auth/photospicker.mediaitems.readonly`
+- 모드: `AppCreatedItems`; 조회 범위: 해당 앱이 Google Photos에 생성한 항목; OAuth scope: `https://www.googleapis.com/auth/photoslibrary.readonly.appcreateddata`
 
 ```cpp
 #include <iiPhotoLibrary/GooglePhotosAlbumSource.h>

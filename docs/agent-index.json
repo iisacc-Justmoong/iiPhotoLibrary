@@ -13,14 +13,14 @@
     {
       "document_id": "urn:iisacc:document:96eb13ac539ca3515cb2d9f1754d469dbabb17223361e20bb5f861c197e86c5b",
       "source": "AGENT.md",
-      "agent_json": "docs/entrypoints/AGENT.agent.json",
+      "agent_json": "docs/Entrypoints/AGENT.agent.json",
       "source_sha256": "460659a10008d08aa29bfb3878466e55e9c708c7f822f77985180d42e0720833",
       "role": "instructions"
     },
     {
       "document_id": "urn:iisacc:document:653e4548eb79591e36c61eb907a6722f96aa12c2ee742ad05a8912bdfed35bf8",
       "source": "README.md",
-      "agent_json": "docs/entrypoints/README.agent.json",
+      "agent_json": "docs/Entrypoints/README.agent.json",
       "source_sha256": "3c1c44fac74a9f1598dd059f92d68ca009b716075b5029fd3e51a9c418e35345",
       "role": "overview"
     },
@@ -28,14 +28,14 @@
       "document_id": "urn:iisacc:document:c23e52cd7bfa969bc308d5c64832b05ac64b335424c4c6e5deb40e2a82a6971f",
       "source": "docs/Albums.md",
       "agent_json": "docs/Albums.agent.json",
-      "source_sha256": "6911c9281e268d341498237be9a4d36c48adde0097c96e446ab2059b54d3090a",
+      "source_sha256": "54ae360756c5e682de52a3f4f707e2f03020f014b8ff61450a11d1c119926639",
       "role": "guide"
     },
     {
       "document_id": "urn:iisacc:document:d6d080f4f4e43c72ea0b7fdb6ddd440d6d0747f3e862f4dfc8f28c5994276859",
       "source": "docs/AlbumsValidation.md",
       "agent_json": "docs/AlbumsValidation.agent.json",
-      "source_sha256": "3f2575b3211ef2ded5eeacb259ed8aa88d83e39fd3d00bbbd12b8149c8a99936",
+      "source_sha256": "932c50c280d6c6b46dc8cd9c35156efe4687140a9e2070ee59ca8f2e882c77f6",
       "role": "guide"
     },
     {
@@ -84,14 +84,14 @@
       "document_id": "urn:iisacc:document:3f44fd5cb021d2026bd8e52b8767924aa8ebb254a9ef0e33e0fc4070fba4249e",
       "source": "docs/README.md",
       "agent_json": "docs/README.agent.json",
-      "source_sha256": "7c112e561e54fde2e9ee779fb7644de84bec44effb364d6e45c939a617aff4c6",
+      "source_sha256": "38d16d778b0f1abbebc0dfa8d35e4309cfaa8f1d6ceac1cad8d5e1490952fac0",
       "role": "overview"
     },
     {
       "document_id": "urn:iisacc:document:3e409b75eaca58f45078847084a49b8865c31167fe03d80e20417eaf2c87492c",
       "source": "docs/SocietyReference.md",
       "agent_json": "docs/SocietyReference.agent.json",
-      "source_sha256": "81605a4809c6dbc66bc874af7252a15cdfbfaca8c248f40ff783119544c535df",
+      "source_sha256": "3c5181ed1c1f91fb185a7ac02dd216530327a4d93d7f5306765a6abeb990960d",
       "role": "guide"
     },
     {
@@ -112,7 +112,7 @@
       "document_id": "urn:iisacc:document:ec9742cb7bc5f2b4177c4e3ad64472fed3db3a8c14824e77059527bc5dc1fb08",
       "source": "docs/documentation-structure.md",
       "agent_json": "docs/documentation-structure.agent.json",
-      "source_sha256": "932e8438db6f5ebea9eba77ecb5de638cd395536544d7a189d569510bdfbf0c0",
+      "source_sha256": "b760dae74d6e5e87defd90c2a48f523d271c41da5138be652e9c3d2282cf6fb5",
       "role": "guide"
     }
   ],

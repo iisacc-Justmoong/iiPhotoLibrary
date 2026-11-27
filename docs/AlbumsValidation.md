@@ -5,17 +5,15 @@
 대상: macOS arm64, Release, C++23. 기존 스마트 앨범 네 종류를 유지하면서
 이미지·비디오·Favorite·Deleted를 추가해 전체 여덟 종류를 검증했다.
 
-| 검증 | 결과 |
-| --- | --- |
-| 전체 SDK 빌드 / CTest | 성공, 8/8 통과, 41.46초 |
-| `SmartAlbums` | 171개 검사 통과 |
-| 기존 `AllLibrary` | 62개 검사 통과 |
-| 기존 `AlbumManager` / `GooglePhotosAlbums` | 각각 41개 / 39개 검사 통과 |
-| `NativeAlbumBridge` | 33개 검사 통과, 미디어·즐겨찾기·삭제 표시 전달 포함 |
-| 기존 `Photos` QtTest | 43 passed / 0 failed / 0 skipped |
-| `AlbumsInstalledConsumer` | 재배치한 설치 패키지에서 여덟 스마트 앨범과 Favorite·Deleted API 링크·실행 성공, Qt 탐색 금지 |
-| 전체 `InstalledConsumer` | 이미지·비디오 조회, Favorite 지정, Deleted 표시·복원과 기존 QML 실행 성공 |
-| 코어 전용 빌드 / CTest | 성공, 5/5 통과, 2.48초 |
+- 검증: 전체 SDK 빌드 / CTest; 결과: 성공, 8/8 통과, 41.46초
+- 검증: `SmartAlbums`; 결과: 171개 검사 통과
+- 검증: 기존 `AllLibrary`; 결과: 62개 검사 통과
+- 검증: 기존 `AlbumManager` / `GooglePhotosAlbums`; 결과: 각각 41개 / 39개 검사 통과
+- 검증: `NativeAlbumBridge`; 결과: 33개 검사 통과, 미디어·즐겨찾기·삭제 표시 전달 포함
+- 검증: 기존 `Photos` QtTest; 결과: 43 passed / 0 failed / 0 skipped
+- 검증: `AlbumsInstalledConsumer`; 결과: 재배치한 설치 패키지에서 여덟 스마트 앨범과 Favorite·Deleted API 링크·실행 성공, Qt 탐색 금지
+- 검증: 전체 `InstalledConsumer`; 결과: 이미지·비디오 조회, Favorite 지정, Deleted 표시·복원과 기존 QML 실행 성공
+- 검증: 코어 전용 빌드 / CTest; 결과: 성공, 5/5 통과, 2.48초
 
 기존 네 종류의 열거형 값을 유지하고 새 네 종류를 뒤에 추가했다. 각 객체의 동일 인스턴스,
 목록·ID 조회·읽기 전용 동작·수명·한도 제외를 여덟 객체 모두에 대해 검사했다.
@@ -41,17 +39,15 @@ Deleted는 SDK가 가진 항목의 논리 삭제 상태이며, 이 실행은 OS/
 대상: macOS arm64, Release, C++23. 전체 네이티브 계층은 Qt 6.8.3이며,
 앨범 코어는 Qt와 iiSocietyContainer 탐색을 비활성화한 별도 구성에서도 검증했다.
 
-| 검증 | 결과 |
-| --- | --- |
-| 전체 SDK 빌드 / CTest | 성공, 8/8 통과, 39.17초 |
-| `SmartAlbums` | 93개 검사 통과 |
-| 기존 `AllLibrary` | 62개 검사 통과 |
-| 기존 `AlbumManager` / `GooglePhotosAlbums` | 각각 41개 / 39개 검사 통과 |
-| `NativeAlbumBridge` | 26개 검사 통과, 분류 전달 및 SDK 리소스 이름의 가져옴 판정 포함 |
-| 기존 `Photos` QtTest | 43 passed / 0 failed / 0 skipped |
-| `AlbumsInstalledConsumer` | 재배치한 패키지에서 네 스마트 앨범·분류 API·중복 그룹·숨김/해제 링크 및 실행 성공, Qt 탐색 금지 |
-| 전체 `InstalledConsumer` | 가져온 사진·숨김·All Library와 기존 네이티브/컨트롤러/QML 실행 성공 |
-| 코어 전용 빌드 / CTest | 성공, 5/5 통과, 1.84초 |
+- 검증: 전체 SDK 빌드 / CTest; 결과: 성공, 8/8 통과, 39.17초
+- 검증: `SmartAlbums`; 결과: 93개 검사 통과
+- 검증: 기존 `AllLibrary`; 결과: 62개 검사 통과
+- 검증: 기존 `AlbumManager` / `GooglePhotosAlbums`; 결과: 각각 41개 / 39개 검사 통과
+- 검증: `NativeAlbumBridge`; 결과: 26개 검사 통과, 분류 전달 및 SDK 리소스 이름의 가져옴 판정 포함
+- 검증: 기존 `Photos` QtTest; 결과: 43 passed / 0 failed / 0 skipped
+- 검증: `AlbumsInstalledConsumer`; 결과: 재배치한 패키지에서 네 스마트 앨범·분류 API·중복 그룹·숨김/해제 링크 및 실행 성공, Qt 탐색 금지
+- 검증: 전체 `InstalledConsumer`; 결과: 가져온 사진·숨김·All Library와 기존 네이티브/컨트롤러/QML 실행 성공
+- 검증: 코어 전용 빌드 / CTest; 결과: 성공, 5/5 통과, 1.84초
 
 스크린샷·가져온 사진·중복·숨김 객체의 동일 인스턴스 유지, 조회·읽기 전용 계약,
 분류 지정/해제와 여러 필드의 원자적 변경, 숨김 항목의 가상 보기 제외 및 숨김 보기 조회,
@@ -79,17 +75,15 @@ Apple 네이티브 어댑터의 PhotoKit 스크린샷·숨김 메타데이터 �
 대상: macOS arm64, Release, C++23. 전체 호환 계층은 Qt 6.8.3이며,
 별도 앨범 코어 구성은 Qt와 iiSocietyContainer 탐색을 비활성화했다.
 
-| 검증 | 결과 |
-| --- | --- |
-| 전체 SDK 빌드 | 성공 |
-| 전체 CTest | 7/7 통과, 41.01초 |
-| `AllLibrary` | 62개 검사 통과 |
-| 기존 `AlbumManager` / `GooglePhotosAlbums` | 각각 41개 / 39개 검사 통과 |
-| 기존 `NativeAlbumBridge` | 20개 검사 통과 |
-| 기존 `Photos` QtTest | 43 passed / 0 failed / 0 skipped |
-| `AlbumsInstalledConsumer` | 재배치한 패키지에서 All Library 조회·연결 해제 반영 성공, Qt/iiSocietyContainer 탐색 금지 |
-| 기존 `InstalledConsumer` | All Library와 네이티브 어댑터·컨트롤러·설치된 QML 로드 성공 |
-| 코어 전용 빌드 / CTest | 성공, 4/4 통과, 2.23초 |
+- 검증: 전체 SDK 빌드; 결과: 성공
+- 검증: 전체 CTest; 결과: 7/7 통과, 41.01초
+- 검증: `AllLibrary`; 결과: 62개 검사 통과
+- 검증: 기존 `AlbumManager` / `GooglePhotosAlbums`; 결과: 각각 41개 / 39개 검사 통과
+- 검증: 기존 `NativeAlbumBridge`; 결과: 20개 검사 통과
+- 검증: 기존 `Photos` QtTest; 결과: 43 passed / 0 failed / 0 skipped
+- 검증: `AlbumsInstalledConsumer`; 결과: 재배치한 패키지에서 All Library 조회·연결 해제 반영 성공, Qt/iiSocietyContainer 탐색 금지
+- 검증: 기존 `InstalledConsumer`; 결과: All Library와 네이티브 어댑터·컨트롤러·설치된 QML 로드 성공
+- 검증: 코어 전용 빌드 / CTest; 결과: 성공, 4/4 통과, 2.23초
 
 `allLibrary()` 객체의 유지, 표시 이름, ID 조회, 빈 목록, 로컬·외부 앨범 합산,
 같은 제공자·계정의 중복 제거, 다른 제공자·계정의 ID 격리, 원래 항목의 참조 메타데이터,
@@ -125,18 +119,16 @@ cmake --install build --prefix build/install
 
 ## 실행 결과
 
-| 검증 | 결과 |
-| --- | --- |
-| 전체 SDK 빌드 | 성공, 네이티브 Apple 어댑터 및 새 앨범 어댑터 포함 |
-| 전체 CTest | 6/6 통과, 40.49초 |
-| `AlbumManager` | 41개 검사 통과 |
-| `GooglePhotosAlbums` | 39개 검사 통과 |
-| `NativeAlbumBridge` | 20개 검사 통과 |
-| 기존 `Photos` QtTest | 34 passed / 0 failed / 0 skipped |
-| `AlbumsInstalledConsumer` | 별도 prefix 설치·재배치 후 Qt/iiSocietyContainer 탐색을 금지한 외부 프로젝트 링크·실행 성공 |
-| 기존 `InstalledConsumer` | 새 관리자·네이티브 어댑터 구성, 컨트롤러 및 설치된 QML 모듈 로드 성공 |
-| 코어 전용 빌드 | 성공, Qt·iiSocietyContainer 의존성 없음 |
-| 코어 전용 CTest | 3/3 통과, 1.17초, 재배치 설치 소비자 포함 |
+- 검증: 전체 SDK 빌드; 결과: 성공, 네이티브 Apple 어댑터 및 새 앨범 어댑터 포함
+- 검증: 전체 CTest; 결과: 6/6 통과, 40.49초
+- 검증: `AlbumManager`; 결과: 41개 검사 통과
+- 검증: `GooglePhotosAlbums`; 결과: 39개 검사 통과
+- 검증: `NativeAlbumBridge`; 결과: 20개 검사 통과
+- 검증: 기존 `Photos` QtTest; 결과: 34 passed / 0 failed / 0 skipped
+- 검증: `AlbumsInstalledConsumer`; 결과: 별도 prefix 설치·재배치 후 Qt/iiSocietyContainer 탐색을 금지한 외부 프로젝트 링크·실행 성공
+- 검증: 기존 `InstalledConsumer`; 결과: 새 관리자·네이티브 어댑터 구성, 컨트롤러 및 설치된 QML 모듈 로드 성공
+- 검증: 코어 전용 빌드; 결과: 성공, Qt·iiSocietyContainer 의존성 없음
+- 검증: 코어 전용 CTest; 결과: 3/3 통과, 1.17초, 재배치 설치 소비자 포함
 
 전체 빌드는 기존 `build/` 구성에서 수행했다. 별도 코어 빌드는 다음과 같이 수행했다.
 
